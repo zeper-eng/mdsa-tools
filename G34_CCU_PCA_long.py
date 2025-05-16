@@ -1,0 +1,66 @@
+#------------------------------------------
+#Functions and paths necessary for this
+#------------------------------------------
+import sys
+sys.path.append("/zfshomes/lperez/final_thesis_scripts/pypure/utilities/")
+import numpy as np
+from Convenience import test_list_2
+from t_a_Manipulation import replicates_to_featurematrix
+from Viz import create_2d_color_mappings,visualize_traj_PCA_onepanel
+from dim_reduction import run_PCA
+legend_labels=legend_labels = {
+    'GCU Short': 'purple',
+    'GCU Long (0-80)': 'orange',
+    'GCU Long (80-160)': 'green',
+    'GCU secondhalf Short': 'yellow',
+    'GCU secondhalf Long (0-80)': 'blue',
+    'GCU secondhalf Long (80-160)': 'red',
+    'CGU secondhalf Short': 'pink',
+    'CGU secondhalf Long (0-80)': 'cyan',
+    'CGU secondhalf Long (80-160)': 'grey',
+}
+
+#------------------------------------------
+#Loading in our files of interest and creating feature matrix
+#------------------------------------------
+
+#load in our trajectories
+CCU_GCU_fulltraj=np.load('/zfshomes/lperez/final_thesis_data/long_CCU_GCU_Trajectory_array.npy',allow_pickle=True) # all 60 replicates
+redone_CCU_CGU_fulltraj=np.load('/zfshomes/lperez/final_thesis_data/redone_unrestrained_CCU_CGU_Trajectory_array.npy',allow_pickle=True)
+arrays=[CCU_GCU_fulltraj,redone_CCU_CGU_fulltraj]
+feature_matrix_long = replicates_to_featurematrix(arrays=arrays)
+print(feature_matrix_long.shape)
+X_pca,weights,explained_variance_ratio_=run_PCA(feature_matrix_long,n=2)
+
+#------------------------------------------
+#Visualizing with the different sections of frames
+#   Note: test_list_2 here is a 1d label vector like the kmeans output
+#         where we are highlighting different frames of our system we would like to viz seperately
+#         in this new 2d visualization
+#
+#------------------------------------------
+
+colors_6kinds_of_frames = create_2d_color_mappings(labels=test_list_2,clustering=True)
+visualize_traj_PCA_onepanel(X_pca,colors_6kinds_of_frames,legend_labels,title="Principal Component Analysis (PCA) of GCU and long GCU frames"
+                            ,savepath="/zfshomes/lperez/thesis_figures/PCA/long_Onepanel_colored_frames",clustering = True)
+
+#------------------------------------------
+#Visualizing with our labels from Kmeans_clustering
+#   Note: It is assumed that the kmeans data would have been run in some capacity and saved for
+#   an optimal number of K's so we will assume so and use it as our import
+#
+# Since we save every set of labels despite optimizing based on our evaluation metrics we can also pull out the 
+# observations we are most interested in and also interested in comparing
+#------------------------------------------
+
+kmeans_labels_9k=np.load("/zfshomes/lperez/thesis_figures/kmeans/long_kluster_labels_9clust.npy",allow_pickle=True).tolist()
+visualize_traj_PCA_onepanel(X_pca,color_mappings=kmeans_labels_9k,title="Sillouhete Labeled PCA of GCU and CGU Systems K=9"
+                            ,savepath="/zfshomes/lperez/thesis_figures/PCA/long_sillouhete_colored_frames",clustering=False)
+
+kmeans_labels_2k=np.load("/zfshomes/lperez/thesis_figures/kmeans/long_kluster_labels_2clust.npy",allow_pickle=True).tolist()
+visualize_traj_PCA_onepanel(X_pca,color_mappings=kmeans_labels_2k,title="Two Subsystems labeled PCA of GCU and CGU Systems K=2"
+                            ,savepath="/zfshomes/lperez/thesis_figures/PCA/long_distinct_systems_frames",clustering=False)
+
+kmeans_5k_labels=np.load("/zfshomes/lperez/thesis_figures/kmeans/long_kluster_labels_5clust.npy",allow_pickle=True).tolist()
+visualize_traj_PCA_onepanel(X_pca,color_mappings=kmeans_5k_labels,title="Elbow Labeled PCA of GCU and CGU Systems K=5"
+                            ,savepath="/zfshomes/lperez/thesis_figures/PCA/long_elbow_colored_frames",clustering=False)
