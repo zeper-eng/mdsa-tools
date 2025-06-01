@@ -1103,7 +1103,7 @@ def visualize_traj_PCA_onepanel(X_pca, color_mappings, clustering=False,
                                 title="Principal Component Analysis (PCA) of GCU and CGU Systems", 
                                 colors_list=['purple', 'orange', 'green', 'yellow', 'blue', 'red', 'pink', 'cyan', 'grey','brown'],
                                 legend_labels = {'GCU Short': 'purple','GCU Long (0-80)': 'orange','GCU Long (80-160)': 'green','CGU Short': 'yellow','CGU Long (0-80)': 'blue','CGU Long (80-160)': 'red'},
-                                cmap=cm.cool_r):
+                                cmap=cm.plasma_r):
     ''' Visualizes data from an original feature matrix on two principal components after PCA
 
     Parameters
@@ -1179,7 +1179,6 @@ def visualize_traj_PCA_onepanel(X_pca, color_mappings, clustering=False,
     plt.tight_layout()
     plt.savefig(savepath, dpi=300)
     plt.close()
-
 
 def create_black_fig(x,y):
     '''' This is really just for the readibility of my own code to myself 

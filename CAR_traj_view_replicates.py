@@ -1,3 +1,23 @@
+
+##########################################################################################################
+##########################################################################################################
+##########################################################################################################
+
+#A brief introduction
+
+# In general, for programming concepts like modules, OOP, and other topics, Professor Weir's bioinformatics
+# courses are great. In particular, this one here from the end of the course really helps with a lot of those
+# concepts:
+# 
+# 
+# My work is currently organized using a "function warehouse" approach, where each module is filled
+# only with functions. One of my goals is to neatly wrap these into OOP instead. It helps make everything
+# more modular through inheritance, encapsualtion and reuse but in thesis efforts, I had to cut down on certain 
+# things for timeliness.
+
+##########################################################################################################
+##########################################################################################################
+##########################################################################################################
 import numpy as np
 import os
 from t_a_Manipulation import get_labels_from_t_a
@@ -45,8 +65,8 @@ np.savetxt(f'/zfshomes/lperez/final_thesis_data/greys_411_422_Hbonding_per_frame
 np.savetxt(f'/zfshomes/lperez/final_thesis_data/greys_412_422_Hbonding_per_frame.csv',reformatted_labels_412,delimiter=',')
 np.savetxt(f'/zfshomes/lperez/final_thesis_data/ccar_plusone_reformatted_Hbonding_per_frame.csv',ccar_plusone_reformatted,delimiter=',')
 
-traj_view_replicates_10by10(reformatted_labels_411,title='greys_411-422_average_Hbonding_per_frame',savepath=final_filename_411,clustering=False,colormap=cm.cool_r) #note clustering is false
-traj_view_replicates_10by10(reformatted_labels_412,title='greys_412-422_average_Hbonding_per_frame',savepath=final_filename_412,clustering=False,colormap=cm.cool_r) #note clustering is false
+traj_view_replicates_10by10(reformatted_labels_411,title='greys_411-422_average_Hbonding_per_frame',savepath=final_filename_411,clustering=False,colormap=cm.plasma_r) #note clustering is false
+traj_view_replicates_10by10(reformatted_labels_412,title='greys_412-422_average_Hbonding_per_frame',savepath=final_filename_412,clustering=False,colormap=cm.plasma_r) #note clustering is false
 
 
 
@@ -78,7 +98,7 @@ for GCU_result,CGU_result in zip(results_GCU,results_CGU):
 for i,result in enumerate(concatenated_results):
     reformatted_labels=label_iterator(labels=result,frame_list=replicate_frames)
     traj_view_replicates_10by10(reformatted_labels,title=f'{comparison_names[i]}_average_Hbonding_per_frame',
-                                savepath="/zfshomes/lperez/thesis_figures/independent_analysis/Greys_"+f'{comparison_names[i]}_average_Hbonding_per_frame',clustering=False,colormap=cm.cool_r) #note clustering is false
+                                savepath="/zfshomes/lperez/thesis_figures/independent_analysis/Greys_"+f'{comparison_names[i]}_average_Hbonding_per_frame',clustering=False,colormap=cm.plasma_r) #note clustering is false
 
 
 

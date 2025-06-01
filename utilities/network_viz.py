@@ -1,7 +1,6 @@
 import matplotlib.pyplot as plt
 from utilities.Convenience import unrestrained_residues 
 import networkx as nx
-import matplotlib.pyplot as plt
 import matplotlib.colors as mcolors
 import random
 import pandas as pd
