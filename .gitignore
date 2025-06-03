@@ -2,6 +2,6 @@ PDBs/
 !PDBs/CCU_GCU_10frames.mdcrd
 !PDBs/CCU_GCU_10frames.mdcrd
 !PDBs/CCU_CGU.pdb
-utilities/
+utilities/*
 !utilities/G34_CCU_Hbonding_matrices_gen.py
 
