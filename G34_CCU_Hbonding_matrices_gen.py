@@ -16,7 +16,6 @@ CCU_GCU_mdtrajectory = md.load(CCU_GCU_Concatenated,top=CCU_GCU_Topology)
 
 from Data_gen_hbond import create_attributes
 GCU_dictionary,GCU_Array=create_attributes(CCU_GCU_mdtrajectory)
-CGU_dictionary,CGU_Array=create_attributes(CCU_CGU_mdtrajectory)
 
 #----------------------------------------------
 # Generating data and filling in arrays
