@@ -1,4 +1,4 @@
-PDBs/
+PDBs/*
 !PDBs/CCU_GCU_10frames.mdcrd
 !PDBs/CCU_CGU.pdb
 !PDBs/5JUP_N2_GCU_nowat.prmtop
