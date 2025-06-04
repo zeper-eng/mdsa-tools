@@ -91,6 +91,9 @@ def Process_trajectory(trajectory,array_template,atom_to_residue)->np.ndarray:
 
         Examples
         --------
+        >>> 
+        >>>
+        >>>
 
         Notes
         -----

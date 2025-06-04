@@ -18,12 +18,16 @@ from Data_gen_hbond import create_attributes
 GCU_dictionary,GCU_Array=create_attributes(CCU_GCU_mdtrajectory)
 CGU_dictionary,CGU_Array=create_attributes(CCU_CGU_mdtrajectory)
 
+#----------------------------------------------
+# Generating data and filling in arrays
+#----------------------------------------------
+CCU_GCU_Trajectory_array  = Process_trajectory(CCU_GCU_mdtrajectory,GCU_Array,GCU_dictionary)
+
 #------------------------------------------------
 # Saving original array before further processing
 #------------------------------------------------
 import numpy as np
 np.save("/zfshomes/lperez/final_thesis_data/redone_CCU_GCU_Trajectory_array",CCU_GCU_Trajectory_array)
-np.save("/zfshomes/lperez/final_thesis_data/redone_CCU_CGU_Trajectory_array",CCU_CGU_Trajectory_array)
 
 #-----------------------------------------------------------
 # Filtering for only unrestrained residues and saving again
@@ -32,12 +36,7 @@ np.save("/zfshomes/lperez/final_thesis_data/redone_CCU_CGU_Trajectory_array",CCU
 from t_a_Manipulation import filter_res
 from Convenience import unrestrained_residues #just a list of int 1 indexed residue indexes
 
-
 unrestrained_CCU_GCU_Trajectory_array=filter_res(CCU_GCU_Trajectory_array,residues_to_filter=unrestrained_residues)
-unrestrained_CCU_CGU_Trajectory_array=filter_res(CCU_CGU_Trajectory_array,residues_to_filter=unrestrained_residues)
-
-
 np.save("/zfshomes/lperez/final_thesis_data/redone_unrestrained_CCU_GCU_Trajectory_array",unrestrained_CCU_GCU_Trajectory_array)
-np.save("/zfshomes/lperez/final_thesis_data/redone_unrestrained_CCU_CGU_Trajectory_array",unrestrained_CCU_CGU_Trajectory_array)
 
 
