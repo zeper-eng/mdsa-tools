@@ -15,7 +15,9 @@ git clone https://github.com/pardoluis123/workspace.git
 cd workspace
 ```
 
-There various necessary packages that we need in order to run all of the features as a part of this analysisThe workaround that makes the most sense for projects such as this one is to have a virtual environment that we can activate any time that we want to run  
+We still need to go ahead and create an environment that would include all of the various python packages we need in order to run our analysis.
+ 
+The workaround that makes the most sense for projects such as this one is to have a virtual environment that we can activate any time that we want to run. 
 
 I have included an environment.yml file which should make it easy to create and then activate the enviornment file any time you need to get going 
 
