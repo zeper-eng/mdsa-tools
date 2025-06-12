@@ -5,8 +5,25 @@ The labs current focus is on computational genetics expirements.
 We modify various adjacent codon identites at the A-site and +1 (poised to enter the A site 5'-3').
 
 # A note on setting up
-In order to properly get work underway we leverage various python packages we need to load in our environment. In order to do this the most easily I have set up a bootsrrap file that can be easily run inside
-of any bash environment! Below is how you would run the file
+
+First it we must download and install the github repository, this can be done easily by cloning the github repository as follows
+
+```bash
+git clone https://github.com/pardoluis123/workspace.git
+cd workspace
+```
+
+There various necessary packages that we need in order to run all of the features as a part of this analysisThe workaround that makes the most sense for projects such as this one is to have a virtual environment that we can activate any time that we want to run  
+
+I have included an environment.yml file which should make it easy to create and then activate the enviornment file any time you need to get going 
+
+In order to create the virtual environment in your python virtual environment you should do as follows:
+
+```bash
+conda env create -f environment.yml #create enviornment (only needs to be done once)
+conda activate
+
+```
 
 in order to install on another machine you should run the following line below. In all honesty for now marc I am just gonna have you go ahead and install my whole miniconda but, in theory it should work fine like this for you to start messing around. 
 
