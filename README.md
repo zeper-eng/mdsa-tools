@@ -21,17 +21,13 @@ In order to create the virtual environment in your python virtual environment yo
 
 ```bash
 conda env create -f environment.yml #create enviornment (only needs to be done once)
-conda activate
-
+conda activate SBTA_ENV #This is what you would need to run the environment
 ```
 
-in order to install on another machine you should run the following line below. In all honesty for now marc I am just gonna have you go ahead and install my whole miniconda but, in theory it should work fine like this for you to start messing around. 
-
+Alternatively, you could set it up as a part of your bashrc file such that it always activates on setup you would just include this line after opening your bashrc
 ```bash
-conda env create -f environment.yml
+conda activate SBTA_ENV
 ```
-
-Alternatively, we could also set it up by pip installing the requirements file ourselves
 
 # Specifically for Marc
 
