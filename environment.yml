@@ -12,13 +12,13 @@ dependencies:
   - scikit-learn
   - scipy
   - biopython
-  - mdtraj
   - openpyxl
   - tqdm
   - requests
   - beautifulsoup4
   - networkx
   - pip:
+      - mdtraj
       - torch
       - torchaudio
       - torchvision
