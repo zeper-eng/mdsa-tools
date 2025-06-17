@@ -1,5 +1,6 @@
 # A brief introduction to the goal of this project
-![CAR break mechanism diagrahm](resources/Ribosome_Diagrahm.png)
+
+![Alt text](resources/Ribosome_figure1.png)
 
 This was my BA/MA project which leveraged network theoretic concepts and machine learning techniques to perform a systems biology analysis of molecular dynamics simulations of a ribsomal subsystem we deemed the N2 nighborhood.
 
@@ -24,7 +25,7 @@ bash Miniconda3-latest-MacOSX-x86_64.sh
 source ~/.bashrc   # or ~/.zshrc depending on shell
 
 ```
-As with most python packages the expectation is that you have some level of familiarity in a computing environment but some quick notes on installation are:
+As with most python packages the expectation is that you have some level of familiarity in a computing environment but some quick notes on installation are
 
 - The password prompts do not show your password on screen so make sure to type them in carefully 
 - Restarting your terminal is equivalent to running the miniconda installer
