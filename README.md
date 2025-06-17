@@ -8,7 +8,7 @@ translation rate changes.
 
 # Installing miniconda for the intelligent naive user
 
-If you are unfamiliar with installing a version of miniconda yourself the following is mean to be a quick 
+If you are unfamiliar with installing a version of miniconda yourself the following is meant to be a quick 
 guide on how to go ahead and do it yourslef.
 
 ```bash
@@ -22,7 +22,7 @@ bash Miniconda3-latest-MacOSX-x86_64.sh
 source ~/.bashrc   # or ~/.zshrc depending on shell
 
 ```
-As with most python packages the expectation is that you have some level of familiarity in a computing environment but somequick notes on installation are
+As with most python packages the expectation is that you have some level of familiarity in a computing environment but some quick notes on installation are:
 
 - The password prompts do not show your password on screen so make sure to type them in carefully 
 - Restarting your terminal is equivalent to running the miniconda installer
