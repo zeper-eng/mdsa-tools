@@ -18,7 +18,7 @@ dependencies:
   - beautifulsoup4
   - networkx
   - pip:
-      - mdtraj
+      - git+https://github.com/mdtraj/mdtraj.git
       - torch
       - torchaudio
       - torchvision
