@@ -8,7 +8,8 @@ class trajectory():
         
         if topology_path is not None:
             self.trajectory=md.load(trajectory_path,topology_path)
-
+        elif topology_path is None:
+            self.trajectory=md.load(trajectory_path)
     
     def create_system_representations(self,trajectory):
         '''Wraps operations for creating systems representations into a nice single method
