@@ -2,92 +2,28 @@ import numpy as np
 import mdtraj as md
 from typing import Tuple, Dict
 
-def create_attributes(trajectory) -> Tuple[np.ndarray, Dict]:
-    '''returns atom to residue dictionary and template array for processing
+class trajectory():
 
-    Parameters
-    ----------
-    trajectory:mdtraj.Trajectory
+    def __init__(self, trajectory_path,topology_path):
+        
+        if topology_path is not None:
+            self.trajectory=md.load(trajectory_path,topology_path)
 
-    Returns
-    -------
-    atom_to_residue:Dict, atom_to_residue[atom_index]=residue_index
-        Dictionary containing atom to residue mappings
-
-    template_array: np.ndarray, shape=(n_frames,n_residues,n_residues)
-        returns array containing adjacency matrices for every frame. Shape is dependent on residues in trajectory and number of frames.
-
- Examples
---------
-
->>> #------------------------------------------
->>> #Loading in a trajectories
->>> #------------------------------------------
-
->>> ten_frame = '/zfshomes/lperez/summer2025/SBTA_progression/PDBs/CCU_GCU_10frames.mdcrd'
->>> CCU_GCU_Topology = "/home66/kscopino/AMBER22/CODONS/CCUGCU_G34/TLEAP/5JUP_N2_GCU_nowat.prmtop"
-
->>> CCU_GCU_mdtrajectory = md.load(CCU_GCU_Concatenated,top=CCU_GCU_Topology)
-
->>> #------------------------------------------
->>> # Creating necessary attributes           -
->>> #------------------------------------------
-
->>> from Data_gen_hbond import create_attributes
->>> GCU_dictionary,GCU_Array=create_attributes(CCU_GCU_mdtrajectory)
->>> CGU_dictionary,CGU_Array=create_attributes(CCU_CGU_mdtrajectory)
     
+    def create_system_representations(self,trajectory):
+        '''Wraps operations for creating systems representations into a nice single method
 
-    Notes
-    -----
-    This atom to residue dictionary is important as the function we will use for extracting hydrogen bonding information
-    returns hydrogen bonds at the atomic level, and we need it at the residue level for this particular "systems" 
-    representation. 
-
-    The template array is so we only create one datastructure to modify later improving efficiency.
-
-    '''
-
-    #Make atom to residue dictionary 
-    atom_to_residue = {atom.index:atom.residue.resSeq for atom in trajectory.topology.atoms}
-
-    #Create adjacency matrix, set first row and column as residue indices, and multiply to match the number of frames
-    indexes=[residue.resSeq+1 for residue in trajectory.topology.residues]
-    empty_array = np.zeros(shape=(len(indexes)+1,len(indexes)+1)) 
-
-    empty_array[0,1:]=indexes
-    empty_array[1:,0]=indexes
-
-    template_array=np.repeat(empty_array[np.newaxis,:, :], len(trajectory), axis=0)
-
-
-    return atom_to_residue,template_array
-
-def Process_trajectory(trajectory,array_template,atom_to_residue)->np.ndarray:
-        """returns a call to the now modified array template which has been filled in with data
-        
-        Processes an individual frame of template array and fills in hydrogen bonding values.
-        
         Parameters
         ----------
-        trajectory:md.trajectory
+        trajectory:mdtraj.Trajectory:
+            An mdtraj trajectory object that should have in theory been created when you load in the class but, can also be included in the
+            argument
 
-        array_template:np.ndarray,shape=(n_residues,n_residues,n_frames)
-            This is an empty array of shape (n_residues,n_residues,n_frames) where we have
-            n_frames worth of adjacency matrices of size n_residues*n_residues
-        
-        atom_to_residue:Dict, Dict[atom_index]=residue_index
-            Dictionary containing atom to residue index mappings      
-
-        frame:int
-            Integer for indexing what frame we are iterating over in array        
-
-            
         Returns
         -------
-        array_template:np.ndarray,shape=(n_frames,n_residues,n_residues)
-            A reference to the original array. It is updating the same array in memory but, in theory
-            it is done for throughness.
+        
+        template_array: np.ndarray, shape=(n_frames,n_residues,n_residues)
+            returns array containing adjacency matrices for every frame. Shape is dependent on residues in trajectory and number of frames.
 
         Examples
         --------
@@ -95,24 +31,113 @@ def Process_trajectory(trajectory,array_template,atom_to_residue)->np.ndarray:
         >>>
         >>>
 
+        '''
+        
+        atom_to_residue,template_array = self.create_attributes(trajectory)
+        trajectory_array = self.Process_trajectory(trajectory,template_array,atom_to_residue)
+
+        return trajectory_array 
+
+
+    def create_attributes(self, trajectory) -> Tuple[np.ndarray, Dict]:
+        '''returns atom to residue dictionary and template array for processing
+
+        Parameters
+        ----------
+        trajectory:mdtraj.Trajectory
+
+        Returns
+        -------
+        atom_to_residue:Dict, atom_to_residue[atom_index]=residue_index
+            Dictionary containing atom to residue mappings
+
+        template_array: np.ndarray, shape=(n_frames,n_residues,n_residues)
+            returns array containing adjacency matrices for every frame. Shape is dependent on residues in trajectory and number of frames.
+
+        Examples
+        --------
+        
+
         Notes
         -----
-        
-        """
-        for frame in range(0,len(trajectory)):
-            #splice our current frame and use axis for indexing
-            current_frame=array_template[frame]
+        This atom to residue dictionary is important as the function we will use for extracting hydrogen bonding information
+        returns hydrogen bonds at the atomic level, and we need it at the residue level for this particular "systems" 
+        representation. 
+
+        The template array is so we only create one datastructure to modify later improving efficiency.
+
+        '''
+
+        #Make atom to residue dictionary 
+        atom_to_residue = {atom.index:atom.residue.resSeq for atom in trajectory.topology.atoms}
+
+        #Create adjacency matrix, set first row and column as residue indices, and multiply to match the number of frames
+        indexes=[residue.resSeq+1 for residue in trajectory.topology.residues]
+        empty_array = np.zeros(shape=(len(indexes)+1,len(indexes)+1)) 
+
+        empty_array[0,1:]=indexes
+        empty_array[1:,0]=indexes
+
+        template_array=np.repeat(empty_array[np.newaxis,:, :], len(trajectory), axis=0)
+
+
+        return atom_to_residue,template_array
+
+    def Process_trajectory(self,trajectory,array_template,atom_to_residue)->np.ndarray:
+            """returns a call to the now modified array template which has been filled in with data
             
-            #Use Baker Hubard to get donor and acceptor atom indexes then map to residue indexes
-            Baker_hubbard=md.baker_hubbard(trajectory[frame])
-            donor_atoms,acceptor_atoms=Baker_hubbard[:,0],Baker_hubbard[:,2]
-            donor_residues,acceptor_residues=np.array([atom_to_residue[atom] for atom in donor_atoms]),np.array([atom_to_residue[atom] for atom in acceptor_atoms])
+            Processes an individual frame of template array and fills in hydrogen bonding values.
+            
+            Parameters
+            ----------
+            trajectory:md.trajectory
 
-            #match atoms to residues and increment in array
-            for i in range(donor_residues.shape[0]):
-                current_donor,current_acceptor=donor_residues[i]+1,acceptor_residues[i]+1
-                if current_donor != current_acceptor:
-                    current_frame[current_donor, current_acceptor] += 1
-                    current_frame[current_acceptor, current_donor] += 1
+            array_template:np.ndarray,shape=(n_residues,n_residues,n_frames)
+                This is an empty array of shape (n_residues,n_residues,n_frames) where we have
+                n_frames worth of adjacency matrices of size n_residues*n_residues
+            
+            atom_to_residue:Dict, Dict[atom_index]=residue_index
+                Dictionary containing atom to residue index mappings      
 
-        return array_template
+            frame:int
+                Integer for indexing what frame we are iterating over in array        
+
+                
+            Returns
+            -------
+            array_template:np.ndarray,shape=(n_frames,n_residues,n_residues)
+                A reference to the original array. It is updating the same array in memory but, in theory
+                it is done for throughness.
+
+
+
+            Examples
+            --------
+
+
+
+            Notes
+            -----
+        
+
+
+            """
+
+
+            for frame in range(0,len(trajectory)):
+                #splice our current frame and use axis for indexing
+                current_frame=array_template[frame]
+                
+                #Use Baker Hubard to get donor and acceptor atom indexes then map to residue indexes
+                Baker_hubbard=md.baker_hubbard(trajectory[frame])
+                donor_atoms,acceptor_atoms=Baker_hubbard[:,0],Baker_hubbard[:,2]
+                donor_residues,acceptor_residues=np.array([atom_to_residue[atom] for atom in donor_atoms]),np.array([atom_to_residue[atom] for atom in acceptor_atoms])
+
+                #match atoms to residues and increment in array
+                for i in range(donor_residues.shape[0]):
+                    current_donor,current_acceptor=donor_residues[i]+1,acceptor_residues[i]+1
+                    if current_donor != current_acceptor:
+                        current_frame[current_donor, current_acceptor] += 1
+                        current_frame[current_acceptor, current_donor] += 1
+
+            return array_template
