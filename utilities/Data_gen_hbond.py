@@ -17,25 +17,8 @@ def create_attributes(trajectory) -> Tuple[np.ndarray, Dict]:
     template_array: np.ndarray, shape=(n_frames,n_residues,n_residues)
         returns array containing adjacency matrices for every frame. Shape is dependent on residues in trajectory and number of frames.
 
- Examples
---------
-
->>> #------------------------------------------
->>> #Loading in a trajectories
->>> #------------------------------------------
-
->>> ten_frame = '/zfshomes/lperez/summer2025/SBTA_progression/PDBs/CCU_GCU_10frames.mdcrd'
->>> CCU_GCU_Topology = "/home66/kscopino/AMBER22/CODONS/CCUGCU_G34/TLEAP/5JUP_N2_GCU_nowat.prmtop"
-
->>> CCU_GCU_mdtrajectory = md.load(CCU_GCU_Concatenated,top=CCU_GCU_Topology)
-
->>> #------------------------------------------
->>> # Creating necessary attributes           -
->>> #------------------------------------------
-
->>> from Data_gen_hbond import create_attributes
->>> GCU_dictionary,GCU_Array=create_attributes(CCU_GCU_mdtrajectory)
->>> CGU_dictionary,CGU_Array=create_attributes(CCU_CGU_mdtrajectory)
+    Examples
+    --------
     
 
     Notes
@@ -91,9 +74,6 @@ def Process_trajectory(trajectory,array_template,atom_to_residue)->np.ndarray:
 
         Examples
         --------
-        >>> 
-        >>>
-        >>>
 
         Notes
         -----
