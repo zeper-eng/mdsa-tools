@@ -7,11 +7,11 @@ class trajectory():
     def __init__(self, trajectory_path,topology_path):
         
         if topology_path is not None:
-            self.trajectory=md.load(trajectory_path,topology_path)
+            self.trajectory=md.load(trajectory_path,top=topology_path)
         elif topology_path is None:
             self.trajectory=md.load(trajectory_path)
     
-    def create_system_representations(self,trajectory):
+    def create_system_representations(self,trajectory=None):
         '''Wraps operations for creating systems representations into a nice single method
 
         Parameters
@@ -33,7 +33,8 @@ class trajectory():
         >>>
 
         '''
-        
+        trajectory = trajectory if trajectory is not None else self.trajectory
+
         atom_to_residue,template_array = self.create_attributes(trajectory)
         trajectory_array = self.Process_trajectory(trajectory,template_array,atom_to_residue)
 
