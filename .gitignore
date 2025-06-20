@@ -3,4 +3,4 @@ PDBs/*
 !PDBs/5JUP_N2_GCU_nowat.prmtop
 utilities/*
 !utilities/G34_CCU_Hbonding_matrices_gen.py
-
+!utilities/Convenience.py
