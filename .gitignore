@@ -4,5 +4,6 @@ PDBs/*
 utilities/*
 !utilities/G34_CCU_Hbonding_matrices_gen.py
 !utilities/t_a_Manipulation.py
+!utilities/Convenience.py
 
 
