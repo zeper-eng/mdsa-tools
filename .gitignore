@@ -1,13 +1,11 @@
 PDBs/*
 !PDBs/CCU_GCU_10frames.mdcrd
 !PDBs/5JUP_N2_GCU_nowat.prmtop
-!PDBs/source_files
 utilities/*
 !utilities/G34_CCU_Hbonding_matrices_gen.py
 !utilities/t_a_Manipulation.py
 !utilities/Convenience.py
 !utilities/Clustering.py
-!PDBs/source_files
-!PDZ_analysis.py
-!test_systems/*
-!PDZ_analysis.py
+PDZ_analysis.py
+test_systems/*
+PDZ_analysis.py
