@@ -49,7 +49,6 @@ restrained_residues = [
 unrestrained_residues = [
     res for res in range(1, 495) if res not in restrained_residues
 ]
-print(unrestrained_residues)
 
 #--------------------------------------------------------------------------------------------------
 #Indexes for the decoding center of the ribosome 

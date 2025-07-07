@@ -155,5 +155,5 @@ def preform_clust_opt(data,outfile_path, max_clusters=10):
     optimal_k_silhouette_labels = all_labels[optimal_sillohuette-2] 
     optimal_k_elbow_labels = all_labels[optimal_elbow-2] 
     
-    return optimal_k_silhouette_labels,optimal_k_elbow_labels
+    return optimal_k_silhouette_labels,optimal_k_elbow_labels,cluster_centers
 

@@ -683,7 +683,6 @@ def plot_elbow_scores(cluster_range, inertia_scores, outfile_path="elbow_method.
     return optimal_k
 
 #Circos plots
-import math
 import pycircos.pycircos as py
 
 def get_Circos_coordinates(residue, gcircle):
@@ -859,8 +858,7 @@ def base_mdcircos_graph(empty_circle, residue_dict, savepath=os.getcwd()+'mdcirc
     fig_cb.savefig(savepath + "_colorbar.png",
                 dpi=300, bbox_inches="tight")
     plt.close(fig_cb)
-
-                
+           
 def highlighted_mdcircos_graph(empty_circle, residue_dict_one,residue_dict_two, savepath=os.getcwd()+'highlighted_mdcircos_graph', scale_values=False):
     ''' creates and saves a mdcircos graph to a desired output directory
 
@@ -1098,7 +1096,7 @@ import matplotlib.cm as cm
 import numpy as np
 import os
 
-def visualize_traj_PCA_onepanel(X_pca, color_mappings, clustering=False, 
+def visualize_PCA(X_pca, color_mappings=None, custom=False, 
                                 savepath=os.getcwd(), 
                                 title="Principal Component Analysis (PCA) of GCU and CGU Systems", 
                                 colors_list=['purple', 'orange', 'green', 'yellow', 'blue', 'red', 'pink', 'cyan', 'grey','brown'],
@@ -1130,6 +1128,7 @@ def visualize_traj_PCA_onepanel(X_pca, color_mappings, clustering=False,
     cmap : matplotlib colormap, default=cm.cool
         The continuous colormap to use when clustering=False.
     '''
+    
     labels_font_dict = {
         'family': 'monospace',
         'size': 20,
@@ -1143,7 +1142,16 @@ def visualize_traj_PCA_onepanel(X_pca, color_mappings, clustering=False,
 
     unique_vals = np.unique(color_mappings)
 
-    if clustering:
+    #accounting for there being no color mappings
+    if color_mappings is None or len(color_mappings) == 0:
+        color_mappings = np.arange(X_pca.shape[0])
+        custom = False
+        legend_labels = None
+        print("No color_mappings provided — defaulting to gradient based on sample index.")
+
+
+    #If we are applying a custom colormapping 
+    if custom:
         scatter = ax.scatter(X_pca[:, 0], X_pca[:, 1], c=color_mappings, 
                              cmap=ListedColormap(colors_list[:len(unique_vals)]), alpha=0.6)
 
@@ -1167,9 +1175,11 @@ def visualize_traj_PCA_onepanel(X_pca, color_mappings, clustering=False,
         cbar.ax.yaxis.set_tick_params(color='black', labelsize=8)
         cbar.ax.set_yticklabels([str(int(val)) for val in unique_vals_numeric])
 
+    #getting rid of the borders i like it like this more
     for spine in ax.spines.values():
         spine.set_visible(False)
 
+    #add in legends to each side
     ax.set_title(title, fontdict=labels_font_dict)
     ax.set_xlabel("Principal Component 1", fontdict=labels_font_dict)
     ax.set_ylabel("Principal Component 2", fontdict=labels_font_dict)
