@@ -8,6 +8,6 @@ utilities/*
 !utilities/Convenience.py
 !utilities/Clustering.py
 !PDBs/source_files
-!/Users/luis/Desktop/workspace/PDZ_analysis.py
-!/Users/luis/Desktop/workspace/test_systems
-!/Users/luis/Desktop/workspace/PDZ_analysis.py
+!PDZ_analysis.py
+!test_systems/
+!PDZ_analysis.py
