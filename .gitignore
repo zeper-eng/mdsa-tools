@@ -8,4 +8,5 @@ utilities/*
 !utilities/Clustering.py
 PDZ_analysis.py
 test_systems/*
+test_output/*
 PDZ_analysis.py
