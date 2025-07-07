@@ -9,5 +9,5 @@ utilities/*
 !utilities/Clustering.py
 !PDBs/source_files
 !/Users/luis/Desktop/workspace/PDZ_analysis.py
-!/Users/luis/Desktop/workspace/test_systems/*
+!/Users/luis/Desktop/workspace/test_systems
 !/Users/luis/Desktop/workspace/PDZ_analysis.py
