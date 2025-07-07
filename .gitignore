@@ -9,5 +9,5 @@ utilities/*
 !utilities/Clustering.py
 !PDBs/source_files
 !PDZ_analysis.py
-!test_systems/
+!test_systems/*
 !PDZ_analysis.py
