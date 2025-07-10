@@ -145,7 +145,7 @@ class trajectory():
        
         return trajectory_array 
 
-    def create_attributes(self, trajectory,granularity=None) -> Tuple[np.ndarray, Dict]:
+    def create_attributes(self, topology,granularity=None) -> Tuple[np.ndarray, Dict]:
         '''returns atom to residue dictionary and template array for processing
 
         Parameters
@@ -180,20 +180,22 @@ class trajectory():
 
         #Create adjacency matrix, set first row and column as residue indices, and multiply to match the number of frames
         
+        topology = topology if topology is not None else self.trajectory.topology
+        trajectory=self.trajectory
 
         if granularity == 'residue':
-            indexes=[residue.resSeq+1 for residue in trajectory.topology.residues]
+            indexes=[residue.resSeq+1 for residue in topology.residues]
             empty_array = np.zeros(shape=(len(indexes)+1,len(indexes)+1)) 
 
             empty_array[0,1:]=indexes
             empty_array[1:,0]=indexes
 
             template_array=np.repeat(empty_array[np.newaxis,:, :], len(trajectory), axis=0)
-            atom_to_residue = {atom.index:atom.residue.resSeq for atom in trajectory.topology.atoms}
+            atom_to_residue = {atom.index:atom.residue.resSeq for atom in topology.atoms}
             return atom_to_residue,template_array
         
         elif granularity == 'atom':
-            indexes=[atom.index+1 for atom in trajectory.topology.atoms]
+            indexes=[atom.index+1 for atom in topology.atoms]
             empty_array = np.zeros(shape=(len(indexes)+1,len(indexes)+1)) 
 
             empty_array[0,1:]=indexes
@@ -274,10 +276,182 @@ class trajectory():
 
             return array_template
 
+class cpptraj_hbond_import():
+
+    def __init__(self,filepath,topology):
+        ''' Init takes just the filepath to the desires data and then the topology
+
+        Parameters
+        ----------
+
+
+
+        Returns
+        -------
+
+
+
+        Examples
+        --------
+
+
+
+        Notes
+        -----
+
+
+
+        '''
+        self.indices=self.extract_headers(filepath)
+        self.data=np.loadtxt(filepath, skiprows=1, usecols=range(1, len(self.indices)+1), dtype=int)
+
+        return
+    
+    
+
+    def extract_headers(self,filepath):
+        '''Smaller module for importing files from cpptraj 
+
+        Parameters
+        ----------
+
+
+
+        Returns
+        -------
+
+
+
+        Notes
+        -----
+
+
+
+        Examples
+        --------
+
+
+        '''
+        filepath = filepath if filepath is not None else None
+
+        lines=[]
+        indices=[]
+        with open(filepath,'r') as infile:
+            for line in infile:
+                lines.append(line.split())
+
+        for col_header in lines[0]:
+            if col_header !='#Frame':
+                res1 = col_header.split('_')[1].split('@')[0]
+                res2 = col_header.split('_')[2].split('@')[0]
+                indices.append((int(res1),int(res2)))
+        return indices
+
+
+    def create_cpptraj_attributes(self,data,topology,granularity=None):
+            '''returns atom to residue dictionary and template array for processing
+
+            Parameters
+            ----------
+            trajectory:mdtraj.Trajectory
+
+            Returns
+            -------
+            atom_to_residue:Dict, atom_to_residue[atom_index]=residue_index
+                Dictionary containing atom to residue mappings
+
+            template_array: np.ndarray, shape=(n_frames,n_residues,n_residues)
+                returns array containing adjacency matrices for every frame. Shape is dependent on residues in trajectory and number of frames.
+
+            Examples
+            --------
+            
+
+            Notes
+            -----
+            This atom to residue dictionary is important as the function we will use for extracting hydrogen bonding information
+            returns hydrogen bonds at the atomic level, and we need it at the residue level for this particular "systems" 
+            representation. 
+
+            The template array is so we only create one datastructure to modify later improving efficiency.
+
+            '''
+
+            granularity = granularity if granularity is not None else 'residue'
+
+            #Make atom to residue dictionary 
+
+            #Create adjacency matrix, set first row and column as residue indices, and multiply to match the number of frames
+            
+            topology = md.load_topology(topology) if topology is not None else self.trajectory.topology
+
+            if granularity == 'residue':
+
+                indexes=[residue.resSeq+1 for residue in topology.residues]
+                empty_array = np.zeros(shape=(len(indexes)+1,len(indexes)+1)) 
+
+                empty_array[0,1:]=indexes
+                empty_array[1:,0]=indexes
+
+                template_array=np.repeat(empty_array[np.newaxis,:, :], data.shape[0], axis=0)
+
+                return template_array
+            
+
+    def create_systems_rep(self,filepath,topology):
+        '''Filling in the matrix
+
+        Parameters
+        ----------
+
+        Returns
+        -------
+
+        Notes
+        -----
+
+        Examples
+        --------
+
+        '''
+        indices = indices if indices is not None else self.indices
+        data = data if data is not None else self.data
+
+        template_array=self.create_cpptraj_attributes(data,topology)
+
+        iterator=0
+
+        for col in data.T: #simply transpose so we are going column wise instead
+            current_pair=indices[iterator]
+
+            if current_pair[0]!=current_pair[1]:
+                template_array[:,current_pair[0],current_pair[1]]=col
+
+            iterator+=1
+        
+        return template_array
+    
+
+
+        
+
+
+
+
+
 
 if __name__ == '__main__':
 
-    #load in and test trajectory
+
+    ##############
+    #cpptraj test#
+    ##############
+    initial_file='/zfshomes/sstetson/ShortVsLong/Analysis/HBond/p53_FL_Y220C_PK11000_Short_HBondTime_Rep1.dat'
+    test_top='/zfshomes/sstetson/ShortVsLong/Trajectories/Y220C_PK11000/Rep1/01_TLEAP/p53_Y220C_PK11000_nowat.prmtop'
+
+    cpptraj_hbond_import(initial_file,test_top)
+
+    '''#load in and test trajectory
     topology = '/Users/luis/Desktop/workspace/PDBs/5JUP_N2_GCU_nowat.prmtop'
     traj = '/Users/luis/Desktop/workspace/PDBs/CCU_GCU_10frames.mdcrd' 
     test_trajectory = trajectory(trajectory_path=traj,topology_path=topology)
@@ -287,4 +461,4 @@ if __name__ == '__main__':
     test_atomic_system_no_indexes=test_atomic_system[0,1:,1:]
     print(test_atomic_system_no_indexes[test_atomic_system_no_indexes!=0])
 
-    print('test running jus tthe datagen file')
+    print('test running jus tthe datagen file')'''

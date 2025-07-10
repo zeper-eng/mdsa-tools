@@ -9,3 +9,9 @@ PDZ_analysis.py
 test_systems/*
 test_output/*
 PDZ_analysis.py
+batch_outfiles/
+cpptraj_hbond_import.ipynb
+offline_run.sh
+sean_hbond.py
+test.ipynb
+test_systemsp53_WT_md100_str.nc.npy
