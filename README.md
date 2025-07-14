@@ -73,13 +73,13 @@ I have included an environment.yml file which should make it easy to create and 
 In order to create the virtual environment in your python virtual environment you should do as follows:
 
 ```bash
-conda env create -f environment.yml #create enviornment (only needs to be done once)
-conda activate SBTA_ENV #This is what you would need to run the environment
+conda env create -f bash_environment.yml #create enviornment (only needs to be done once)
+conda activate mdproj #This is what you would need to run the environment
 ```
 
 Alternatively, you could set it up as a part of your bashrc file such that it always activates on setup you would just include this line after opening your bashrc
 ```bash
-conda activate SBTA_ENV
+conda activate mdproj
 ```
 
 # Specifically for Marc
