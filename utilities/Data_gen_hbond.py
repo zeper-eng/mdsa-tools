@@ -304,11 +304,10 @@ class cpptraj_hbond_import():
         '''
         self.indices=self.extract_headers(filepath)
         self.data=np.loadtxt(filepath, skiprows=1, usecols=range(1, len(self.indices)+1), dtype=int)
+        self.topology = md.load_topology(topology) 
 
         return
-    
-    
-
+     
     def extract_headers(self,filepath):
         '''Smaller module for importing files from cpptraj 
 
@@ -347,7 +346,6 @@ class cpptraj_hbond_import():
                 indices.append((int(res1),int(res2)))
         return indices
 
-
     def create_cpptraj_attributes(self,data,topology,granularity=None):
             '''returns atom to residue dictionary and template array for processing
 
@@ -383,7 +381,7 @@ class cpptraj_hbond_import():
 
             #Create adjacency matrix, set first row and column as residue indices, and multiply to match the number of frames
             
-            topology = md.load_topology(topology) if topology is not None else self.trajectory.topology
+            topology = md.load_topology(topology) if topology is not None else self.topology
 
             if granularity == 'residue':
 
@@ -397,8 +395,7 @@ class cpptraj_hbond_import():
 
                 return template_array
             
-
-    def create_systems_rep(self,filepath,topology):
+    def create_systems_rep(self,data=None,topology=None,indices=None):
         '''Filling in the matrix
 
         Parameters
@@ -414,8 +411,9 @@ class cpptraj_hbond_import():
         --------
 
         '''
-        indices = indices if indices is not None else self.indices
+        topology = topology if topology is not None else self.topology
         data = data if data is not None else self.data
+        indices = indices if indices is not None else self.indices
 
         template_array=self.create_cpptraj_attributes(data,topology)
 
@@ -425,33 +423,16 @@ class cpptraj_hbond_import():
             current_pair=indices[iterator]
 
             if current_pair[0]!=current_pair[1]:
-                template_array[:,current_pair[0],current_pair[1]]=col
+                template_array[:,current_pair[0]-1,current_pair[1]-1]=col
 
             iterator+=1
         
         return template_array
     
 
-
-        
-
-
-
-
-
-
 if __name__ == '__main__':
 
-
-    ##############
-    #cpptraj test#
-    ##############
-    initial_file='/zfshomes/sstetson/ShortVsLong/Analysis/HBond/p53_FL_Y220C_PK11000_Short_HBondTime_Rep1.dat'
-    test_top='/zfshomes/sstetson/ShortVsLong/Trajectories/Y220C_PK11000/Rep1/01_TLEAP/p53_Y220C_PK11000_nowat.prmtop'
-
-    cpptraj_hbond_import(initial_file,test_top)
-
-    '''#load in and test trajectory
+    #load in and test trajectory
     topology = '/Users/luis/Desktop/workspace/PDBs/5JUP_N2_GCU_nowat.prmtop'
     traj = '/Users/luis/Desktop/workspace/PDBs/CCU_GCU_10frames.mdcrd' 
     test_trajectory = trajectory(trajectory_path=traj,topology_path=topology)
@@ -461,4 +442,5 @@ if __name__ == '__main__':
     test_atomic_system_no_indexes=test_atomic_system[0,1:,1:]
     print(test_atomic_system_no_indexes[test_atomic_system_no_indexes!=0])
 
-    print('test running jus tthe datagen file')'''
+    print('test running jus tthe datagen file')
+    

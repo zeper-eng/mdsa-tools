@@ -5,6 +5,9 @@ import numpy as np
 import os
 from sklearn.decomposition import PCA
 from utilities.Viz import visualize_PCA
+import pandas as pd
+import matplotlib.cm as cm
+import os
 
 class systems_analysis:
     '''A big wrapper for conveniently storing a lot of our analysis methods
@@ -36,11 +39,15 @@ class systems_analysis:
         '''
         
         self.num_systems=len(systems_representations) #this is useful later on for when we are doing system_specific operations
+        self.systems_representations=systems_representations
+        self.indexes = systems_representations[0][0,0,1:]
         self.feature_matrix=self.replicates_to_featurematrix(systems_representations)
 
         #this will be updated later and are defined within the functions themselves
         self.optimal_k_silhouette_labels=None
         self.optimal_k_elbow_labels=None
+        self.pca_weights=None
+
 
         return
 
@@ -129,7 +136,7 @@ class systems_analysis:
 
         return optimal_k_silhouette_labels,optimal_k_elbow_labels,centers_sillohuette,centers_elbow
     
-    def reduce_systems_representations(self,outfile_path=None,feature_matrix=None,n=None,colormappings=None):
+    def reduce_systems_representations(self,outfile_path=None,feature_matrix=None,n=None,colormappings=None,colormap=None,custom=None):
         '''
         Parameters
         ----------
@@ -148,7 +155,9 @@ class systems_analysis:
         
         Returns
         -------
+        X_pca,weights,explained_variance_ratio_
 
+        As in the output from scikit learns module PCA() from the cluster.vq() module check in later for link 
 
 
         Notes
@@ -156,7 +165,7 @@ class systems_analysis:
         You should include a pre-fix in your outfile path as the image will be saved with the ending
         "PCA_reduction" so a good example input is
 
-        '/users/userone/desktop/project/output/test_'
+        "/users/userone/desktop/project/output/test_"
 
         Examples
         --------
@@ -167,11 +176,14 @@ class systems_analysis:
         feature_matrix = feature_matrix if feature_matrix is not None else self.feature_matrix
         n=n if n is not None else 2
         colormappings=colormappings if colormappings is not None else None
+        colormap=colormap if colormap is not None else cm.cividis
+        custom=custom if custom is not None else False
         
         X_pca,weights,explained_variance_ratio_=self.run_PCA(feature_matrix,n)
         visualize_PCA(X_pca,title="Sillouhete Labeled PCA of GCU and CGU Systems K=10",
                       color_mappings=colormappings,
-                                savepath=f"{outfile_path}pca_reduction",custom=False)
+                                savepath=f"{outfile_path}pca_reduction",custom=custom,cmap=colormap)
+        return X_pca,weights,explained_variance_ratio_
 
     def cluster_embeddingspace(self,outfile_path=None,feature_matrix=None,n=None,max_clusters=None,elbow_or_sillohuette=None):
         '''A function for looking at conformational states in embedding space
@@ -261,10 +273,10 @@ class systems_analysis:
                             title=f'optimal sillohuette clustering in embedding space for system {i}',
                             custom=False)
             index+=int(rows_per_system)
+        
+        self.pca_weights=weights
 
-
-
-        return
+        return 
     
     def create_pearsontest_for_kmeans_distributions(self,labels,coordinates,cluster_centers):
         '''A function that is meant for the 
@@ -340,6 +352,121 @@ class systems_analysis:
 
         return correlation_df
        
+    def create_PCA_ranked_weights(self, outfile_path=None, weights=None, indexes=None):
+        '''A function for quickly creating the weights
+
+        Parameters
+        ----------
+
+
+
+        Returns
+        -------
+
+
+
+        Examples
+        --------
+
+
+
+        Notes
+        -----
+
+        
+        '''
+
+        if weights is None:
+            _,weights,_ =self.reduce_systems_representations
+        if weights is not None:
+            weights=weights
+
+        outfile_path = outfile_path if outfile_path is not None else os.getcwd()
+        indexes=indexes if indexes is not None else self.indexes
+
+        # get shape info
+        n_components, n_comparisons = weights.shape
+        n_residues = self.systems_representations[0][0,1:,1:].shape[1] - 1  #grabbing original matrix  
+
+        # grab only upper triangle
+        triu_idx = np.triu_indices(len(indexes), k=1)
+
+        # Generate comparison labels (no array values needed)
+        comparisons = [f"{int(indexes[i])}-{int(indexes[j])}" for i, j in zip(*triu_idx)]
+        dataframe={
+            'Comparisons':comparisons,
+            'PC1_Weights':weights[0],
+            'PC2_Weights':weights[1],
+            'PC1_magnitude':weights[0]**2,
+            'PC2_magnitude':weights[1]**2,
+            
+        
+        }
+
+        dataframe=pd.DataFrame(dataframe).round(3)
+        
+        return dataframe
+
+    def create_contour_plot(self,outfile_path=None,feature_matrix=None):
+        '''
+        Parameters
+        ----------
+
+        Notes
+        -----
+
+        Examples
+        --------
+
+
+        Returns
+        -------
+        
+        '''
+        feature_matrix=feature_matrix if feature_matrix is not None else self.feature_matrix
+        outfile_path = outfile_path if outfile_path is not None else os.getcwd()
+        
+        X_pca,weights,explained_variance_ratio_=self.run_PCA(feature_matrix,2)
+        
+        import seaborn as sns
+        import matplotlib.pyplot as plt
+
+
+
+        '''
+        Since we are not explicitly setting an h seaborn automatically picks one using scotts rule or silvermans rule
+        the param would be bandwidth and can be adjusted using bw_adjust=.05 for instance creating narrower kernels
+
+        bandwidth-> spread of the KDE (shape of the landscape)
+
+        levels-> controls where to draw the contour lines (which KDE values)
+            We arent setting levels so it can really be whatever at that point
+            
+        thresh-> hides regiosn below this KDE value (cut-off for noise)
+
+        fill=true fills betweent he contours
+
+        cbar = true
+
+
+        '''
+        sns.kdeplot(
+            x=X_pca[:, 0],  # PC1
+            y=X_pca[:, 1],  # PC2
+            fill=True,      # shaded contours
+            cmap="cviridis",
+            thresh=0,#only plots regions where values are greater than some threshold 
+            cbar=True
+        )
+
+
+
+
+
+        
+
+        return
+
     #Algorithm wrappers 
     def preform_clust_opt(self,outfile_path, max_clusters=None,data=None):
         '''
