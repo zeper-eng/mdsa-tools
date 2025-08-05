@@ -490,7 +490,25 @@ def mdcircos_graph(empty_circle, residue_dict, savepath=os.getcwd()+'mdcircos_gr
     
     plt.close(fig_cb)
 
-def create_MDcircos_from_weightsdf(PCA_ranked_weights):
+def extract_properties_from_weightsdf(pca_table):
+
+    comps = pca_table['Comparisons'].astype(str)
+
+    # split stack and clean
+    sides = comps.str.split('-', n=1, expand=True)
+    residues = (sides.stack()
+                      .str.strip()
+                      .dropna()
+                      .unique())
+
+    # arc ids are strings
+    residues = [str(x) for x in residues]
+
+    PC1_weight_dict = pca_table.set_index('Comparisons')['PC1_magnitude'].to_dict()
+    PC2_weight_dict = pca_table.set_index('Comparisons')['PC2_magnitude'].to_dict()
+    return residues, PC1_weight_dict, PC2_weight_dict
+
+def create_MDcircos_from_weightsdf(PCA_ranked_weights,outfilepath='/Users/luis/Desktop/workspacetwo/test_output/circos/'):
     '''Processes Weights table to create MDcircos plots visualizing weightings
 
     Parameters
@@ -517,10 +535,11 @@ def create_MDcircos_from_weightsdf(PCA_ranked_weights):
 
 
     '''
-
-    
-    return
-
+    res_indexes,PC1_magnitude_dict,PC2_magnitude_dict = extract_properties_from_weightsdf(PCA_ranked_weights)
+    pc1_circos_object=make_MDCircos_object(res_indexes)
+    pc2_circos_object=make_MDCircos_object(res_indexes)
+    mdcircos_graph(pc1_circos_object,PC1_magnitude_dict,outfilepath+'PC1_magnitudeviz')
+    mdcircos_graph(pc2_circos_object,PC2_magnitude_dict,outfilepath+'PC2_magnitudeviz') 
 
 
 #PCA visualizations
