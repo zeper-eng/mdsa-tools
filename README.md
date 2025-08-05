@@ -1,8 +1,8 @@
 # A brief introduction to the goal of this project
 
-![Alt text](resources/Pipelineflic.png)
+![Alt text](/resources/Pipelineflic.png)
 
-This was my BA/MA project which leveraged network theoretic concepts and machine learning techniques to perform a systems biology analysis of molecular dynamics simulations of a ribsomal subsystem we deemed the N2 nighborhood.
+Pictured is a directed graph describing the pipeline for our trajectory analysis. From left to right, we begin with a trajectory file, convert it into networks, which can be represented as either graphs or adjacency matrices. We move forward with the adjacency matrix representations and concatenate each matrix’s rows to create a vector representation of our system at every frame. Next, we vertically concatenate these to create a feature matrix that can be used as input to either K-means or PCA, whose results can then be visualized using the principal components analysis, our MDcircos plots, or replicate maps (which can alternatively represent the raw H-bond counts).
 
 The labs current focus is on computational genetics expirements.
 We modify various adjacent codon identites at the A-site and +1 (poised to enter the A site 5'-3')
