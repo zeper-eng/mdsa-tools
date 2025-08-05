@@ -1,11 +1,10 @@
-
 import numpy as np
-import numpy.ma as ma
 import os
 import matplotlib.pyplot as plt
-from matplotlib.colors import ListedColormap, Normalize
 from matplotlib.colors import Normalize
-from matplotlib import cm
+import matplotlib.cm as cm
+import pycircos.pycircos as py 
+
 
 ''' 
 A suite of functions meant to simplify the process of visualizing our data in new and more interpretable formats.
@@ -68,7 +67,7 @@ def label_iterator(labels,frame_list) -> np.ndarray:
     return reformatted_labels
 
 
-def traj_view_replicates_10by10(array, colors_list=['purple', 'orange', 'green', 'yellow', 'blue', 'red', 'pink', 'cyan', 'grey', 'brown'],
+def traj_view_replicates(array, colors_list=['purple', 'orange', 'green', 'yellow', 'blue', 'red', 'pink', 'cyan', 'grey', 'brown'],
                                 clustering=True, savepath='traj_view', title='Clusters per frame', xlabel='Frames', ylabel='Replicates',colormap=cm.plasma_r):
     """Returns None
 
@@ -166,7 +165,6 @@ def traj_view_replicates_10by10(array, colors_list=['purple', 'orange', 'green',
         plt.legend(cluster_labels.values(), cluster_labels.keys(), title="Clusters", loc='upper left', fontsize='small', markerscale=0.8, bbox_to_anchor=(1.02, 1))    
     
     if clustering == False:
-        from matplotlib.colors import BoundaryNorm
         unique_vals = np.unique(array[~np.isnan(array)]).astype(int)
         bounds = np.append(unique_vals, unique_vals[-1] + 1)  # to define edges between bins
 
@@ -273,12 +271,44 @@ def plot_elbow_scores(cluster_range, inertia_scores, outfile_path="elbow_method.
     return optimal_k
 
 #Circos plots
-import pycircos.pycircos as py
-
 def get_Circos_coordinates(residue, gcircle):
-    """
+    """helper function for creating coordinates for arc sizes in Circos graph
+
+    Parameters
+    ----------
+    residue:int,default=None
+        A residue index from which to create the current arc (in general you will be iterating
+        through residue indexes when using this method)
+
+    gcirlce:py.Gcircle,default=py.Gcircle(figsize=(6,6))
+        A Pycircos Gcricle object. By default we use one with a figsize of (6,6).
+
+    
+
     Return a 4-element tuple telling PyCircos chord_plot()
     to start in the middle of the arc with a radial anchor of 550.
+
+
+
+    Returns
+    -------
+    tuple:coordinates:defualt=(residue, mid_position, mid_position, raxis_position)
+        A four member tuple consisting of the positioning needed to create an arc.
+
+
+
+    Notes
+    -----
+
+
+
+
+    Examples
+    --------
+
+
+
+    
     """
     arc = gcircle._garc_dict[residue]
     # The "size" is the arc length in PyCircos coordinates
@@ -289,7 +319,8 @@ def get_Circos_coordinates(residue, gcircle):
     return (residue, mid_position, mid_position, raxis_position)
 
 def make_MDCircos_object(residue_indexes):
-    """
+    """Returns a PyCircos Gcircle scaled arcs
+
     Returns a PyCircos Gcircle object whose arcs are automatically scaled
     based on how many arcs (residues) there are. Also scales line widths,
     so that very few arcs don't produce huge lines and many arcs don't
@@ -306,7 +337,7 @@ def make_MDCircos_object(residue_indexes):
         A PyCircos object containing arcs scaled by the number of residues.
     """
 
-    if len(residue_indexes) < 50:
+    if len(residue_indexes) <= 50:
         circle = py.Gcircle(figsize=(6, 6))
         plt.subplots_adjust(left=0.01, right=0.99, bottom=0.01, top=0.99)
 
@@ -330,7 +361,7 @@ def make_MDCircos_object(residue_indexes):
         circle.set_garcs()
 
 
-    if len(residue_indexes) >150:
+    if len(residue_indexes) >50:
         circle = py.Gcircle(figsize=(10, 10))
         plt.subplots_adjust(left=0.01, right=0.99, bottom=0.01, top=0.99)
 
@@ -354,8 +385,9 @@ def make_MDCircos_object(residue_indexes):
     circle.set_garcs()
     return circle
 
-def base_mdcircos_graph(empty_circle, residue_dict, savepath=os.getcwd()+'mdcircos_graph', scale_factor=5,colormap=cm.magma_r):
+def mdcircos_graph(empty_circle, residue_dict, savepath=os.getcwd()+'mdcircos_graph', scale_factor=5,colormap=cm.magma_r):
     ''' creates and saves a mdcircos graph to a desired output directory
+
     Parameters
     ----------
     Residue_indexes:list, shape=(n_residues)
@@ -379,12 +411,19 @@ def base_mdcircos_graph(empty_circle, residue_dict, savepath=os.getcwd()+'mdcirc
     Returns
     -------
     None
+        Strictly a graphing function the methods can be called individually if youd like to tamper with the
+        Circos object further
+
 
     Notes
     -----
     This is built as basically a wrapper for another python package so it is a little finicky in its implementation. In theory it should work fine
-    with the other two functions and really only needs to be specific in the way that its taking the inputs for
+    with the other two functions and really only needs to be specific in the way that its taking the inputs for.
+    
+    An important note is that the scale is saved as a seperate colorbar and the values are normalized by min max because it takes
+    generally as input the weightings which happen to be too small to really visualize well typically.
 
+    
     Examples
     --------
 
@@ -395,18 +434,19 @@ def base_mdcircos_graph(empty_circle, residue_dict, savepath=os.getcwd()+'mdcirc
     from matplotlib.colors import Normalize
     import numpy as np
 
-    # 0) Prep––your residue_dict, empty_circle, scale_factor, etc.
 
-    # 1) Color normalization on the raw signed range
+    # Normalize the colors based on the values provided 
     vals = list(residue_dict.values())
     vmin, vmax = min(vals), max(vals)
     color_norm = Normalize(vmin=vmin, vmax=vmax)
     cmap = colormap if colormap is not None else cm.plasma
     hex_color_map = {k: cmap(color_norm(v)) for k, v in residue_dict.items()}
 
-    # 2) Width normalization on the absolute values via min–max
+    # Width normalization on the absolute values via min–max (makes plot aesthetically closer to raw
+    # values it is still suggested to use outputted tables for any actual raw analysis of values)
     abs_vals = [abs(v) for v in vals if v != 0]
     min_abs, max_abs = min(abs_vals), max(abs_vals)
+
     # avoid division by zero if all values are the same magnitude
     denom = max_abs - min_abs if max_abs != min_abs else 1.0
 
@@ -416,10 +456,10 @@ def base_mdcircos_graph(empty_circle, residue_dict, savepath=os.getcwd()+'mdcirc
     }
 
     # 3) Plot chords
-    fig, ax = plt.subplots(figsize=(6, 6))
     for key, value in residue_dict.items():
         if value == 0:
             continue
+        
         res1, res2 = key.split('-')
         arc1 = get_Circos_coordinates(res1, empty_circle)
         arc2 = get_Circos_coordinates(res2, empty_circle)
@@ -447,212 +487,41 @@ def base_mdcircos_graph(empty_circle, residue_dict, savepath=os.getcwd()+'mdcirc
 
     fig_cb.savefig(savepath + "_colorbar.png",
                 dpi=300, bbox_inches="tight")
+    
     plt.close(fig_cb)
-           
-def highlighted_mdcircos_graph(empty_circle, residue_dict_one,residue_dict_two, savepath=os.getcwd()+'highlighted_mdcircos_graph', scale_values=False):
-    ''' creates and saves a mdcircos graph to a desired output directory
+
+def create_MDcircos_from_weightsdf(PCA_ranked_weights):
+    '''Processes Weights table to create MDcircos plots visualizing weightings
 
     Parameters
     ----------
-    Residue_indexes:list, shape=(n_residues)
-        A list of residue indexes pertaining to the residues you would like to use as parts of the circle
-
-    Residue_dict:dict,format:dict['residue']=float(value)
-        A dictionary where keys are residue indexes (as strings) and values are floats representing the corresponding 
-        edge weights in the adjacency matrix (or another method) used for mapping.
-
-    savepath:str(),default=os.getcwd()+'mdcircos_graph'
-        Absolute path to the location and name of the file you would like to save the file. Default is mdcircos_graph in the 
-        working directory
-
-    Residue_dict:dict,dict['residue']=float(value)
-        A dictionary containing mappings from specific residue indexes *as strings* to their respective edge weights in whatever adjacency matrix
-        (or other method) is being used as the basis for mapping.
-    
-    scale_values:bool,default=False
-        A boolean argument meant to give the user the option of using a gradient color map in order to visualize stronger interactions
-
-    arcs_of_interest:list,shape(n_lists of pairwise tuples)
+    PCA_ranked_weights:Pandas.DataFrame,default=None
+      A table containing the ranked weights we created as a part of the analysis Systems Analysis
+      module. It is expected that it wold contain columns with the headers:
 
     Returns
     -------
-    None
 
     Notes
     -----
-    This is built as basically a wrapper for another python package so it is a little finicky in its implementation. In theory it should work fine
-    with the other two functions and really only needs to be specific in the way that its taking the inputs for
+
+
 
     Examples
     --------
 
-    '''
 
-    import matplotlib
-
-    plasma_cmap,viridis_cmap = cm.plasma_r,cm.viridis_r
-    norm_plasma = Normalize(vmin=min(residue_dict_one.values()), vmax=max(residue_dict_one.values()))
-    norm_viridis = Normalize(vmin=min(residue_dict_two.values()), vmax=max(residue_dict_two.values()))
-    
-
-    hex_color_map_plasma = {key: plasma_cmap(norm_plasma(value)) for key, value in residue_dict_one.items()}
-    hex_color_map_viridis = {key: viridis_cmap(norm_viridis(value)) for key, value in residue_dict_two.items()}
-
-
-    # Normalize the linewidth values if scale_values is True
-    max_dictone_value,min_dictone_value =  max(residue_dict_one.values()),min(residue_dict_one.values())
-    max_dicttwo_value,min_dicttwo_value = max(residue_dict_two.values()),min(residue_dict_two.values())
-    
-    for (key1, val1), (key2, val2) in zip(residue_dict_one.items(), residue_dict_two.items()):
-    
-        assert key1 == key2  # sanity check
-    
-        if val1 != 0:
-            residue_one, residue_two = key1.split('-')
-            arc_one = get_Circos_coordinates(residue_one, empty_circle)
-            arc_two = get_Circos_coordinates(residue_two, empty_circle)
-            
-               # Normalize linewidth
-            if scale_values is True:
-                # Normalize the linewidth based on the min and max values in the residue_dict
-                normalized_linewidth = (val1 - min_dictone_value) / (max_dictone_value - min_dictone_value) * 10  # Scaling factor of 10 for visualization
-                color = hex_color_map_plasma[key1]
-                empty_circle.chord_plot(arc_one, arc_two,
-                                        linewidth=normalized_linewidth,
-                                        facecolor=color,
-                                        edgecolor=color)
-                
-            elif scale_values is False:
-                empty_circle.chord_plot(arc_one, arc_two, linewidth=val1)
-
-        
-        if val2 != 0:
-            residue_one, residue_two = key2.split('-')
-            arc_one = get_Circos_coordinates(residue_one, empty_circle)
-            arc_two = get_Circos_coordinates(residue_two, empty_circle)
-
-               # Normalize linewidth
-            if scale_values is True:
-                # Normalize the linewidth based on the min and max values in the residue_dict
-                normalized_linewidth = (val2 - min_dicttwo_value) / (max_dicttwo_value - min_dicttwo_value) * 10  # Scaling factor of 10 for visualization
-                color = hex_color_map_viridis[key2]
-                empty_circle.chord_plot(arc_one, arc_two,
-                                        linewidth=normalized_linewidth,
-                                        facecolor=color,
-                                        edgecolor=color)
-                
-            elif scale_values is False:
-                empty_circle.chord_plot(arc_one, arc_two, linewidth=val2)
-    
-        
-    empty_circle.save(savepath,format="png",dpi=400)
-
-def original_highlighted_mdcircos_graph(empty_circle, residue_dict_one,unique,unique_dos, savepath=os.getcwd()+'highlighted_mdcircos_graph', scale_values=False):
-    ''' creates and saves a mdcircos graph to a desired output directory
-
-    Parameters
-    ----------
-    Residue_indexes:list, shape=(n_residues)
-        A list of residue indexes pertaining to the residues you would like to use as parts of the circle
-
-    Residue_dict:dict,format:dict['residue']=float(value)
-        A dictionary where keys are residue indexes (as strings) and values are floats representing the corresponding 
-        edge weights in the adjacency matrix (or another method) used for mapping.
-
-    savepath:str(),default=os.getcwd()+'mdcircos_graph'
-        Absolute path to the location and name of the file you would like to save the file. Default is mdcircos_graph in the 
-        working directory
-
-    Residue_dict:dict,dict['residue']=float(value)
-        A dictionary containing mappings from specific residue indexes *as strings* to their respective edge weights in whatever adjacency matrix
-        (or other method) is being used as the basis for mapping.
-    
-    scale_values:bool,default=False
-        A boolean argument meant to give the user the option of using a gradient color map in order to visualize stronger interactions
-
-    arcs_of_interest:list,shape(n_lists of pairwise tuples)
-
-    Returns
-    -------
-    None
 
     Notes
     -----
-    This is built as basically a wrapper for another python package so it is a little finicky in its implementation. In theory it should work fine
-    with the other two functions and really only needs to be specific in the way that its taking the inputs for
 
-    Examples
-    --------
 
     '''
 
-    import matplotlib
-
-    plasma_cmap,viridis_cmap = cm.plasma,cm.viridis
-    norm = Normalize(vmin=min(residue_dict.values()), vmax=max(residue_dict.values()))
-
-    hex_color_map_plasma = {key: plasma_cmap(norm(value)) for key, value in residue_dict.items()}
-    hex_color_map_viridis = {key: viridis_cmap(norm(value)) for key, value in residue_dict.items()}
-
-
-    # Normalize the linewidth values if scale_values is True
-    min_value = min(residue_dict.values())
-    max_value = max(residue_dict.values())
     
-    for key, value in residue_dict.items(): 
-        if value != 0:
-            residue_one, residue_two = key.split('-')
-            arc_one = get_Circos_coordinates(residue_one, empty_circle)
-            arc_two = get_Circos_coordinates(residue_two, empty_circle)
+    return
 
-            # Normalize the linewidth based on the min and max values in the residue_dict  # Scaling factor of 10 for visualization
-            if (residue_one,residue_two) in unique: 
-                 # Normalize the linewidth based on the min and max values in the residue_dict
-                normalized_linewidth = (value - min_value) / (max_value - min_value) * 10  # Scaling factor of 10 for visualization
-                color = hex_color_map_plasma[key]
-                empty_circle.chord_plot(arc_one, arc_two,
-                                        linewidth=normalized_linewidth,
-                                        facecolor=color,
-                                        edgecolor=color)
-                
-            elif scale_values is False:
-                empty_circle.chord_plot(arc_one, arc_two, linewidth=value)
-                
-
-                
-            if (residue_one,residue_two) in unique_dos: 
-                color = '#ed7953'
-                empty_circle.chord_plot(arc_one, arc_two,
-                                    linewidth=value*10,
-                                    facecolor=color,
-                                    edgecolor=color)
-    
-    for key, value in residue_dict.items():
-        if value != 0:
-            residue_one, residue_two = key.split('-')
-            arc_one = get_Circos_coordinates(residue_one, empty_circle)
-            arc_two = get_Circos_coordinates(residue_two, empty_circle)
-
-            # Normalize linewidth
-            if scale_values is True:
-                # Normalize the linewidth based on the min and max values in the residue_dict
-                normalized_linewidth = (value - min_value) / (max_value - min_value) * 10  # Scaling factor of 10 for visualization
-                color = hex_color_map[key]
-                empty_circle.chord_plot(arc_one, arc_two,
-                                        linewidth=normalized_linewidth,
-                                        facecolor=color,
-                                        edgecolor=color)
-            elif scale_values is False:
-                empty_circle.chord_plot(arc_one, arc_two, linewidth=value)
-         
-    empty_circle.save(savepath,format="png",dpi=400)
-
-
-
-#Dimensional Reduction
-import numpy as np
-import matplotlib.pyplot as plt
-
+#PCA visualizations
 def create_2d_color_mappings(labels=([80]*20)+([160]*10), 
                              colors_list=['purple', 'orange', 'green', 'yellow', 'blue', 'red', 'pink', 'cyan', 'grey', 'brown'], 
                              clustering=True):
@@ -679,12 +548,6 @@ def create_2d_color_mappings(labels=([80]*20)+([160]*10),
                 i += 1
         sample_color_mappings = [label_dict[i] for i in labels]
         return sample_color_mappings
-
-import matplotlib.pyplot as plt
-from matplotlib.colors import ListedColormap, BoundaryNorm
-import matplotlib.cm as cm
-import numpy as np
-import os
 
 def visualize_PCA(X_pca, color_mappings=None, custom=False, 
                   savepath=os.getcwd(), 
@@ -756,9 +619,6 @@ def visualize_PCA(X_pca, color_mappings=None, custom=False,
     plt.tight_layout()
     plt.savefig(savepath, dpi=500)
     plt.close()
-
-
-   
 
 def create_black_fig(x,y):
     '''' This is really just for the readibility of my own code to myself 
@@ -948,16 +808,6 @@ def create_PCA_per_rep(X_pca,
         plt.savefig(f"{name}{replicate}.png")
         plt.close()
 
-     
-        
-
-    
-
-    
-
-
-    
-
-
-
-
+ 
+if __name__ == "__main__":
+    print('runnign just the visualization module')

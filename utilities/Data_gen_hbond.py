@@ -4,6 +4,7 @@ from typing import Tuple, Dict
 
 class trajectory():
     '''A wrapper class for creating and manipulating systems representations of our trajectories
+    
     '''
 
     def __init__(self, trajectory_path,topology_path):
