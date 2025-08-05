@@ -157,7 +157,25 @@ class systems_analysis:
         -------
         X_pca,weights,explained_variance_ratio_
 
-        As in the output from scikit learns module PCA() from the cluster.vq() module check in later for link 
+        X_PCA:np.ndarray,shape=(n_samples,n_components)
+            An array returned by the PCA module in scikit-learns vs.cluster module. Essentially it is the x and y coordinates
+            of every sample from the original feature matrix now reduced into the principal component embedding space.
+            ---As in the output from scikit learns module PCA() from the cluster.vq() module check in later for link---
+
+            In theory it should be (n_sampels,2) since we are generally reducing to two principal components but, if you choose to 
+            use a different number of principal components this would be a different # thus, the signature is broad
+
+
+        weights:shape=(n_samples,n_components)
+            The loadings for each principal component. Theese can be thought of as eigenvector components and they are the raw values 
+            they have not been **2 for magnitude measurements yet. This is a seperate function in this module called create_PCA_ranked_weights.
+
+        explained_variance_ratio_:int,
+            The explained variance ratio of the principal components. This is just a fraction since we are using two principal components
+            but, if you choose to use more it would be slightly different. 
+            **Check back here**    
+        
+       
 
 
         Notes
@@ -172,6 +190,7 @@ class systems_analysis:
 
         
         '''
+
         outfile_path = outfile_path if outfile_path is not None else os.getcwd()
         feature_matrix = feature_matrix if feature_matrix is not None else self.feature_matrix
         n=n if n is not None else 2
@@ -180,9 +199,11 @@ class systems_analysis:
         custom=custom if custom is not None else False
         
         X_pca,weights,explained_variance_ratio_=self.run_PCA(feature_matrix,n)
+
         visualize_PCA(X_pca,title="Sillouhete Labeled PCA of GCU and CGU Systems K=10",
                       color_mappings=colormappings,
                                 savepath=f"{outfile_path}pca_reduction",custom=custom,cmap=colormap)
+        
         return X_pca,weights,explained_variance_ratio_
 
     def cluster_embeddingspace(self,outfile_path=None,feature_matrix=None,n=None,max_clusters=None,elbow_or_sillohuette=None):
@@ -352,54 +373,72 @@ class systems_analysis:
 
         return correlation_df
        
-    def create_PCA_ranked_weights(self, outfile_path=None, weights=None, indexes=None):
-        '''A function for quickly creating the weights
+    def create_PCA_ranked_weights(self,outfile_path=None, weights=None, indexes=None):
+        '''Create a ranked table of PCA feature weights for the first two principal components.
 
         Parameters
         ----------
 
-
+        weights : np.ndarray, shape = (n_components, n_features), optional
+            PCA component loadings (rows = components, columns = features). If None, this function
+            calls `reduce_systems_representations()` to compute PCA (default n=2) and uses the
+            returned `weights`.
+        indexes : array-like of int, optional
+            Residue indices used to label pairwise comparisons. If None, uses `self.indexes`.
+            These indices define the order used to generate upper-triangle residue–residue
+            comparison labels (e.g., "12-47").
 
         Returns
         -------
-
-
-
-        Examples
-        --------
-
-
+        pandas.DataFrame
+            A table mapping each feature (upper-triangle residue pair) to its PCA weights and
+            magnitudes. Columns:
+                - 'Comparisons'     : str, "i-j" residue pair label
+                - 'PC1_Weights'     : float, raw loading for PC1
+                - 'PC2_Weights'     : float, raw loading for PC2
+                - 'PC1_magnitude'   : float, (PC1_Weights)**2
+                - 'PC2_magnitude'   : float, (PC2_Weights)**2
+                - 'PC1_mag_norm'    : float, min–max normalized PC1_magnitude to [0,1] (within PC1)
+                - 'PC2_mag_norm'    : float, min–max normalized PC2_magnitude to [0,1] (within PC2)
 
         Notes
         -----
+        - Only the upper triangle (excluding the diagonal) of the residue–residue matrix is used,
+        so each row corresponds to a unique residue pair.
+        - “Weights” are PCA component loadings (eigenvector entries). Squaring gives a magnitude
+        that is convenient for ranking feature importance within a component (sign is discarded).
+        - The min–max normalization is performed **within each component** to [0,1] and is intended
+        for visualization/ranking. Do not compare these normalized values across different PCA
+        runs unless you control scaling consistently.
+        - This function assumes at least two components are available; it reports PC1 and PC2.
 
-        
+        Examples
+        --------
+        >>> sa = systems_analysis([traj_array_sys1, traj_array_sys2])
+        >>> df = sa.create_PCA_ranked_weights()
+        >>> df.head()
+
         '''
 
         if weights is None:
-            _,weights,_ =self.reduce_systems_representations
+            _,weights,_ =self.reduce_systems_representations()
         if weights is not None:
             weights=weights
 
         outfile_path = outfile_path if outfile_path is not None else os.getcwd()
         indexes=indexes if indexes is not None else self.indexes
 
-        # get shape info
-        n_components, n_comparisons = weights.shape
-        n_residues = self.systems_representations[0][0,1:,1:].shape[1] - 1  #grabbing original matrix  
-
         # grab only upper triangle
         triu_idx = np.triu_indices(len(indexes), k=1)
 
         # Generate comparison labels (no array values needed)
-        comparisons = [f"{int(indexes[i])}-{int(indexes[j])}" for i, j in zip(*triu_idx)]
+        comparisons = [f"{str(int(indexes[i]))}-{str(int(indexes[j]))}" for i, j in zip(*triu_idx)]
         dataframe={
             'Comparisons':comparisons,
             'PC1_Weights':weights[0],
             'PC2_Weights':weights[1],
             'PC1_magnitude':weights[0]**2,
             'PC2_magnitude':weights[1]**2,
-            
         
         }
 
@@ -572,6 +611,8 @@ class systems_analysis:
 
         print("X_pca shape (new data):",X_pca.shape)
         print(f"the total explained variance ratio is {np.sum(explained_variance_ratio_)}")
+        print(f"the total explained variance of PC's is {explained_variance_ratio_}")
         print("weights shape:", weights.shape) 
         
         return X_pca,weights,explained_variance_ratio_
+    
