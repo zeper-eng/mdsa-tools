@@ -1,0 +1,28 @@
+name: mdproj
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - python=3.10
+  - numpy
+  - pandas
+  - matplotlib
+  - scikit-learn
+  - seaborn
+  - jupyter
+  - notebook
+  - ipykernel
+  - ipython
+  - ipywidgets
+  - jupyterlab
+  - matplotlib-inline
+  - tqdm
+  - pyyaml
+  - requests
+  - scipy
+  - pip
+  - pip:
+      - mdtraj
+      - biopython
+      - networkx
+
