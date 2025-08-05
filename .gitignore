@@ -16,3 +16,7 @@ offline_run.sh
 sean_hbond.py
 test.ipynb
 test_systemsp53_WT_md100_str.nc.npy
+CCU_G34_top_pc*
+PDZ*
+*.csv*
+.sh
