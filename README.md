@@ -1,6 +1,6 @@
 # A brief introduction to the goal of this project
 
-![Alt text](resources/Ribosome_figure1.png)
+![Alt text](resources/Pipelineflic.png)
 
 This was my BA/MA project which leveraged network theoretic concepts and machine learning techniques to perform a systems biology analysis of molecular dynamics simulations of a ribsomal subsystem we deemed the N2 nighborhood.
 
