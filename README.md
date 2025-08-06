@@ -1,3 +1,8 @@
+![CI]
+[![PyPI version]]
+[![Anaconda version]]
+![Downloads]
+[![DOI]]
 # A brief introduction to the goal of this project
 
 ![Alt text](/resources/Pipelineflic.png)
