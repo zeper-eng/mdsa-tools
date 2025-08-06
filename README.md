@@ -1,3 +1,5 @@
+# Utilities; A set of tools for performing systems analyses of Molecular Dynamics (MD) Simulations
+
 ![CI](https://img.shields.io/badge/CI-passing-brightgreen)
 [![PyPI version](https://img.shields.io/badge/PyPI--version-inactive.svg)]()
 [![Anaconda version](https://img.shields.io/badge/Anaconda--version-inactive.svg)]()
