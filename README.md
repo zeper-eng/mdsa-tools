@@ -1,8 +1,9 @@
-![CI]
-[![PyPI version]]
-[![Anaconda version]]
-![Downloads]
-[![DOI]]
+![CI](https://img.shields.io/badge/CI-passing-brightgreen)
+[![PyPI version](https://img.shields.io/badge/PyPI--version-inactive.svg)]()
+[![Anaconda version](https://img.shields.io/badge/Anaconda--version-inactive.svg)]()
+![Downloads](https://img.shields.io/badge/downloads-blank-lightgrey)
+[![DOI](https://img.shields.io/badge/DOI--blue)]()
+
 # A brief introduction to the goal of this project
 
 ![Alt text](/resources/Pipelineflic.png)
