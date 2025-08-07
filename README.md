@@ -29,6 +29,7 @@ pip install .
 
 #Regardless of the python environment you should be good to go
 pip show workspace
+
 ```
 
 # This will eventually be replaced with a proper pip install but we are clearly in development

@@ -532,7 +532,7 @@ def create_MDcircos_from_weightsdf(PCA_ranked_weights,outfilepath='/Users/luis/D
     mdcircos_graph(pc2_circos_object,PC2_magnitude_dict,outfilepath+'PC2_magnitudeviz') 
 
 
-#PCA visualizations
+#Embeddingspace visualizations
 def create_2d_color_mappings(labels=([80]*20)+([160]*10), 
                              colors_list=['purple', 'orange', 'green', 'yellow', 'blue', 'red', 'pink', 'cyan', 'grey', 'brown'], 
                              clustering=True):
@@ -750,9 +750,9 @@ def create_PCA_on_rep(X_pca, frame_list=((([80] * 20) + ([160] * 10)) * 2)):
 
     return
 
-def create_PCA_per_rep(X_pca,
+def highlight_reps_in_embeddingspace(X_pca,
                     frame_list=((([80] * 20) + ([160] * 10)) * 2),
-                    name='/zfshomes/lperez/thesis_figures/PCA/test_one_rep'):
+                    outfilepath='/zfshomes/lperez/thesis_figures/PCA/test_one_rep'):
     '''
     Visualizes and saves a replicate mapping of embedded data.
 
@@ -819,7 +819,7 @@ def create_PCA_per_rep(X_pca,
 
         rep_iterator += current_rep_length
 
-        plt.savefig(f"{name}{replicate}.png")
+        plt.savefig(f"{outfilepath}{replicate}.png")
         plt.close()
 
 #Contour plots 

@@ -24,6 +24,11 @@ from utilities.Viz import visualize_reduction
 substitute_kmeans_labels=(([1]*3200)+([2]*3200))
 visualize_reduction(embedding,color_mappings=substitute_kmeans_labels,savepath='/Users/luis/Desktop/workspacetwo/test_output/UMAP/UMAP_mindistpoint2_neighbors6000',cmap=cm.cividis)
 
-#explorew embedding space
+#Visualize replicates in embedding space (umap)
+frame_list=((([80] * 20) + ([160] * 10)) * 2)
+from utilities.Viz import highlight_reps_in_embeddingspace
+highlight_reps_in_embeddingspace()
+
+#Contour embedding space (umap)
 from utilities.Viz import contour_embedding_space
-contour_embedding_space('test_output/contour/contour_test_one',X_pca)
+contour_embedding_space('test_output/contour/contour_test_one',embedding)
