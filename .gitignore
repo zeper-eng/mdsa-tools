@@ -4,10 +4,6 @@ PDZ_analysis.py
 PDBs/*
 !PDBs/CCU_GCU_10frames.mdcrd
 !PDBs/5JUP_N2_GCU_nowat.prmtop
-!utilities/Analysis.py
-!utilities/Data_gen_hbond.py
-!utilities/Viz.py
-utilities/*
 PDZ_analysis.py
 test_systems/*
 test_output/*
