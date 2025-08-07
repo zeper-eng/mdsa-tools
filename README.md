@@ -15,7 +15,25 @@ We modify various adjacent codon identites at the A-site and +1 (poised to enter
 in order to model the varying behaviors of the CAR interaction surface and how they correllate to varying
 translation rate changes.
 
-# Installing miniconda for the intelligent naive user
+# The easiest way to get going if your familiar with python developement especially in conda environments is to pip install after forking. I.e.:
+
+```bash
+# First fork the repository over 
+git clone https://github.com/zeper-eng/workspace.git
+
+#Now from inside of the workspace folder simply pip install!
+
+pip install .
+
+#Regardless of the python environment you should be good to go
+pip show workspace
+```
+
+
+
+# Below are more detailed instructions for the intelligent naive user
+
+## Installing miniconda 
 
 If you are unfamiliar with installing a version of miniconda yourself the following is meant to be a quick 
 guide on how to go ahead and do it yourslef.
