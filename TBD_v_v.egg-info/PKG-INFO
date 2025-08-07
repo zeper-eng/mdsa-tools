@@ -13,6 +13,7 @@ Requires-Dist: matplotlib
 Requires-Dist: seaborn
 Requires-Dist: scikit-learn
 Requires-Dist: mdtraj
+Requires-Dist: umap-learn
 Dynamic: author
 Dynamic: author-email
 Dynamic: classifier
