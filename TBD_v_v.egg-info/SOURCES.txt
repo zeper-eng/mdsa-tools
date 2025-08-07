@@ -7,6 +7,7 @@ TBD_v_v.egg-info/dependency_links.txt
 TBD_v_v.egg-info/requires.txt
 TBD_v_v.egg-info/top_level.txt
 utilities/Analysis.py
+utilities/Convenience.py
 utilities/Data_gen_hbond.py
 utilities/Viz.py
 utilities/__init__.py

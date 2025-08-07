@@ -15,7 +15,7 @@ setup(
         'matplotlib',
         'seaborn',
         'scikit-learn',
-        'mdtraj',
+        'mdtraj==1.10.3',
         'umap-learn ',
     ],
     classifiers=[

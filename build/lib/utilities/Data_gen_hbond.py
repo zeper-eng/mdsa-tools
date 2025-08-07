@@ -44,7 +44,6 @@ class trajectory():
         self.system_representation=None 
         self.filtered_representation=None
         self.feature_matrix=None
-        self.topology = self.trajectory.topology
 
     def create_filtered_representations(self,residues_to_filter,systems_representation=None):
         '''Filters arrray representations to contain only residues of interest
@@ -147,7 +146,7 @@ class trajectory():
        
         return trajectory_array 
 
-    def create_attributes(self, trajectory,granularity=None) -> Tuple[np.ndarray, Dict]:
+    def create_attributes(self, topology,granularity=None) -> Tuple[np.ndarray, Dict]:
         '''returns atom to residue dictionary and template array for processing
 
         Parameters
@@ -182,8 +181,8 @@ class trajectory():
 
         #Create adjacency matrix, set first row and column as residue indices, and multiply to match the number of frames
         
-        trajectory = trajectory if trajectory is not None else self.trajectory
-        topology = trajectory.topology if topology is not None else self.trajectory.topology
+        topology = topology if topology is not None else self.trajectory.topology
+        trajectory=self.trajectory
 
         if granularity == 'residue':
             indexes=[residue.resSeq+1 for residue in topology.residues]
@@ -194,7 +193,6 @@ class trajectory():
 
             template_array=np.repeat(empty_array[np.newaxis,:, :], len(trajectory), axis=0)
             atom_to_residue = {atom.index:atom.residue.resSeq for atom in topology.atoms}
-            
             return atom_to_residue,template_array
         
         elif granularity == 'atom':
