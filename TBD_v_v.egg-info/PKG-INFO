@@ -12,7 +12,7 @@ Requires-Dist: pandas
 Requires-Dist: matplotlib
 Requires-Dist: seaborn
 Requires-Dist: scikit-learn
-Requires-Dist: mdtraj
+Requires-Dist: mdtraj==1.10.3
 Requires-Dist: umap-learn
 Dynamic: author
 Dynamic: author-email
