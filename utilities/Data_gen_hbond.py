@@ -183,10 +183,9 @@ class trajectory():
         #Create adjacency matrix, set first row and column as residue indices, and multiply to match the number of frames
         
         trajectory = trajectory if trajectory is not None else self.trajectory
-        topology = trajectory.topology if topology is not None else self.trajectory.topology
 
         if granularity == 'residue':
-            indexes=[residue.resSeq+1 for residue in topology.residues]
+            indexes=[residue.resSeq+1 for residue in trajectory.topology.residues]
             empty_array = np.zeros(shape=(len(indexes)+1,len(indexes)+1)) 
 
             empty_array[0,1:]=indexes
@@ -198,7 +197,7 @@ class trajectory():
             return atom_to_residue,template_array
         
         elif granularity == 'atom':
-            indexes=[atom.index+1 for atom in topology.atoms]
+            indexes=[atom.index+1 for atom in trajectory.topology.atoms]
             empty_array = np.zeros(shape=(len(indexes)+1,len(indexes)+1)) 
 
             empty_array[0,1:]=indexes
