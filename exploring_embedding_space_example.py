@@ -1,4 +1,3 @@
-
 from utilities.Analysis import systems_analysis
 import os
 import numpy as np
@@ -24,9 +23,6 @@ print(embedding.shape)
 from utilities.Viz import visualize_reduction
 substitute_kmeans_labels=(([1]*3200)+([2]*3200))
 visualize_reduction(embedding,color_mappings=substitute_kmeans_labels,savepath='/Users/luis/Desktop/workspacetwo/test_output/UMAP/UMAP_mindistpoint2_neighbors6000',cmap=cm.cividis)
-os._exit(0)
-
-visualize_reduction(X_pca,savepath='')
 
 #explorew embedding space
 from utilities.Viz import contour_embedding_space
