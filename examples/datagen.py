@@ -7,15 +7,23 @@ import numpy as np
 #########################################
 
 #load in and test trajectory
-topology = '/Users/luis/Desktop/workspace/PDBs/5JUP_N2_GCU_nowat.prmtop'
-trajectory = '/Users/luis/Desktop/workspace/PDBs/CCU_GCU_10frames.mdcrd' 
-test_trajectory = traj(trajectory_path=trajectory,topology_path=topology)
+system_one_topology = '/Users/luis/Desktop/workspace/PDBs/5JUP_N2_CGU_nowat.prmtop'
+system_one_trajectory = '/Users/luis/Desktop/workspace/PDBs/CCU_CGU_10frames.mdcrd' 
+
+system_two_topology = '/Users/luis/Desktop/workspace/PDBs/5JUP_N2_GCU_nowat.prmtop'
+system_two_trajectory = '/Users/luis/Desktop/workspace/PDBs/CCU_GCU_10frames.mdcrd' 
+
+test_trajectory_one = traj(trajectory_path=system_one_trajectory,topology_path=system_one_topology)
+test_trajectory_two = traj(trajectory_path=system_two_trajectory,topology_path=system_two_topology)
+
 
 #now that its loaded in try to make object
-test_system=test_trajectory.create_system_representations()
+test_system_one_ = test_trajectory_one.create_system_representations()
+test_system_two_ = test_trajectory_two.create_system_representations()
 
-print(test_system.shape)
-print(test_system[0])
+
+np.save(test_system_one_,'/Users/luis/Desktop/example_systems/test_system_one')
+np.save(test_system_two_,'/Users/luis/Desktop/example_systems/test_system_two')
 
 
 
