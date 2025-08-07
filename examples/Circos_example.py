@@ -4,13 +4,10 @@ import numpy as np
 from sklearn.decomposition import PCA
 import pandas as pd
 
+#Load in previously generated data
 redone_CCU_GCU_fulltraj=np.load('/Users/luis/Downloads/redone_unrestrained_CCU_GCU_Trajectory_array.npy',allow_pickle=True)
 redone_CCU_CGU_fulltraj=np.load('/Users/luis/Downloads/redone_unrestrained_CCU_CGU_Trajectory_array.npy',allow_pickle=True)
-
 all_systems=[redone_CCU_GCU_fulltraj,redone_CCU_CGU_fulltraj]
-replicate_frames = (([80] * 20) + ([160] * 10)) * 2
-substitute_kmeans_labels=(([1]*3200)+([2]*3200))
-
 
 #the goal of this is to analyze multiple differnt structures so naturally we need two different systems
 Systems_Analyzer = systems_analysis(all_systems)

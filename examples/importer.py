@@ -4,6 +4,17 @@ from typing import Tuple, Dict
 from utilities.Data_gen_hbond import cpptraj_hbond_import
 import os
 
+'''
+
+First and foremost this is a an example of using our cpptraj import module. It doubles as a convenient
+example of how to work with multiple files/trajectories/etc instead of using the concatenated workflow we suggest (although
+a little hardcoded in terms of paths etc).
+
+Part of the reality of working with MD trajectories is that very often you will be working with incredibly high volume
+of data and as such the concatenated workflow is not always a reasonable use case.
+
+'''
+
 wt_files = [
     "/zfshomes/sstetson/ShortVsLong/Analysis/HBond/p53_FL_WT_Short_HBondTime_Rep1.dat",
     "/zfshomes/sstetson/ShortVsLong/Analysis/HBond/p53_FL_WT_Short_HBondTime_Rep2.dat",
