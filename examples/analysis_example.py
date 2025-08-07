@@ -12,9 +12,11 @@ filtered_CCU_CGU_Trajectory_array = np.load('/zfshomes/lperez/ba_and_ma/final_th
 systems=[filtered_CCU_GCU_Trajectory_array,filtered_CCU_CGU_Trajectory_array]
 Systems_Analyzer = systems_analysis(systems)
 
-#Clustering ju=t the systems representations of the trajectories we are interested in
+#Clustering and visualizing clusters 
 optimal_k_silhouette_labels,optimal_k_elbow_labels,centers_sillohuette,centers_elbow = Systems_Analyzer.cluster_system_level(outfile_path='/Users/luis/Desktop/workspace/test_output/systems_kmeans/',max_clusters=3)
 print('clustering succesfully completed')
+
+
 Systems_Analyzer.reduce_systems_representations(outfile_path='/Users/luis/Desktop/workspace/test_output/PCA/test_',colormappings=optimal_k_silhouette_labels) #you could do method=PCA/UMAP here
 print('PCA reduction succesful')
 Systems_Analyzer.cluster_embeddingspace(outfile_path='/Users/luis/Desktop/workspace/test_output/cluster_embeddingspace/',max_clusters=10,elbow_or_sillohuette='sillohuette')
