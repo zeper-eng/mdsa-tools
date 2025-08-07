@@ -22,8 +22,8 @@ test_system_one_ = test_trajectory_one.create_system_representations()
 test_system_two_ = test_trajectory_two.create_system_representations()
 
 
-np.save(test_system_one_,'/Users/luis/Desktop/example_systems/test_system_one')
-np.save(test_system_two_,'/Users/luis/Desktop/example_systems/test_system_two')
+np.save('/Users/luis/Desktop/example_systems/test_system_one',test_system_one_)
+np.save('/Users/luis/Desktop/example_systems/test_system_two',test_system_two_)
 
 
 

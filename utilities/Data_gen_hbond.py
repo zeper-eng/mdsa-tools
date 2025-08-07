@@ -192,7 +192,7 @@ class trajectory():
             empty_array[1:,0]=indexes
 
             template_array=np.repeat(empty_array[np.newaxis,:, :], len(trajectory), axis=0)
-            atom_to_residue = {atom.index:atom.residue.resSeq for atom in topology.atoms}
+            atom_to_residue = {atom.index:atom.residue.resSeq for atom in trajectory.topology.atoms}
             
             return atom_to_residue,template_array
         
