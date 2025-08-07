@@ -16,6 +16,7 @@ setup(
         'seaborn',
         'scikit-learn',
         'mdtraj',
+        'umap-learn ',
     ],
     classifiers=[
         'Programming Language :: Python :: 3',
