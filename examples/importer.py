@@ -76,6 +76,3 @@ for i in range(len(files)):
         rep=importer_instance.create_systems_rep()
         np.savez_compressed(f'/zfshomes/lperez/summer2025/workspace/compresserz/{name}_{counter}',rep=rep)
         counter+=1
-
-
-    
