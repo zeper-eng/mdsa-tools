@@ -634,123 +634,8 @@ def visualize_reduction(X_pca, color_mappings=None, custom=False,
     plt.savefig(savepath, dpi=500)
     plt.close()
 
-def create_black_fig(x,y):
-    '''' This is really just for the readibility of my own code to myself 
 
-    Parameters
-    ----------
-    X:int,default=1
-        number of rows of plots you want
-
-    Y:int,default=1
-        number of rows of plots you want
-
-    Returns
-    -------
-    
-    Examples
-    --------
-
-    Notes
-    -----
-    
-    '''
-    fig, ax = plt.subplots(x,y)
-    # Create a new figure with black background
-    plt.gca().set_facecolor('black')
-    plt.gcf().patch.set_facecolor('black')  # Set figure background to black
-    plt.gcf().set_facecolor('black')  # Set axes background to black
-
-    if (x,y) != (1,1):
-        for row in range(ax.shape[0]):
-            for column in range(ax.shape[1]):
-                current_ax=ax[row,column]
-                current_ax.set_facecolor('black')
-
-    return fig,ax
-
-def create_PCA_on_rep(X_pca, frame_list=((([80] * 20) + ([160] * 10)) * 2)):
-    '''
-    Visualizes and saves a replicate mapping of embedded data.
-
-    Parameters
-    ----------
-    X_pca : np.ndarray, shape=(n_samples, n_components)
-        The results of fitting a PCA analysis and using the .transform() method.
-
-    frame_list : list of int, optional
-        A list holding integer counts of the number of frames in each replicate. 
-        Default is (([80] * 20) + ([160] * 10)) * 2.
-
-    Returns
-    -------
-    None
-
-    Notes
-    -----
-    Each replicate is plotted in its own subplot. A new row of plots begins every 30 replicates.
-    '''
-
-    import numpy as np
-    import matplotlib.pyplot as plt
-    from matplotlib import cm
-    from matplotlib.colors import Normalize
-
-    labels_font_dict = {
-        'family': 'monospace',
-        'size': 20,
-        'weight': 'bold',
-        'style': 'italic',
-        'color': 'white',
-    }
-
-    cmap = cm.plasma
-    rep_iterator = 0
-
-    ''' # Create a figure with 2 rows and 30 columns
-        fig, ax = create_black_fig(2, 30)
-        fig.set_figheight(8)
-        fig.set_figwidth(30)'''
-
-    current_row_in_figures = 0
-
-    for replicate in range(len(frame_list)):
-        fig, ax = create_black_fig(1,1)
-
-        current_rep_length = frame_list[replicate]
-
-        if replicate % 30 == 0 and replicate != 0:
-            current_row_in_figures += 1  # Move to next row every 30 replicates
-
-        # Extract PCA data for this replicate
-        current_replicate_labels = list(range(current_rep_length))
-        current_replicate_X_PCA = X_pca[rep_iterator:rep_iterator + current_rep_length, 0].astype(float)
-        current_replicate_Y_PCA = X_pca[rep_iterator:rep_iterator + current_rep_length, 1].astype(float)
-
-        # Plot on the correct axis
-        col_idx = replicate % 30
-        current_ax = ax[current_row_in_figures, col_idx]
-
-        current_rep_norm = Normalize(vmin=0, vmax=len(frame_list))
-        current_ax.scatter(
-            current_replicate_X_PCA,
-            current_replicate_Y_PCA,
-            c=current_replicate_labels,
-            cmap=cmap,
-            norm=current_rep_norm,
-            alpha=0.6
-        )
-
-        current_ax.tick_params(axis='y', colors='white')
-
-        rep_iterator += current_rep_length
-
-    plt.savefig(f"/zfshomes/lperez/thesis_figures/PCA/test_one_rep{rep_iterator}.png")
-    plt.close()
-
-    return
-
-def highlight_reps_in_embeddingspace(X_pca,
+def highlight_reps_in_embeddingspace(data,
                     frame_list=((([80] * 20) + ([160] * 10)) * 2),
                     outfilepath='/zfshomes/lperez/thesis_figures/PCA/test_one_rep'):
     '''
@@ -792,30 +677,15 @@ def highlight_reps_in_embeddingspace(X_pca,
 
     for replicate in range(len(frame_list)):
     
-        fig, ax = create_black_fig(1,1)
 
         current_rep_length = frame_list[replicate]
 
         # Extract PCA data for this replicate
         current_replicate_labels = list(range(current_rep_length))
-        current_replicate_X_PCA = X_pca[rep_iterator:rep_iterator + current_rep_length, 0].astype(float)
-        current_replicate_Y_PCA = X_pca[rep_iterator:rep_iterator + current_rep_length, 1].astype(float)
+        current_replicate_X_PCA = data[rep_iterator:rep_iterator + current_rep_length, 0].astype(float)
+        current_replicate_Y_PCA = data[rep_iterator:rep_iterator + current_rep_length, 1].astype(float)
 
 
-
-        current_rep_norm = Normalize(vmin=0, vmax=len(frame_list))
-        ax.scatter(
-            current_replicate_X_PCA,
-            current_replicate_Y_PCA,
-            c=current_replicate_labels,
-            cmap=cmap,
-            norm=current_rep_norm,
-            alpha=0.6
-        )
-
-        ax.tick_params(axis='y', colors='white')
-        ax.set_yticks(np.arange(-8,8))
-        ax.set_xticks(np.arange(-8,8))
 
         rep_iterator += current_rep_length
 
