@@ -444,5 +444,5 @@ if __name__ == '__main__':
     test_atomic_system_no_indexes=test_atomic_system[0,1:,1:]
     print(test_atomic_system_no_indexes[test_atomic_system_no_indexes!=0])
 
-    print('test running jus tthe datagen file')
+    print('test running just the datagen file')
     
