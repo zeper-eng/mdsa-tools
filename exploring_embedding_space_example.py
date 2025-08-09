@@ -13,25 +13,38 @@ all_systems=[redone_CCU_GCU_fulltraj,redone_CCU_CGU_fulltraj]
 #Extract Principal Components or UMAP
 Systems_Analyzer = systems_analysis(all_systems)
 
-X_pca,_,_=Systems_Analyzer.reduce_systems_representations(method='PCA',n_components=380)#PCA
-embedding=Systems_Analyzer.reduce_systems_representations(feature_matrix=X_pca, method='UMAP', min_dist=.2, n_neighbors=6000) #UMAP
+X_pca,_,_=Systems_Analyzer.reduce_systems_representations(method='PCA',n_components=380) #PCA
+umap_embedding=Systems_Analyzer.reduce_systems_representations(method='UMAP', min_dist=.2, n_neighbors=6000) #UMAP
 
-print(X_pca.shape)
-print(embedding.shape)
 
 #Lets virst visualize the embedding space
 from utilities.Viz import visualize_reduction
 substitute_kmeans_labels=(([1]*3200)+([2]*3200))
-visualize_reduction(embedding,color_mappings=substitute_kmeans_labels,savepath='/Users/luis/Desktop/workspacetwo/test_output/UMAP/UMAP_mindistpoint2_neighbors6000',cmap=cm.cividis)
+visualize_reduction(X_pca,color_mappings=substitute_kmeans_labels,savepath='/Users/luis/Desktop/workspacetwo/test_output/PCA/justPCA',cmap=cm.cividis)
 
 #Visualize replicates in embedding space (umap)
 frame_list=((([80] * 20) + ([160] * 10)) * 2)
 from utilities.Viz import highlight_reps_in_embeddingspace
-highlight_reps_in_embeddingspace(data=embedding,outfilepath='test_output/per_rep/G34CCU_PCA+UMAP_')
+highlight_reps_in_embeddingspace(data=X_pca,outfilepath='test_output/per_rep/G34CCU_PCA_')
 
 #Contour embedding space (umap)
 from utilities.Viz import contour_embedding_space
-contour_embedding_space('test_output/contour/contour_test_one',embedding)
+contour_embedding_space('test_output/contour/contour_test_PCA',X_pca)
 
-#Cluster embedding space (umap)
+#Cluster embedding space (PCA)
+results=Systems_Analyzer.cluster_individual_systems_in_embeddingspace()
+
+iterator=1
+for i in results:
+    visualize_reduction(X_pca,color_mappings=i,savepath='/Users/luis/Desktop/workspacetwo/test_output/PCA/system_{1}_embeddingspacecluster_',cmap=cm.cividis)
+
+#Cluster embedding space (UMAP)
+results=Systems_Analyzer.cluster_individual_systems_in_embeddingspace(reduced_data=umap_embedding)
+
+iterator=1
+
+for i in results:
+    visualize_reduction(umap_embedding,color_mappings=i,savepath='/Users/luis/Desktop/workspacetwo/test_output/UMAP/system_{1}_embeddingspacecluster_',cmap=cm.cividis)
+
+
 

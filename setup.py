@@ -17,6 +17,7 @@ setup(
         'scikit-learn',
         'mdtraj==1.10.3',
         'umap-learn ',
+        'python-circos'
     ],
     classifiers=[
         'Programming Language :: Python :: 3',

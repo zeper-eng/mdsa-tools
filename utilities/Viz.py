@@ -634,7 +634,6 @@ def visualize_reduction(X_pca, color_mappings=None, custom=False,
     plt.savefig(savepath, dpi=500)
     plt.close()
 
-
 def highlight_reps_in_embeddingspace(data,
                     frame_list=((([80] * 20) + ([160] * 10)) * 2),
                     outfilepath='/zfshomes/lperez/thesis_figures/PCA/test_one_rep'):
