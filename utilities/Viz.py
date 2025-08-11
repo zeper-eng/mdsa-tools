@@ -634,11 +634,10 @@ def visualize_reduction(X_pca, color_mappings=None, custom=False,
     plt.savefig(savepath, dpi=500)
     plt.close()
 
-def highlight_reps_in_embeddingspace(data,
+def highlight_reps_in_embeddingspace(reduced_coordinates,
                     frame_list=((([80] * 20) + ([160] * 10)) * 2),
                     outfilepath='/zfshomes/lperez/thesis_figures/PCA/test_one_rep'):
-    '''
-    Visualizes and saves a replicate mapping of embedded data.
+    '''Visualizes and saves a replicates inside of embedding space
 
     Parameters
     ----------
@@ -661,35 +660,28 @@ def highlight_reps_in_embeddingspace(data,
     import numpy as np
     import matplotlib.pyplot as plt
     from matplotlib import cm
-    from matplotlib.colors import Normalize
 
-    labels_font_dict = {
-        'family': 'monospace',
-        'size': 20,
-        'weight': 'bold',
-        'style': 'italic',
-        'color': 'white',
-    }
-
-    cmap = cm.plasma
     rep_iterator = 0
-
-    for replicate in range(len(frame_list)):
     
+    for entry in range(len(frame_list)):
 
-        current_rep_length = frame_list[replicate]
+        colors = np.full(reduced_coordinates.shape[0], 'lightyellow')
+        colors[rep_iterator:rep_iterator+frame_list[entry]] = 'blue'  
 
-        # Extract PCA data for this replicate
-        current_replicate_labels = list(range(current_rep_length))
-        current_replicate_X_PCA = data[rep_iterator:rep_iterator + current_rep_length, 0].astype(float)
-        current_replicate_Y_PCA = data[rep_iterator:rep_iterator + current_rep_length, 1].astype(float)
+        # ticks for scaling
+        x_min, x_max = reduced_coordinates[:, 0].min(), reduced_coordinates[:, 0].max()
+        y_min, y_max = reduced_coordinates[:, 1].min(), reduced_coordinates[:, 1].max()
+        plt.xticks(np.arange(np.floor(x_min), np.ceil(x_max) + 1, 1))
+        plt.yticks(np.arange(np.floor(y_min), np.ceil(y_max) + 1, 1))
 
-
-
-        rep_iterator += current_rep_length
-
-        plt.savefig(f"{outfilepath}{replicate}.png")
+        plt.scatter(reduced_coordinates[:,0],reduced_coordinates[:,1],c=colors,s=5)
+        plt.grid(visible=False)
+        plt.savefig(f"{outfilepath}_rep{entry}.png")
         plt.close()
+        
+        rep_iterator+=frame_list[entry]
+    
+    return
 
 #Contour plots 
 def contour_embedding_space(outfile_path,embeddingspace_coordinates,levels=10,thresh=0,bw_adjust=.5):

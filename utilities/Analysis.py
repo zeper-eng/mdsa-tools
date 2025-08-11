@@ -559,7 +559,14 @@ class systems_analysis:
      
         '''
 
-        reduced_data = reduced_data if reduced_data is not None else self.reduce_systems_representations(method='PCA')
+        
+        if reduced_data is not None :
+            reduced_data = reduced_data 
+
+        if reduced_data is None:
+            x_pca,_,_ = self.reduce_systems_representations(method='PCA')
+            reduced_data=x_pca
+            
         num_systems = num_systems if num_systems is not None else self.num_systems
         
         if frames_per_sys is None:

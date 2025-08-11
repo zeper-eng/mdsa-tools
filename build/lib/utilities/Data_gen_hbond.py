@@ -183,22 +183,21 @@ class trajectory():
         #Create adjacency matrix, set first row and column as residue indices, and multiply to match the number of frames
         
         trajectory = trajectory if trajectory is not None else self.trajectory
-        topology = trajectory.topology if topology is not None else self.trajectory.topology
 
         if granularity == 'residue':
-            indexes=[residue.resSeq+1 for residue in topology.residues]
+            indexes=[residue.resSeq+1 for residue in trajectory.topology.residues]
             empty_array = np.zeros(shape=(len(indexes)+1,len(indexes)+1)) 
 
             empty_array[0,1:]=indexes
             empty_array[1:,0]=indexes
 
             template_array=np.repeat(empty_array[np.newaxis,:, :], len(trajectory), axis=0)
-            atom_to_residue = {atom.index:atom.residue.resSeq for atom in topology.atoms}
+            atom_to_residue = {atom.index:atom.residue.resSeq for atom in trajectory.topology.atoms}
             
             return atom_to_residue,template_array
         
         elif granularity == 'atom':
-            indexes=[atom.index+1 for atom in topology.atoms]
+            indexes=[atom.index+1 for atom in trajectory.topology.atoms]
             empty_array = np.zeros(shape=(len(indexes)+1,len(indexes)+1)) 
 
             empty_array[0,1:]=indexes
@@ -445,5 +444,5 @@ if __name__ == '__main__':
     test_atomic_system_no_indexes=test_atomic_system[0,1:,1:]
     print(test_atomic_system_no_indexes[test_atomic_system_no_indexes!=0])
 
-    print('test running jus tthe datagen file')
+    print('test running just the datagen file')
     
