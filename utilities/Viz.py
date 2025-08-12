@@ -665,7 +665,7 @@ def highlight_reps_in_embeddingspace(reduced_coordinates,
     
     for entry in range(len(frame_list)):
 
-        colors = np.full(reduced_coordinates.shape[0], 'lightyellow')
+        colors = np.full(reduced_coordinates.shape[0], 'yellow')
         colors[rep_iterator:rep_iterator+frame_list[entry]] = 'blue'  
 
         # ticks for scaling
