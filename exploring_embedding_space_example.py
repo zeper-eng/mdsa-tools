@@ -1,8 +1,5 @@
 from utilities.Analysis import systems_analysis
-import os
 import numpy as np
-from sklearn.decomposition import PCA
-import pandas as pd
 import matplotlib.cm as cm
 
 #Pipeline setup assumed as in: Data Generation
@@ -26,13 +23,15 @@ visualize_reduction(X_pca,color_mappings=substitute_kmeans_labels,savepath='/Use
 #Visualize replicates in embedding space 
 frame_list=((([80] * 20) + ([160] * 10)) * 2)
 from utilities.Viz import highlight_reps_in_embeddingspace
-highlight_reps_in_embeddingspace(reduced_coordinates=X_pca,outfilepath='test_output/per_rep/G34CCU_PCA_')
+highlight_reps_in_embeddingspace(reduced_coordinates=X_pca,outfilepath='test_output/per_rep/G34CCU_PCA_')#PCA
+highlight_reps_in_embeddingspace(reduced_coordinates=X_pca,outfilepath='test_output/per_rep/G34CCU_UMAP_')#UMAP
 
 #Contour embedding space 
 from utilities.Viz import contour_embedding_space
-contour_embedding_space('test_output/contour/contour_test_PCA',X_pca)
+contour_embedding_space('test_output/contour/contour_test_PCA',X_pca)#PCA
+contour_embedding_space('test_output/contour/contour_test_PCA',umap_embedding)#UMAP
 
-#Cluster embedding space 
+#Cluster embedding space (PCA)
 results=Systems_Analyzer.cluster_individual_systems_in_embeddingspace()
 
 iterator=1
@@ -44,7 +43,6 @@ for i in results:
 results=Systems_Analyzer.cluster_individual_systems_in_embeddingspace(reduced_data=umap_embedding)
 
 iterator=1
-
 for i in results:
     visualize_reduction(umap_embedding,color_mappings=i,savepath='/Users/luis/Desktop/workspacetwo/test_output/UMAP/system_{1}_embeddingspacecluster_',cmap=cm.magma_r)
     iterator+=1
