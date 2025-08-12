@@ -117,22 +117,38 @@ class systems_analysis:
         data:np.ndarray,shape=(n_sample,n_features),
             A feature matrix of any kind, hopefully one provided from the rest of the pipeline but in theory, this is 
             just a scikit learn wrapper so you can plug anything you want really
+
+        max_clusters:int,default=10
+            The maximum number of initial centroids we are iterating through while optimizing sillohuette scores and elbow plots.
         
         outfile_path:str,default=os.getcwd()
+            The path to where we would like to save the outputted labels (frame assignments of K-means)
+        
+        data:arraylike,shape=(n_samples,n_features)
+            Ideally this is the feature matrix provided as input at the top of the workflow but, its provided as a parameter incase
+            you'd like to use theese in your own way.
         
 
         Returns
         ----------
+        (optimal_k_silhouette_labels,optimal_k_elbow_labels,centers_sillohuette,centers_elbow):tuple,shape=(4)
+            A tuple holding all of the objects created by the clustering of our systems representations. In order from left to right
+            the labels from the optimal number of initial centroids as defined by sillohuette score analysis; then the labels from optimal
+            clustering as defined the the elbow plots, as well as the centroids found for the sillohuette centers and elbow centers.
         
+            
         Notes
-        ----------
+        -------
+
+
         
         Examples
-        ----------
+        ---------
+
         
         '''
         outfile_path=outfile_path if outfile_path is not None else os.getcwd()
-        optimal_k_silhouette_labels,optimal_k_elbow_labels,centers_sillohuette,centers_elbow=self.preform_clust_opt(outfile_path=outfile_path,data=self.feature_matrix)
+        optimal_k_silhouette_labels,optimal_k_elbow_labels,centers_sillohuette,centers_elbow=self.preform_clust_opt(outfile_path=outfile_path,data=self.feature_matrix,max_clusters=max_clusters)
 
 
         return optimal_k_silhouette_labels,optimal_k_elbow_labels,centers_sillohuette,centers_elbow
