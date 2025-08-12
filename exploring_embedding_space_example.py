@@ -46,7 +46,4 @@ iterator=1
 for i in results:
     visualize_reduction(umap_embedding,color_mappings=i,savepath='/Users/luis/Desktop/workspacetwo/test_output/UMAP/system_{1}_embeddingspacecluster_',cmap=cm.magma_r)
     iterator+=1
-    
-
-
-
+            
