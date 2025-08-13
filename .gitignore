@@ -1,6 +1,5 @@
 *.ipynb*
 manuscript_explorations/
-utilities/Convenience.py
 new_viz.py
 importer.sh
 Manipulating_original_arrays.py
