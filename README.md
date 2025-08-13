@@ -15,7 +15,7 @@ We modify various adjacent codon identites at the A-site and +1 (poised to enter
 in order to model the varying behaviors of the CAR interaction surface and how they correllate to varying
 translation rate changes.
 
-# The easiest way to get going if your familiar with python development especially in conda environments is to pip install from our directory. This will be replaced with a proper pyPI install very soon but, at the moment we are still in development.
+# The easiest way to get going is to pip install from the repository. This will be replaced with a proper pyPI install very soon but, at the moment we are still in development.
 
 ```bash
 
