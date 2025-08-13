@@ -153,7 +153,7 @@ class systems_analysis:
 
         return optimal_k_silhouette_labels,optimal_k_elbow_labels,centers_sillohuette,centers_elbow
     
-    def reduce_systems_representations(self,outfile_path=None,feature_matrix=None,method=None,n_components=None,colormappings=None,colormap=None,custom=None,min_dist=None,n_neighbors=None):
+    def reduce_systems_representations(self,feature_matrix=None,method=None,n_components=None,min_dist=None,n_neighbors=None):
         '''
         Parameters
         ----------
@@ -168,6 +168,16 @@ class systems_analysis:
             
         str:outfile_path,default=os.getcwd()
             path to where you would like to save your visualization
+        
+        min_dist:float,default=0.5
+            This is a UMAP-specific parameter. It controls how tightly UMAP is allowed to pack points together. 
+            Lower values will preserve more of the local clusters in the data whereas higher values will push 
+            points further apart.
+
+        n_neighbors:int,default=900
+            Another UMAP-specific parameter. It determines the number of neighboring points used in 
+            local approximations of the manifold. Larger values result in more global structure being preserved.
+
 
         
         Returns
@@ -321,7 +331,7 @@ class systems_analysis:
                 np.full(after, (np.max(optimal_k_elbow_labels)+1))                        # padding after
                 ])
 
-            print(len(labels_filled))
+            
 
             visualize_reduction(X_pca,
                             color_mappings=labels_filled,

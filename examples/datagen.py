@@ -1,6 +1,6 @@
 from utilities.Data_gen_hbond import trajectory as traj
 import numpy as np
-
+import os
 
 #########################################
 #In house test with our own trajectories#
@@ -20,6 +20,11 @@ test_trajectory_two = traj(trajectory_path=system_two_trajectory,topology_path=s
 #now that its loaded in try to make object
 test_system_one_ = test_trajectory_one.create_system_representations()
 test_system_two_ = test_trajectory_two.create_system_representations()
+
+print(test_system_one_[0])
+print(test_system_two_[0])
+
+os._exit(0)
 
 
 np.save('/Users/luis/Desktop/workspacetwo/example_systems/test_system_one',test_system_one_)

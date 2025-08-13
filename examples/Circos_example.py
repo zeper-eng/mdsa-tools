@@ -40,11 +40,9 @@ PC1_negative=PC1_magnitudes[PC1_magnitudes['PC1_Weights']<0]
 PC1_positive_mag=PC1_positive[['Comparisons','PC1_magnitude']]
 PC1_negative_mag=PC1_negative[['Comparisons','PC1_magnitude']]
 
-PC1_positive_mag=PC1_positive_mag.set_index('Comparisons')['PC1_magnitude'].to_dict()
-PC1_negative_mag=PC1_negative_mag.set_index('Comparisons')['PC1_magnitude'].to_dict()
 
-mdcircos_graph(pc1_circos_object,PC1_positive_mag,'/Users/luis/Desktop/workspacetwo/test_output/circos/PC1_non_G_leading')
-mdcircos_graph(pc2_circos_object,PC1_negative_mag,'/Users/luis/Desktop/workspacetwo/test_output/circos/PC1_G_leading')
+create_MDcircos_from_weightsdf(PC1_positive_mag,'/Users/luis/Desktop/workspacetwo/test_output/circos/PC1_non_G_leading')
+create_MDcircos_from_weightsdf(PC1_negative_mag,'/Users/luis/Desktop/workspacetwo/test_output/circos/PC1_G_leading')
 
 print(PC1_positive_mag)
 print(PC1_negative_mag)

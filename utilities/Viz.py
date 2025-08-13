@@ -102,7 +102,6 @@ def replicatemap_from_labels(labels,frame_list,savepath=None) -> np.ndarray:
 
     return 
 
-
 #K-means Cross-validation metrics
 def plot_sillohette_scores(cluster_range, silhouette_scores, outfile_path="sillohette_method.png"):
     '''quickly plot sillouhette scores afte running kmeans
@@ -415,7 +414,7 @@ def extract_properties_from_weightsdf(pca_table):
     PC2_weight_dict = pca_table.set_index('Comparisons')['PC2_magnitude'].to_dict()
     return residues, PC1_weight_dict, PC2_weight_dict
 
-def create_MDcircos_from_weightsdf(PCA_ranked_weights,outfilepath='/Users/luis/Desktop/workspacetwo/test_output/circos/'):
+def create_MDcircos_from_weightsdf(PCA_ranked_weights, outfilepath=None):
     '''Processes Weights table to create MDcircos plots visualizing weightings
 
     Parameters
@@ -426,9 +425,11 @@ def create_MDcircos_from_weightsdf(PCA_ranked_weights,outfilepath='/Users/luis/D
 
     Returns
     -------
+    None
 
     Notes
     -----
+    Mdcircos plots where arcs are residue indexes and line thickness and darkness are eigenvector coefficient magnituses. 
 
 
 
@@ -442,6 +443,8 @@ def create_MDcircos_from_weightsdf(PCA_ranked_weights,outfilepath='/Users/luis/D
 
 
     '''
+    outfilepath = outfilepath if outfilepath is not None else os.getcwd()
+
     res_indexes,PC1_magnitude_dict,PC2_magnitude_dict = extract_properties_from_weightsdf(PCA_ranked_weights)
     pc1_circos_object=make_MDCircos_object(res_indexes)
     pc2_circos_object=make_MDCircos_object(res_indexes)
@@ -476,7 +479,7 @@ def create_2d_color_mappings(labels=([80]*20)+([160]*10),
         sample_color_mappings = [label_dict[i] for i in labels]
         return sample_color_mappings
 
-def visualize_reduction(X_pca, color_mappings=None, custom=False, 
+def visualize_reduction(embedding_coordinates, color_mappings=None, custom=False, 
                   savepath=os.getcwd(), 
                   title="Principal Component Analysis (PCA) of GCU and CGU Systems", 
                   colors_list=['purple', 'orange', 'green', 'yellow', 'blue', 'red', 'pink', 'cyan', 'grey','brown'],
@@ -500,7 +503,7 @@ def visualize_reduction(X_pca, color_mappings=None, custom=False,
     ax = plt.gca()
 
     if color_mappings is None or len(color_mappings) == 0:
-        color_mappings = np.arange(X_pca.shape[0])
+        color_mappings = np.arange(embedding_coordinates.shape[0])
         custom = False
         legend_labels = None
         print("No color_mappings provided — defaulting to sample index gradient.")
@@ -509,7 +512,7 @@ def visualize_reduction(X_pca, color_mappings=None, custom=False,
     
     if custom:
         # Discrete category color mapping
-        scatter = ax.scatter(X_pca[:, 0], X_pca[:, 1], c=color_mappings, 
+        scatter = ax.scatter(embedding_coordinates[:, 0], embedding_coordinates[:, 1], c=color_mappings, 
                              cmap=ListedColormap(colors_list[:len(unique_vals)]), alpha=0.6)
         
         if legend_labels is not None:
@@ -523,7 +526,7 @@ def visualize_reduction(X_pca, color_mappings=None, custom=False,
         norm = Normalize(vmin=np.min(color_mappings), vmax=np.max(color_mappings))
         cmap = cmap if cmap is not None else plt.get_cmap('Greys')
 
-        scatter = ax.scatter(X_pca[:, 0], X_pca[:, 1],
+        scatter = ax.scatter(embedding_coordinates[:, 0], embedding_coordinates[:, 1],
                              c=color_mappings, cmap=cmap, norm=norm, alpha=0.6)
 
         cbar_ticks = np.linspace(np.min(color_mappings), np.max(color_mappings), 10, dtype=int)
