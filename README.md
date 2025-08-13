@@ -7,7 +7,7 @@
 [![DOI](https://img.shields.io/badge/DOI--blue)]()
 
 
-# Introducing the Pipeline:
+# A pipeline for preforming systems analysis of MD simulations:
 
 ![Alt text](/resources/Pipelineflic.png)
 
