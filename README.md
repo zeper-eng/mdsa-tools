@@ -1,4 +1,4 @@
-# Utilities; A set of tools for performing systems analyses of Molecular Dynamics (MD) Simulations
+# Utilities: A set of tools for performing systems analyses of Molecular Dynamics (MD) Simulations
 
 ![CI](https://img.shields.io/badge/CI-passing-brightgreen)
 [![PyPI version](https://img.shields.io/badge/PyPI--version-inactive.svg)]()
@@ -15,9 +15,16 @@ We modify various adjacent codon identites at the A-site and +1 (poised to enter
 in order to model the varying behaviors of the CAR interaction surface and how they correllate to varying
 translation rate changes.
 
-# The easiest way to get going if your familiar with python development especially in conda environments is to pip install after forking. I.E.:
+# The easiest way to get going if your familiar with python development especially in conda environments is to pip install after forking. i.e.; or to use pip on the repository link. This will eventually be replaced with a proper pyPI pip call but we are currently still in development.
 
 ```bash
+
+#At the moment you can pip install directly from our repo
+pip install git+https://github.com/zeper-eng/workspace.git
+
+###############
+#Alternatively#
+###############
 
 # First fork the repository over 
 git clone https://github.com/zeper-eng/workspace.git
@@ -31,8 +38,6 @@ pip install .
 pip show workspace
 
 ```
-
-# This will eventually be replaced with a proper pip install but we are clearly in development
 
 
 
