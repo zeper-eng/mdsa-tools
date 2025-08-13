@@ -6,14 +6,19 @@
 ![Downloads](https://img.shields.io/badge/downloads-blank-lightgrey)
 [![DOI](https://img.shields.io/badge/DOI--blue)]()
 
-![Alt text](/resources/Pipelineflic.png)
+# The labs current focus: computational genetics expirements.
 
-Pictured is a directed graph describing the pipeline for our trajectory analysis. From left to right, we begin with a trajectory file, convert it into networks, which can be represented as either graphs or adjacency matrices. We move forward with the adjacency matrix representations and concatenate each matrix’s rows to create a vector representation of our system at every frame. Next, we vertically concatenate these to create a feature matrix that can be used as input to either K-means or PCA, whose results can then be visualized using the principal components analysis, our MDcircos plots, or replicate maps (which can alternatively represent the raw H-bond counts).
-
-The labs current focus is on computational genetics expirements.
 We modify various adjacent codon identites at the A-site and +1 (poised to enter the A site 5'-3')
 in order to model the varying behaviors of the CAR interaction surface and how they correllate to varying
 translation rate changes.
+
+# Introducing the Pipeline:
+
+![Alt text](/resources/Pipelineflic.png)
+
+Pictured is a directed graph describing the core of our pipeline for trajectory analysis. From left to right, we begin with a trajectory file, convert it into networks, which can be represented as either graphs or adjacency matrices. We move forward with the adjacency matrix representations and concatenate each matrix’s rows to create a vector representation of our system at every frame. Next, we vertically concatenate these to create a feature matrix that can be used as input to either K-means or PCA, whose results can then be visualized using the principal components analysis, our MDcircos plots, or replicate maps (which can alternatively represent the raw H-bond counts).
+
+
 
 # The easiest way to get going is to pip install from the repository. This will be replaced with a proper pyPI install very soon but, at the moment we are still in development.
 
