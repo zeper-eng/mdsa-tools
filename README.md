@@ -7,10 +7,9 @@
 [![DOI](https://img.shields.io/badge/DOI--blue)]()
 
 # The labs current focus: computational genetics expirements.
+![Alt text](resources/PanelA_summerposter.png)
 
-We modify various adjacent codon identites at the A-site and +1 (poised to enter the A site 5'-3')
-in order to model the varying behaviors of the CAR interaction surface and how they correllate to varying
-translation rate changes.
+At the Weir Lab at Wesleyan University, we perform molecular dynamics simulations of a ribosomal subsystem to study protein translation and the CAR interaction surface—a recently discovered ribosomal interface identified by the lab. Our research focuses on modifying adjacent codon identities at the A-site and the +1 position (poised to enter the A-site in the 5'→3' direction) to model how changes at these sites influence the behavior of the CAR surface and correlate with translation rate variations.
 
 # Introducing the Pipeline:
 
