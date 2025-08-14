@@ -90,7 +90,12 @@ class systems_analysis:
         """
         
         #Concatenate arrays and define list to hold reformatted arrays
-        concatenated_array=np.concatenate((arrays)) 
+        try:
+            concatenated_array=np.concatenate((arrays))
+        except(ValueError, TypeError):
+            print("its really best if you input a list but the program will move on with the assumption you have given just a single arrray as input")
+            concatenated_array=np.asarray(arrays)
+
         final_frames=[]
         frame_num, n_residues, _ = concatenated_array.shape
 
@@ -147,8 +152,9 @@ class systems_analysis:
 
         
         '''
+        data = data if data is not None else self.feature_matrix
         outfile_path=outfile_path if outfile_path is not None else os.getcwd()
-        optimal_k_silhouette_labels,optimal_k_elbow_labels,centers_sillohuette,centers_elbow=self.preform_clust_opt(outfile_path=outfile_path,data=self.feature_matrix,max_clusters=max_clusters)
+        optimal_k_silhouette_labels,optimal_k_elbow_labels,centers_sillohuette,centers_elbow=self.preform_clust_opt(outfile_path=outfile_path,data=data,max_clusters=max_clusters)
 
 
         return optimal_k_silhouette_labels,optimal_k_elbow_labels,centers_sillohuette,centers_elbow
@@ -218,12 +224,8 @@ class systems_analysis:
         
         '''
 
-        outfile_path = outfile_path if outfile_path is not None else os.getcwd()
         feature_matrix = feature_matrix if feature_matrix is not None else self.feature_matrix
         n_components=n_components if n_components is not None else 2
-        colormappings=colormappings if colormappings is not None else None
-        colormap=colormap if colormap is not None else cm.cividis
-        custom=custom if custom is not None else False
         method = method if method is not None else 'PCA'
         min_dist = min_dist if min_dist is not None else .5
         n_neighbors= n_neighbors if n_neighbors is not None else 900
@@ -616,7 +618,7 @@ class systems_analysis:
         return results
     
     #Algorithm wrappers 
-    def preform_clust_opt(self,outfile_path, max_clusters=None,data=None):
+    def preform_clust_opt(self,outfile_path, max_clusters=None, data=None):
         '''
         Parameters
         ----------
@@ -637,7 +639,7 @@ class systems_analysis:
         ----------
         
         '''
-        data=data if data is not None else self.feature_matrix
+        data = data if data is not None else self.feature_matrix
         outfile_path = outfile_path if outfile_path is not None else os.getcwd()
         max_clusters = max_clusters if max_clusters is not None else 10
         
@@ -726,4 +728,60 @@ class systems_analysis:
         print("weights shape:", weights.shape) 
         
         return X_pca,weights,explained_variance_ratio_
+
+class MSM_Modeller():
+
+    def __init__(self,labels,frame_list):
+        self.labels=labels if labels is not None else None
+        self.frame_list=frame_list if frame_list is not None else frame_list
+
     
+    def create_transition_probability_matrix(self,labels=None,frame_list=None):
+        '''Create probability matrix from input data
+        Parameters
+        ----------
+        labels:arraylike,shape=(n_labels,)
+            A list of labels pertaining to frames of molecular dynamics trajectories assigned particular substates
+
+        frame_list:
+
+        
+        Returns
+        -------
+
+
+        
+        Notes
+        -----
+        Since we have different 
+
+
+
+        Examples
+        --------
+
+        '''
+
+        labels=labels if labels is not None else self.labels
+        frame_list=frame_list if frame_list is not None else self.frame_list
+
+        #extract unique states and initiate transiiton probability matrix
+        unique_states=np.unique(labels)
+        number_of_states=len(unique_states)
+        transtion_prob_matrix=np.zeros(shape=(number_of_states,number_of_states))
+        
+        iterator=0
+        for trajectory_length in frame_list: # iterate through 
+            current_trajectory=labels[iterator:iterator+trajectory_length]
+            iterator=iterator+trajectory_length #update this 
+            for (current_state, next_state) in zip(current_trajectory[:-1], current_trajectory[1:]):
+                transtion_prob_matrix[current_state, next_state] += 1
+        
+        return transtion_prob_matrix
+        
+if __name__ == '__main__':
+
+    print('testing testing 1 2 3')
+
+
+
