@@ -5,15 +5,14 @@ import numpy as np
 
 
 #We seperate out the data generation phase and assume you generated and saved your data prior
-filtered_CCU_GCU_Trajectory_array = np.load('/zfshomes/lperez/ba_and_ma/final_thesis_data/redone_unrestrained_CCU_GCU_Trajectory_array.npy') 
-filtered_CCU_CGU_Trajectory_array = np.load('/zfshomes/lperez/ba_and_ma/final_thesis_data/redone_unrestrained_CCU_CGU_Trajectory_array.npy')
+redone_CCU_GCU_fulltraj=np.load('/Users/luis/Downloads/redone_unrestrained_CCU_GCU_Trajectory_array.npy',allow_pickle=True)
+redone_CCU_CGU_fulltraj=np.load('/Users/luis/Downloads/redone_unrestrained_CCU_CGU_Trajectory_array.npy',allow_pickle=True)
+all_systems=[redone_CCU_GCU_fulltraj,redone_CCU_CGU_fulltraj]
 
-#the goal of this is to analyze multiple differnt structures so naturally we need two different systems
-systems=[filtered_CCU_GCU_Trajectory_array,filtered_CCU_CGU_Trajectory_array]
-Systems_Analyzer = systems_analysis(systems)
+Systems_Analyzer = systems_analysis(all_systems)
 
 #Clustering and visualizing clusters 
-optimal_k_silhouette_labels,optimal_k_elbow_labels,centers_sillohuette,centers_elbow = Systems_Analyzer.cluster_system_level(outfile_path='/Users/luis/Desktop/workspace/test_output/systems_kmeans/',max_clusters=3)
+optimal_k_silhouette_labels,optimal_k_elbow_labels,centers_sillohuette,centers_elbow = Systems_Analyzer.cluster_system_level(outfile_path='/Users/luis/Desktop/workspacetwo/manuscript_explorations/syskmeans/',max_clusters=25)
 print('clustering succesfully completed')
 
 

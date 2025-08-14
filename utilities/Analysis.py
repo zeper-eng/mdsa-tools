@@ -115,7 +115,7 @@ class systems_analysis:
         return final_frames
 
     #Analyses
-    def cluster_system_level(self,outfile_path, max_clusters=10,data=None):
+    def cluster_system_level(self,outfile_path, max_clusters=None,data=None):
         '''
         Parameters
         ----------
@@ -152,6 +152,7 @@ class systems_analysis:
 
         
         '''
+        max_clusters=max_clusters if max_clusters is not None else 10
         data = data if data is not None else self.feature_matrix
         outfile_path=outfile_path if outfile_path is not None else os.getcwd()
         optimal_k_silhouette_labels,optimal_k_elbow_labels,centers_sillohuette,centers_elbow=self.preform_clust_opt(outfile_path=outfile_path,data=data,max_clusters=max_clusters)
@@ -735,7 +736,6 @@ class MSM_Modeller():
         self.labels=labels if labels is not None else None
         self.frame_list=frame_list if frame_list is not None else frame_list
 
-    
     def create_transition_probability_matrix(self,labels=None,frame_list=None):
         '''Create probability matrix from input data
         Parameters
@@ -778,8 +778,13 @@ class MSM_Modeller():
                 transtion_prob_matrix[current_state, next_state] += 1
         row_sums = transtion_prob_matrix.sum(axis=1, keepdims=True)
         transition_probs = transtion_prob_matrix / row_sums
+
+        final_transition_prob_matrix=np.zeros(shape=(number_of_states+1,number_of_states+1))
+        final_transition_prob_matrix[1:,1:]=transition_probs
+        final_transition_prob_matrix[0,1:],final_transition_prob_matrix[1:,0]=unique_states,unique_states
+
         
-        return transition_probs
+        return final_transition_prob_matrix
         
 if __name__ == '__main__':
 
