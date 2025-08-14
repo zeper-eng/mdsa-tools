@@ -776,8 +776,10 @@ class MSM_Modeller():
             iterator=iterator+trajectory_length #update this 
             for (current_state, next_state) in zip(current_trajectory[:-1], current_trajectory[1:]):
                 transtion_prob_matrix[current_state, next_state] += 1
+        row_sums = transtion_prob_matrix.sum(axis=1, keepdims=True)
+        transition_probs = transtion_prob_matrix / row_sums
         
-        return transtion_prob_matrix
+        return transition_probs
         
 if __name__ == '__main__':
 
