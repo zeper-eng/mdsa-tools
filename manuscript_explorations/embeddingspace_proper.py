@@ -11,14 +11,9 @@ all_systems=[redone_CCU_GCU_fulltraj,redone_CCU_CGU_fulltraj]
 Systems_Analyzer = systems_analysis(all_systems)
 X_pca,_,_=Systems_Analyzer.reduce_systems_representations(method='PCA',n_components=2) #PCA
 
-from utilities.Viz import visualize_reduction
-import matplotlib.cm as cm
-potential_7=np.load('/Users/luis/Desktop/workspacetwo/test_output/systems_kmeans/kluster_labels_7clust.npy')
-visualize_reduction(X_pca,color_mappings=potential_7,cmap=cm.plasma_r,savepath='/Users/luis/Desktop/workspacetwo/manuscript_explorations/7klust_') 
-
 #Contour embedding space 
 from utilities.Viz import contour_embedding_space
-contour_embedding_space('/Users/luis/Desktop/workspacetwo/test_output/contour/contour_test_PCA',X_pca)#PCA
+contour_embedding_space('/Users/luis/Desktop/workspacetwo/manuscript_explorations/contour/contour_test_PCA',X_pca)#PCA
 
 #Cluster embedding space (PCA)
 optimal_k_silhouette_labels_GCUresults,optimal_k_elbow_labels_GCUresults,centers_sillohuette_GCUresults,centers_elbow_GCUresults=Systems_Analyzer.cluster_system_level(data=X_pca[0:3200,:],outfile_path='/Users/luis/Desktop/workspacetwo/manuscript_explorations//embeddingspace_kmeanslabels/GCU')
@@ -44,6 +39,14 @@ print(sum(frame_list))
 from utilities.Viz import replicatemap_from_labels
 replicatemap_from_labels(optimal_k_silhouette_labels_GCUresults,frame_list=frame_list,savepath='/Users/luis/Desktop/workspacetwo/manuscript_explorations/replicate_maps/GCU_embeddingspace_',title='GCU_substate_replicatemap')
 replicatemap_from_labels(optimal_k_silhouette_labels_CGUresults,frame_list=frame_list,savepath='/Users/luis/Desktop/workspacetwo/manuscript_explorations/replicate_maps/CGU_embeddingspace_',title='CGU_substate_replicatemap')
+
+#Visualize embeddingspace results on embeddingspace 
+GCU_with_filler=np.concatenate((optimal_k_silhouette_labels_GCUresults,np.full(shape=(3200,),fill_value=10)))
+CGU_with_filler=np.concatenate((np.full(shape=(3200,),fill_value=10),optimal_k_silhouette_labels_CGUresults))
+
+from utilities.Viz import visualize_reduction
+visualize_reduction(X_pca,color_mappings=CGU_with_filler,cmap=cm.plasma,savepath='/Users/luis/Desktop/workspacetwo/manuscript_explorations/embeddingspace_visualizations/CGU_embeddingspacecluster_visualizations')
+visualize_reduction(X_pca,color_mappings=GCU_with_filler,cmap=cm.plasma,savepath='/Users/luis/Desktop/workspacetwo/manuscript_explorations/embeddingspace_visualizations/GCU_embeddingspacecluster_visualizations')
 
 from utilities.Analysis import MSM_Modeller
 
