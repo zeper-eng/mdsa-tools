@@ -604,54 +604,85 @@ def highlight_reps_in_embeddingspace(reduced_coordinates,
     return
 
 #Contour plots 
-def contour_embedding_space(outfile_path,embeddingspace_coordinates,levels=10,thresh=0,bw_adjust=.5):
-    '''plot contour map of embedding space coordinates
+def contour_embedding_space(outfile_path, embeddingspace_coordinates, levels=10, thresh=0, bw_adjust=.5,
+                             title=None, xlabel=None, ylabel=None):
+    '''Plots a contour map of embedding space coordinates.
 
-    Paramters
-    ---------
-    embeddingspace_coordinates:arraylike,shape=(n_samples,2)
-    This is the coordinates of your samples in the embedding space created
-    by either UMAP or PCA. We assume you are reducing to two dimensions for 
-    visualization purposes and therefore will use Gaussian KDE for estimation 
-    via Seaborn.
+    Parameters
+    ----------
+    outfile_path : str or None
+        Path to save the output plot. If None, defaults to the current working directory.
 
+    embeddingspace_coordinates : array-like, shape = (n_samples, 2)
+        The coordinates of your samples in the embedding space created by either UMAP or PCA.
+        This function assumes a two-dimensional representation for visualization purposes.
+        A Gaussian KDE (via Seaborn) is used to estimate the density.
+
+    levels : int, default = 10
+        Number of contour levels to draw.
+
+    thresh : float, default = 0
+        Only plot density regions where the estimated value is greater than this threshold.
+
+    bw_adjust : float, default = 0.5
+        Bandwidth adjustment factor for the KDE. Lower values give finer detail, higher values
+        give smoother estimates.
+
+    title : str, default = None
+        Optional title for the plot.
+
+    xlabel : str, default = None
+        Optional label for the x-axis.
+
+    ylabel : str, default = None
+        Optional label for the y-axis.
 
     Returns
     -------
-    None:
-        Plots and saves
-
+    None
+        Saves the contour plot to the specified path.
 
     Notes
     -----
-    This just wraps the sns.kdeplot method for easy incorporation into our workflow and as such
-    we provide essentially the same inputs for further customization you should go ahead and use
-    the sns.kdeplot function yourself on the outputted matrices after reducing your original arrays. 
+    This function wraps `sns.kdeplot` for quick integration into analysis workflows.
+    For more customized control over contour appearance, call `sns.kdeplot` directly
+    on the reduced coordinates.
 
-
-    
     Examples
     --------
-    
+    contour_embedding_space("embedding_contour.png", X_pca, title="Embedding Space",
+                            xlabel="PC1", ylabel="PC2")
     '''
 
     outfile_path = outfile_path if outfile_path is not None else os.getcwd()
 
     sns.kdeplot(
-    x=embeddingspace_coordinates[:, 0],  # PC1
-    y=embeddingspace_coordinates[:, 1],  # PC2
-    fill=True,      # shaded contours
-    cmap="cividis",
-    levels=levels,
-    thresh=thresh,#only plots regions where values are greater than some threshold 
-    bw_adjust=bw_adjust,#wanted finer details which makes sense because we are looking for minority behaviors 
-    cbar=True
+        x=embeddingspace_coordinates[:, 0],
+        y=embeddingspace_coordinates[:, 1],
+        fill=True,
+        cmap="cividis",
+        levels=levels,
+        thresh=thresh,
+        bw_adjust=bw_adjust,
+        cbar=True
     )
 
+    ax = plt.gca()
+    for spine in ax.spines.values():
+        spine.set_visible(False)
+
+    if title:
+        plt.title(title)
+    if xlabel:
+        plt.xlabel(xlabel)
+    if ylabel:
+        plt.ylabel(ylabel)
+
     plt.grid(visible=False)
-    plt.savefig(outfile_path,dpi=800)
-    
+    plt.savefig(outfile_path, dpi=800)
+
     return
+
 
 if __name__ == "__main__":
     frame_list=((([80] * 20) + ([160] * 10)) * 2)
