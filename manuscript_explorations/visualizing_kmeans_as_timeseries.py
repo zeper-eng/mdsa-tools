@@ -5,8 +5,6 @@ import os
 
 #Pipeline setup assumed as in: Data Generation
 redone_CCU_GCU_fulltraj=np.load('/Users/luis/Downloads/redone_unrestrained_CCU_GCU_Trajectory_array.npy',allow_pickle=True)
-print(redone_CCU_GCU_fulltraj[0])
-os._exit(0)
 redone_CCU_CGU_fulltraj=np.load('/Users/luis/Downloads/redone_unrestrained_CCU_CGU_Trajectory_array.npy',allow_pickle=True)
 
 
