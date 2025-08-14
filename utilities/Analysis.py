@@ -736,34 +736,46 @@ class MSM_Modeller():
         self.labels=labels if labels is not None else None
         self.frame_list=frame_list if frame_list is not None else frame_list
 
-    def create_transition_probability_matrix(self,labels=None,frame_list=None):
+    def create_transition_probability_matrix(self,labels=None,frame_list=None,lag=None):
         '''Create probability matrix from input data
         Parameters
         ----------
         labels:arraylike,shape=(n_labels,)
             A list of labels pertaining to frames of molecular dynamics trajectories assigned particular substates
 
-        frame_list:
+        frame_list: listlike,shape=(data,)
+            A list of integers representing the number of frames present in each replicate. This should be in the order
+            of which the various versions of the system, and replicates where concatenated. 
 
         
         Returns
         -------
+        transition_probability_matrix:arraylike;shape=(n_states+1,n_states+1)
+            A transition probability matrix created from the list of labels. Diagonals indicate
+            if it is likely to stay in the same state and off diagonals mark probabilities of transitions
+
 
 
         
         Notes
         -----
-        Since we have different 
+        Much in the spirit of our original matrices the first row and column of theese matrices contain
+        indexes mainly for ease of use and manipulation. Yes, in theory pandas dataframes could streamline this process
+        but, numpy arrays are just that much more efficient in most use cases,
 
 
 
         Examples
         --------
 
+        
+
         '''
+
 
         labels=labels if labels is not None else self.labels
         frame_list=frame_list if frame_list is not None else self.frame_list
+        lag=lag if lag is not None else 1
 
         #extract unique states and initiate transiiton probability matrix
         unique_states=np.unique(labels)
@@ -774,8 +786,12 @@ class MSM_Modeller():
         for trajectory_length in frame_list: # iterate through 
             current_trajectory=labels[iterator:iterator+trajectory_length]
             iterator=iterator+trajectory_length #update this 
-            for (current_state, next_state) in zip(current_trajectory[:-1], current_trajectory[1:]):
+
+            for i in range(current_trajectory.shape[0]-1):
+                current_state=current_trajectory[i]
+                next_state = current_trajectory[i+lag]
                 transtion_prob_matrix[current_state, next_state] += 1
+
         row_sums = transtion_prob_matrix.sum(axis=1, keepdims=True)
         transition_probs = transtion_prob_matrix / row_sums
 
@@ -785,7 +801,15 @@ class MSM_Modeller():
 
         
         return final_transition_prob_matrix
-        
+    
+    def test_possible_lag_values(self,labels=None,frame_list=None):
+
+        labels = labels if labels is not None else self.labels
+        frame_list = frame_list if frame_list is not None else self.frame_list
+
+        return
+
+
 if __name__ == '__main__':
 
     print('testing testing 1 2 3')

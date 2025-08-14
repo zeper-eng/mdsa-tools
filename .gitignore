@@ -1,5 +1,5 @@
 *.ipynb*
-manuscript_explorations/
+manuscript_explorations//*/*.npy
 new_viz.py
 importer.sh
 Manipulating_original_arrays.py

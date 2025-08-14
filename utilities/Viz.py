@@ -10,7 +10,7 @@ import seaborn as sns
 
 
 #Replicate maps
-def replicatemap_from_labels(labels,frame_list,savepath=None) -> np.ndarray:
+def replicatemap_from_labels(labels,frame_list,savepath=None,title=None, xlabel=None, ylabel=None) -> np.ndarray:
     '''returns an array consisting of a re-formatted list of labels through which to view a set.
 
     Parameters
@@ -26,6 +26,14 @@ def replicatemap_from_labels(labels,frame_list,savepath=None) -> np.ndarray:
     savepath:str,default=os.getcwd()
         Path to where you would like to save your plot; generally dpi=800 and default is the directory you are running from
 
+    title : str, default = None
+        Optional title for the plot.
+
+    xlabel : str, default = None
+        Optional label for the x-axis.
+
+    ylabel : str, default = None
+        Optional label for the y-axis.
 
     Returns
     -------
@@ -96,9 +104,18 @@ def replicatemap_from_labels(labels,frame_list,savepath=None) -> np.ndarray:
     ax.set_yticks(y_ticks_locations)
     ax.set_yticklabels([str(i) for i in y_ticks_labels], fontsize=8)
 
+    if title:
+        plt.title(title)
+    if xlabel:
+        plt.xlabel(xlabel)
+    if ylabel:
+        plt.ylabel(ylabel)
+
+
 
     plt.tight_layout()
-    plt.savefig(f'{savepath}/test_plot.png', dpi=800)
+    plt.savefig(f'{savepath}replicate_map.png', dpi=800)
+    plt.close()
 
     return 
 
@@ -211,7 +228,6 @@ def get_Circos_coordinates(residue, gcircle):
 
     Examples
     --------
-
 
 
     
@@ -680,6 +696,7 @@ def contour_embedding_space(outfile_path, embeddingspace_coordinates, levels=10,
 
     plt.grid(visible=False)
     plt.savefig(outfile_path, dpi=800)
+    plt.close()
 
     return
 
