@@ -479,17 +479,18 @@ def create_2d_color_mappings(labels=([80]*20)+([160]*10),
         sample_color_mappings = [label_dict[i] for i in labels]
         return sample_color_mappings
 
-def visualize_reduction(embedding_coordinates, color_mappings=None, custom=False, 
+def visualize_reduction(embedding_coordinates, color_mappings=None, 
+                  custom=False, 
                   savepath=os.getcwd(), 
-                  title="Principal Component Analysis (PCA) of GCU and CGU Systems", 
+                  title="Dimensional Reduction of (PCA) of GCU and CGU Systems", 
                   colors_list=['purple', 'orange', 'green', 'yellow', 'blue', 'red', 'pink', 'cyan', 'grey','brown'],
-                  legend_labels=None,
                   cmap=None,
+                  legend_labels=None,
                   axis_one_label=None,
                   axis_two_label=None):
 
-    axis_one_label=None if axis_one_label is not None else 'Principal Component 1'
-    axis_two_label=None if axis_two_label is not None else 'Principal Component 2'
+    axis_one_label=None if axis_one_label is not None else 'Embedding Space Axis 1'
+    axis_two_label=None if axis_two_label is not None else 'Embedding Space Axis 2'
 
     labels_font_dict = {
         'family': 'monospace',
@@ -522,11 +523,11 @@ def visualize_reduction(embedding_coordinates, color_mappings=None, custom=False
             ax.legend(handles=legend_handles, title="System Types", loc="upper right", prop={'size': 20, 'weight': 'bold'})
 
     else:
-        # Use provided colormap, fallback to Greys
+        # Use provided colormap, fallback to red
         norm = Normalize(vmin=np.min(color_mappings), vmax=np.max(color_mappings))
-        cmap = cmap if cmap is not None else plt.get_cmap('Greys')
+        cmap = cmap if cmap is not None else plt.get_cmap('Reds')
 
-        scatter = ax.scatter(embedding_coordinates[:, 0], embedding_coordinates[:, 1],
+        ax.scatter(embedding_coordinates[:, 0], embedding_coordinates[:, 1],
                              c=color_mappings, cmap=cmap, norm=norm, alpha=0.6)
 
         cbar_ticks = np.linspace(np.min(color_mappings), np.max(color_mappings), 10, dtype=int)
