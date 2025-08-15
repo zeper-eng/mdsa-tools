@@ -62,7 +62,7 @@ np.save('/Users/luis/Desktop/workspacetwo/example_systems/test_system_two',test_
 
 from mdsa_tools.Analysis import systems_analysis
 
-all_systems=[redone_CCU_GCU_fulltraj,redone_CCU_CGU_fulltraj]
+all_systems=[test_system_one_,test_system_two_]
 Systems_Analyzer = systems_analysis(all_systems)
 
 #Clustering and visualizing clusters 
