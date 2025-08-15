@@ -1,5 +1,5 @@
-from utilities.Convenience import unrestrained_residues
-from utilities.Analysis import systems_analysis
+from mdsa_tools.Convenience import unrestrained_residues
+from mdsa_tools.Analysis import systems_analysis
 import os
 import numpy as np
 

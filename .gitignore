@@ -1,3 +1,5 @@
+
+dist/
 *.ipynb*
 manuscript_explorations//*/*.npy
 new_viz.py

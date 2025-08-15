@@ -1,4 +1,4 @@
-from utilities.Analysis import systems_analysis
+from mdsa_tools.Analysis import systems_analysis
 import numpy as np
 import matplotlib.cm as cm
 
@@ -15,19 +15,19 @@ umap_embedding=Systems_Analyzer.reduce_systems_representations(method='UMAP', mi
 
 
 #Lets virst visualize the embedding space
-from utilities.Viz import visualize_reduction
+from mdsa_tools.Viz import visualize_reduction
 substitute_kmeans_labels=(([1]*3200)+([2]*3200))
 visualize_reduction(X_pca,color_mappings=substitute_kmeans_labels,savepath='/Users/luis/Desktop/workspacetwo/test_output/PCA/justPCA',cmap=cm.magma_r)
 
 
 #Visualize replicates in embedding space 
 frame_list=((([80] * 20) + ([160] * 10)) * 2)
-from utilities.Viz import highlight_reps_in_embeddingspace
+from mdsa_tools.Viz import highlight_reps_in_embeddingspace
 highlight_reps_in_embeddingspace(reduced_coordinates=X_pca,outfilepath='test_output/per_rep/G34CCU_PCA_')#PCA
 highlight_reps_in_embeddingspace(reduced_coordinates=X_pca,outfilepath='test_output/per_rep/G34CCU_UMAP_')#UMAP
 
 #Contour embedding space 
-from utilities.Viz import contour_embedding_space
+from mdsa_tools.Viz import contour_embedding_space
 contour_embedding_space('test_output/contour/contour_test_PCA',X_pca)#PCA
 contour_embedding_space('test_output/contour/contour_test_PCA',umap_embedding)#UMAP
 

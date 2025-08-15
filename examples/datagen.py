@@ -1,4 +1,4 @@
-from utilities.Data_gen_hbond import trajectory as traj
+from mdsa_tools.Data_gen_hbond import trajectory as traj
 import numpy as np
 import os
 

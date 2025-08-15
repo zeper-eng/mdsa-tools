@@ -1,7 +1,7 @@
 import numpy as np
 import mdtraj as md
 from typing import Tuple, Dict
-from utilities.Data_gen_hbond import cpptraj_hbond_import
+from mdsa_tools.Data_gen_hbond import cpptraj_hbond_import
 import os
 
 '''
