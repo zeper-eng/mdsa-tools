@@ -804,6 +804,8 @@ class MSM_Modeller():
         final_transition_prob_matrix[0,1:],final_transition_prob_matrix[1:,0]=unique_states,unique_states
 
         self.transition_probability_matrix=final_transition_prob_matrix
+        print(final_transition_prob_matrix)
+
 
         return final_transition_prob_matrix
     

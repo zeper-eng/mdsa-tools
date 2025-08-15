@@ -1,4 +1,4 @@
-# A set of tools for performing systems analyses of (MD) simulations.
+# mdsa-tools: A set of tools for performing systems analyses of Molecular Dynamics (MD) simulations.
 
 ![CI](https://img.shields.io/badge/CI-passing-brightgreen)
 [![PyPI version](https://img.shields.io/badge/PyPI--version-inactive.svg)]()
