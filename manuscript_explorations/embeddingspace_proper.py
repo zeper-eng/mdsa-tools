@@ -53,8 +53,12 @@ frame_list*=2 #updating frame_list here
 MSM_GCU=MSM_Modeller(optimal_k_silhouette_labels_GCUresults,frame_list)
 MSM_CGU=MSM_Modeller(optimal_k_silhouette_labels_CGUresults,frame_list)
 
-MSM_GCU.create_transition_probability_matrix(lag=8)
-MSM_CGU.create_transition_probability_matrix(lag=8)
+MSM_GCU_transition_matrix=MSM_GCU.create_transition_probability_matrix(lag=8)
+MSM_CGU_transition_matrix=MSM_CGU.create_transition_probability_matrix(lag=8)
+
+np.savetxt('MSM_GCU_transition_matrix',MSM_GCU_transition_matrix)
+np.savetxt('MSM_CGU_transition_matrix',MSM_CGU_transition_matrix)
+
 
 res_GCU_frob = MSM_GCU.evaluate_Chapman_Kolmogorov(original_lag=8)
 res_CGU_frob = MSM_CGU.evaluate_Chapman_Kolmogorov(original_lag=8)

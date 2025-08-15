@@ -10,7 +10,7 @@ import seaborn as sns
 
 
 #Replicate maps
-def label_iterator(labels,frame_list) -> np.ndarray:
+def replicatemap_from_labels(labels,frame_list,savepath=None,title=None, xlabel=None, ylabel=None) -> np.ndarray:
     '''returns an array consisting of a re-formatted list of labels through which to view a set.
 
     Parameters
@@ -23,6 +23,17 @@ def label_iterator(labels,frame_list) -> np.ndarray:
         A list of integers representing the number of frames present in each replicate. This should be in the order
         of which the various versions of the system, and replicates where concatenated. 
 
+    savepath:str,default=os.getcwd()
+        Path to where you would like to save your plot; generally dpi=800 and default is the directory you are running from
+
+    title : str, default = None
+        Optional title for the plot.
+
+    xlabel : str, default = None
+        Optional label for the x-axis.
+
+    ylabel : str, default = None
+        Optional label for the y-axis.
 
     Returns
     -------
@@ -42,152 +53,73 @@ def label_iterator(labels,frame_list) -> np.ndarray:
 
     '''
 
-    label_iterator=0
-    reformatted_labels=[]
-    max_frames = max(frame_list)
-
-    for rep_length in frame_list:
-        current_replicate = np.copy(labels[label_iterator:label_iterator + rep_length]).astype(float)
-        padded_replicate = np.pad(current_replicate, (0, max_frames - rep_length), constant_values=np.nan)
-        reformatted_labels.append(padded_replicate)
-        label_iterator+=rep_length
+    savepath=savepath if savepath is not None else os.getcwd()
 
 
-    reformatted_labels = np.vstack(reformatted_labels)
-    #print(reformatted_labels.shape)  # Debugging output
-    return reformatted_labels
+    iterator=0
+    final_coordinates=[]
 
-def traj_view_replicates(array, colors_list=['purple', 'orange', 'green', 'yellow', 'blue', 'red', 'pink', 'cyan', 'grey', 'brown'],
-                                clustering=True, savepath='traj_view', title='Clusters per frame', xlabel='Frames', ylabel='Replicates',colormap=cm.plasma_r):
-    """Returns None
-
-    A function for visualizing the clusters that all frames of each replicate end up in, with 10x10 squares for clarity.
-
-    Parameters
-    ----------
-    array: np.ndarray shape=(n_replicates, n_frames)
-        Our final array where each row corresponds to a replicate
-        and each column corresponds to a frame pertaining to that replicate
-
-    colors_list: list-like, default=['purple', 'orange', 'green', 'yellow', 'blue', 'red', 'pink', 'cyan', 'grey', 'brown']
-        A list of colors to visualize clusters by default it contains 10 colors
-        which is sufficient for clusters 0-9
-
-    clustering: bool, default=True
-        Whether to visualize clusters using predefined colors from colors_list.
-        If False the function will use a colormap (e.g. viridis) based on normalized values
-
-    savepath: str, default='traj_view'
-        The path where the plot will be saved
-
-    title: str, default='Clusters per frame'
-        The title of the plot
-
-    xlabel: str, default='Frames'
-        The label for the x-axis
-
-    ylabel: str, default='Replicates'
-        The label for the y-axis
-
-    Returns
-    -------
-    visualized_array: np.ndarray
-        A masked heatmap of the trajectory replicates returned for alternative use
-    """
-
-    rows, cols = array.shape
-
-      # Example font dict
-    labels_font_dict = {
-        'family': 'monospace',  # Font family (e.g., 'sans-serif', 'serif', 'monospace')
-        'size': 20,             # Font size
-        'weight': 'bold',       # Font weight ('normal', 'bold', 'light')
-        'style': 'italic',      # Font style ('normal', 'italic', 'oblique')
-        'color': 'black',       # Text color
-    }
-
-    # Use the Viridis colormap if clustering=False
-    if not clustering:
-        norm = Normalize(vmin=np.nanmin(array), vmax=np.nanmax(array))
-        cmap = colormap if colormap is not None else cm.plasma_r
-
-    #mw wants it black
-    # Set figure and background to black
-    fig=plt.figure(figsize=(16,12)) 
-    fig.tight_layout(pad=0) 
-
-    #plt.gca().set_facecolor('black')
-    #fig.set_facecolor('black')  # Set also background of plot to black
-
-
-# realy the chunk of this other than it just being matplot stuff
-#----
-
-    cluster_labels = {} #cluster labels for the is clustering case (although annoyingly enough I think the plasma will be the baseline)
-    for i in range(rows):
-        for j in range(cols):
-            if not np.isnan(array[i, j]):
-
-                x_pos = j 
-                y_pos = rows-i-1
-
-                if clustering == True:
-                    color_index = int(array[i, j]) % len(colors_list)
-                    color = colors_list[color_index]
-                    cluster_label = f"Cluster {int(array[i, j])}"
-
-                    # Add label to the dictionary (to make sure it's unique)
-                    if cluster_label not in cluster_labels:
-                        cluster_labels[cluster_label] = scatter
-
-                elif clustering == False:
-                    color = cmap(norm(array[i, j]))  
-                    cluster_label = 'Plasma Colormap'
-
-                scatter = plt.scatter(x_pos, y_pos,
-                                     color=color,
-                                     marker="P", 
-                                     s=40)  
-#-----
-
-    # Add legend for clustering, and colorbar for not clustering
-    if clustering == True:
-        plt.legend(cluster_labels.values(), cluster_labels.keys(), title="Clusters", loc='upper left', fontsize='small', markerscale=0.8, bbox_to_anchor=(1.02, 1))    
+    for i in range(len(frame_list)):
+        current_replicate_coordinates=np.full(shape=(frame_list[i],),fill_value=i+1) #make list of 11111 then 22222 for each rep
+        frame_positions=np.arange(1,frame_list[i]+1)
+        frame_values=labels[iterator:iterator+frame_list[i]]
+        replicate_block = np.stack([current_replicate_coordinates, frame_positions, frame_values], axis=1)
+        final_coordinates.append(replicate_block)
+        iterator+=frame_list[i]
     
-    if clustering == False:
-        unique_vals = np.unique(array[~np.isnan(array)]).astype(int)
-        bounds = np.append(unique_vals, unique_vals[-1] + 1)  # to define edges between bins
+    final_coordinates = np.vstack(final_coordinates)
 
-        cbar = plt.colorbar(cm.ScalarMappable(norm=norm, cmap=cmap), ax=plt.gca(),
-                        ticks=unique_vals, shrink=0.8, aspect=30, pad=0.02)
+    y_spacing_factor = 10 
+    x_spacing_factor = 10
 
-        cbar.set_label(" ", rotation=270, labelpad=10, fontsize=12, fontdict=labels_font_dict)
-        cbar.ax.yaxis.set_tick_params(color='black', labelcolor='black')
-        cbar.ax.set_yticklabels([str(val) for val in unique_vals])
-        
-    for spine in plt.gca().spines.values():
+    plt.scatter(
+                x=final_coordinates[:,1] * x_spacing_factor,
+                y=final_coordinates[:,0] * y_spacing_factor,
+                c=final_coordinates[:,2],
+                s=1,
+                marker='s',
+                cmap=cm.plasma_r)
+    
+    #personal preferences
+    plt.grid(visible=False)
+    currentaax=plt.gca()
+    for spine in currentaax.spines.values():
         spine.set_visible(False)
 
-    # Add labels, title, ticks, grid, then hide ticks and show every 10
-    plt.gca().set_xlabel(xlabel, fontdict=labels_font_dict)
-    plt.gca().set_ylabel(ylabel, fontdict=labels_font_dict)
-    plt.gca().set_title(title, fontdict=labels_font_dict)
+    ax=plt.gca()
+    ax.invert_yaxis()
+    ax.set_title('Clusters per frame', fontsize=20, weight='bold', family='monospace', style='italic')
+    n_reps = int(final_coordinates[:, 0].max())
+    n_frames = int(final_coordinates[:, 1].max())
 
-    # Set tick positions based on original dimensions, but spaced out by the scaling factor
-    plt.gca().set_xticks(np.arange(0, cols))  
-    plt.gca().set_yticks(np.arange(0, rows))  
-    plt.gca().set_xticklabels([str(i) if i % 80 == 0 else '' for i in range(cols)], fontdict=labels_font_dict)  
-    plt.gca().set_yticklabels([str(i) if i % 30 == 0 else '' for i in range(rows-1, -1, -1)], fontdict=labels_font_dict)  
+    #Setting Ticks
+    x_ticks_labels = np.arange(0, n_frames+10, 10)
+    x_ticks_locations = x_ticks_labels * x_spacing_factor
+    ax.set_xticks(x_ticks_locations)
+    ax.set_xticklabels([str(i) for i in x_ticks_labels],fontsize=8)
 
-    plt.gca().tick_params(color='black', labelsize=8,pad=0,axis='both', direction='in')#changed from white
 
-    plt.grid(False)
-    plt.savefig(savepath, dpi=300)
+    y_ticks_labels = np.arange(0, n_reps+10,10)
+    y_ticks_locations = y_ticks_labels * y_spacing_factor
+    ax.set_yticks(y_ticks_locations)
+    ax.set_yticklabels([str(i) for i in y_ticks_labels], fontsize=8)
+
+    if title:
+        plt.title(title)
+    if xlabel:
+        plt.xlabel(xlabel)
+    if ylabel:
+        plt.ylabel(ylabel)
+
+
+
+    plt.tight_layout()
+    plt.savefig(f'{savepath}replicate_map.png', dpi=800)
     plt.close()
 
-    return
+    return 
 
-#Optimizing kmeans
+#K-means Cross-validation metrics
 def plot_sillohette_scores(cluster_range, silhouette_scores, outfile_path="sillohette_method.png"):
     '''quickly plot sillouhette scores afte running kmeans
     Parameters
@@ -219,6 +151,7 @@ def plot_sillohette_scores(cluster_range, silhouette_scores, outfile_path="sillo
     plt.legend()
     plt.grid(True)
     plt.savefig(outfile_path+'sillohuette_plot', dpi=300)
+    plt.close()
 
     return optimal_k_sil
  
@@ -254,8 +187,8 @@ def plot_elbow_scores(cluster_range, inertia_scores, outfile_path="elbow_method.
     plt.title('Elbow Method for Optimal k')
     plt.legend()
     plt.grid(True)
-
     plt.savefig(outfile_path+'elbow_plot', dpi=300)  # Save the figure
+    plt.close()
 
 
     return optimal_k
@@ -295,7 +228,6 @@ def get_Circos_coordinates(residue, gcircle):
 
     Examples
     --------
-
 
 
     
@@ -498,7 +430,7 @@ def extract_properties_from_weightsdf(pca_table):
     PC2_weight_dict = pca_table.set_index('Comparisons')['PC2_magnitude'].to_dict()
     return residues, PC1_weight_dict, PC2_weight_dict
 
-def create_MDcircos_from_weightsdf(PCA_ranked_weights,outfilepath='/Users/luis/Desktop/workspacetwo/test_output/circos/'):
+def create_MDcircos_from_weightsdf(PCA_ranked_weights, outfilepath=None):
     '''Processes Weights table to create MDcircos plots visualizing weightings
 
     Parameters
@@ -509,9 +441,11 @@ def create_MDcircos_from_weightsdf(PCA_ranked_weights,outfilepath='/Users/luis/D
 
     Returns
     -------
+    None
 
     Notes
     -----
+    Mdcircos plots where arcs are residue indexes and line thickness and darkness are eigenvector coefficient magnituses. 
 
 
 
@@ -525,12 +459,13 @@ def create_MDcircos_from_weightsdf(PCA_ranked_weights,outfilepath='/Users/luis/D
 
 
     '''
+    outfilepath = outfilepath if outfilepath is not None else os.getcwd()
+
     res_indexes,PC1_magnitude_dict,PC2_magnitude_dict = extract_properties_from_weightsdf(PCA_ranked_weights)
     pc1_circos_object=make_MDCircos_object(res_indexes)
     pc2_circos_object=make_MDCircos_object(res_indexes)
     mdcircos_graph(pc1_circos_object,PC1_magnitude_dict,outfilepath+'PC1_magnitudeviz')
     mdcircos_graph(pc2_circos_object,PC2_magnitude_dict,outfilepath+'PC2_magnitudeviz') 
-
 
 #Embeddingspace visualizations
 def create_2d_color_mappings(labels=([80]*20)+([160]*10), 
@@ -560,17 +495,18 @@ def create_2d_color_mappings(labels=([80]*20)+([160]*10),
         sample_color_mappings = [label_dict[i] for i in labels]
         return sample_color_mappings
 
-def visualize_reduction(X_pca, color_mappings=None, custom=False, 
+def visualize_reduction(embedding_coordinates, color_mappings=None, 
+                  custom=False, 
                   savepath=os.getcwd(), 
-                  title="Principal Component Analysis (PCA) of GCU and CGU Systems", 
+                  title="Dimensional Reduction of (PCA) of GCU and CGU Systems", 
                   colors_list=['purple', 'orange', 'green', 'yellow', 'blue', 'red', 'pink', 'cyan', 'grey','brown'],
-                  legend_labels=None,
                   cmap=None,
+                  legend_labels=None,
                   axis_one_label=None,
                   axis_two_label=None):
 
-    axis_one_label=None if axis_one_label is not None else 'Principal Component 1'
-    axis_two_label=None if axis_two_label is not None else 'Principal Component 2'
+    axis_one_label=None if axis_one_label is not None else 'Embedding Space Axis 1'
+    axis_two_label=None if axis_two_label is not None else 'Embedding Space Axis 2'
 
     labels_font_dict = {
         'family': 'monospace',
@@ -584,7 +520,7 @@ def visualize_reduction(X_pca, color_mappings=None, custom=False,
     ax = plt.gca()
 
     if color_mappings is None or len(color_mappings) == 0:
-        color_mappings = np.arange(X_pca.shape[0])
+        color_mappings = np.arange(embedding_coordinates.shape[0])
         custom = False
         legend_labels = None
         print("No color_mappings provided — defaulting to sample index gradient.")
@@ -593,7 +529,7 @@ def visualize_reduction(X_pca, color_mappings=None, custom=False,
     
     if custom:
         # Discrete category color mapping
-        scatter = ax.scatter(X_pca[:, 0], X_pca[:, 1], c=color_mappings, 
+        scatter = ax.scatter(embedding_coordinates[:, 0], embedding_coordinates[:, 1], c=color_mappings, 
                              cmap=ListedColormap(colors_list[:len(unique_vals)]), alpha=0.6)
         
         if legend_labels is not None:
@@ -603,11 +539,11 @@ def visualize_reduction(X_pca, color_mappings=None, custom=False,
             ax.legend(handles=legend_handles, title="System Types", loc="upper right", prop={'size': 20, 'weight': 'bold'})
 
     else:
-        # Use provided colormap, fallback to Greys
+        # Use provided colormap, fallback to red
         norm = Normalize(vmin=np.min(color_mappings), vmax=np.max(color_mappings))
-        cmap = cmap if cmap is not None else plt.get_cmap('Greys')
+        cmap = cmap if cmap is not None else plt.get_cmap('Reds')
 
-        scatter = ax.scatter(X_pca[:, 0], X_pca[:, 1],
+        ax.scatter(embedding_coordinates[:, 0], embedding_coordinates[:, 1],
                              c=color_mappings, cmap=cmap, norm=norm, alpha=0.6)
 
         cbar_ticks = np.linspace(np.min(color_mappings), np.max(color_mappings), 10, dtype=int)
@@ -634,11 +570,10 @@ def visualize_reduction(X_pca, color_mappings=None, custom=False,
     plt.savefig(savepath, dpi=500)
     plt.close()
 
-def highlight_reps_in_embeddingspace(data,
+def highlight_reps_in_embeddingspace(reduced_coordinates,
                     frame_list=((([80] * 20) + ([160] * 10)) * 2),
                     outfilepath='/zfshomes/lperez/thesis_figures/PCA/test_one_rep'):
-    '''
-    Visualizes and saves a replicate mapping of embedded data.
+    '''Visualizes and saves a replicates inside of embedding space
 
     Parameters
     ----------
@@ -661,85 +596,114 @@ def highlight_reps_in_embeddingspace(data,
     import numpy as np
     import matplotlib.pyplot as plt
     from matplotlib import cm
-    from matplotlib.colors import Normalize
 
-    labels_font_dict = {
-        'family': 'monospace',
-        'size': 20,
-        'weight': 'bold',
-        'style': 'italic',
-        'color': 'white',
-    }
-
-    cmap = cm.plasma
     rep_iterator = 0
-
-    for replicate in range(len(frame_list)):
     
+    for entry in range(len(frame_list)):
 
-        current_rep_length = frame_list[replicate]
+        colors = np.full(reduced_coordinates.shape[0], 'yellow')
+        colors[rep_iterator:rep_iterator+frame_list[entry]] = 'blue'  
 
-        # Extract PCA data for this replicate
-        current_replicate_labels = list(range(current_rep_length))
-        current_replicate_X_PCA = data[rep_iterator:rep_iterator + current_rep_length, 0].astype(float)
-        current_replicate_Y_PCA = data[rep_iterator:rep_iterator + current_rep_length, 1].astype(float)
+        # ticks for scaling
+        x_min, x_max = reduced_coordinates[:, 0].min(), reduced_coordinates[:, 0].max()
+        y_min, y_max = reduced_coordinates[:, 1].min(), reduced_coordinates[:, 1].max()
+        plt.xticks(np.arange(np.floor(x_min), np.ceil(x_max) + 1, 1))
+        plt.yticks(np.arange(np.floor(y_min), np.ceil(y_max) + 1, 1))
 
-
-
-        rep_iterator += current_rep_length
-
-        plt.savefig(f"{outfilepath}{replicate}.png")
+        plt.scatter(reduced_coordinates[:,0],reduced_coordinates[:,1],c=colors,s=5)
+        plt.grid(visible=False)
+        plt.savefig(f"{outfilepath}_rep{entry}.png")
         plt.close()
+        
+        rep_iterator+=frame_list[entry]
+    
+    return
 
 #Contour plots 
-def contour_embedding_space(outfile_path,embeddingspace_coordinates,levels=10,thresh=0,bw_adjust=.5):
-    '''plot contour map of embedding space coordinates
+def contour_embedding_space(outfile_path, embeddingspace_coordinates, levels=10, thresh=0, bw_adjust=.5,
+                             title=None, xlabel=None, ylabel=None):
+    '''Plots a contour map of embedding space coordinates.
 
-    Paramters
-    ---------
-    embeddingspace_coordinates:arraylike,shape=(n_samples,2)
-    This is the coordinates of your samples in the embedding space created
-    by either UMAP or PCA. We assume you are reducing to two dimensions for 
-    visualization purposes and therefore will use Gaussian KDE for estimation 
-    via Seaborn.
+    Parameters
+    ----------
+    outfile_path : str or None
+        Path to save the output plot. If None, defaults to the current working directory.
 
+    embeddingspace_coordinates : array-like, shape = (n_samples, 2)
+        The coordinates of your samples in the embedding space created by either UMAP or PCA.
+        This function assumes a two-dimensional representation for visualization purposes.
+        A Gaussian KDE (via Seaborn) is used to estimate the density.
+
+    levels : int, default = 10
+        Number of contour levels to draw.
+
+    thresh : float, default = 0
+        Only plot density regions where the estimated value is greater than this threshold.
+
+    bw_adjust : float, default = 0.5
+        Bandwidth adjustment factor for the KDE. Lower values give finer detail, higher values
+        give smoother estimates.
+
+    title : str, default = None
+        Optional title for the plot.
+
+    xlabel : str, default = None
+        Optional label for the x-axis.
+
+    ylabel : str, default = None
+        Optional label for the y-axis.
 
     Returns
     -------
-    None:
-        Plots and saves
-
+    None
+        Saves the contour plot to the specified path.
 
     Notes
     -----
-    This just wraps the sns.kdeplot method for easy incorporation into our workflow and as such
-    we provide essentially the same inputs for further customization you should go ahead and use
-    the sns.kdeplot function yourself on the outputted matrices after reducing your original arrays. 
+    This function wraps `sns.kdeplot` for quick integration into analysis workflows.
+    For more customized control over contour appearance, call `sns.kdeplot` directly
+    on the reduced coordinates.
 
-
-    
     Examples
     --------
-    
+    contour_embedding_space("embedding_contour.png", X_pca, title="Embedding Space",
+                            xlabel="PC1", ylabel="PC2")
     '''
 
     outfile_path = outfile_path if outfile_path is not None else os.getcwd()
 
     sns.kdeplot(
-    x=embeddingspace_coordinates[:, 0],  # PC1
-    y=embeddingspace_coordinates[:, 1],  # PC2
-    fill=True,      # shaded contours
-    cmap="cividis",
-    levels=levels,
-    thresh=thresh,#only plots regions where values are greater than some threshold 
-    bw_adjust=bw_adjust,#wanted finer details which makes sense because we are looking for minority behaviors 
-    cbar=True
+        x=embeddingspace_coordinates[:, 0],
+        y=embeddingspace_coordinates[:, 1],
+        fill=True,
+        cmap="cividis",
+        levels=levels,
+        thresh=thresh,
+        bw_adjust=bw_adjust,
+        cbar=True
     )
 
+    ax = plt.gca()
+    for spine in ax.spines.values():
+        spine.set_visible(False)
+
+    if title:
+        plt.title(title)
+    if xlabel:
+        plt.xlabel(xlabel)
+    if ylabel:
+        plt.ylabel(ylabel)
+
     plt.grid(visible=False)
-    plt.savefig(outfile_path,dpi=800)
-    
+    plt.savefig(outfile_path, dpi=800)
+    plt.close()
+
     return
 
+
 if __name__ == "__main__":
-    print('runnign just the visualization module')
+    frame_list=((([80] * 20) + ([160] * 10)) * 2)
+    print('running just the visualization module')
+    fake_labels=[1]*3200+[2]*3200
+    print(fake_labels)
+    replicatemap_from_labels(fake_labels,frame_list)

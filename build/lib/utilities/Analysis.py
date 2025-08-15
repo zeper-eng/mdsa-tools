@@ -90,7 +90,12 @@ class systems_analysis:
         """
         
         #Concatenate arrays and define list to hold reformatted arrays
-        concatenated_array=np.concatenate((arrays)) 
+        try:
+            concatenated_array=np.concatenate((arrays))
+        except(ValueError, TypeError):
+            print("its really best if you input a list but the program will move on with the assumption you have given just a single arrray as input")
+            concatenated_array=np.asarray(arrays)
+
         final_frames=[]
         frame_num, n_residues, _ = concatenated_array.shape
 
@@ -110,34 +115,52 @@ class systems_analysis:
         return final_frames
 
     #Analyses
-    def cluster_system_level(self,outfile_path, max_clusters=10,data=None):
+    def cluster_system_level(self,outfile_path, max_clusters=None,data=None):
         '''
         Parameters
         ----------
         data:np.ndarray,shape=(n_sample,n_features),
             A feature matrix of any kind, hopefully one provided from the rest of the pipeline but in theory, this is 
             just a scikit learn wrapper so you can plug anything you want really
+
+        max_clusters:int,default=10
+            The maximum number of initial centroids we are iterating through while optimizing sillohuette scores and elbow plots.
         
         outfile_path:str,default=os.getcwd()
+            The path to where we would like to save the outputted labels (frame assignments of K-means)
+        
+        data:arraylike,shape=(n_samples,n_features)
+            Ideally this is the feature matrix provided as input at the top of the workflow but, its provided as a parameter incase
+            you'd like to use theese in your own way.
         
 
         Returns
         ----------
+        (optimal_k_silhouette_labels,optimal_k_elbow_labels,centers_sillohuette,centers_elbow):tuple,shape=(4)
+            A tuple holding all of the objects created by the clustering of our systems representations. In order from left to right
+            the labels from the optimal number of initial centroids as defined by sillohuette score analysis; then the labels from optimal
+            clustering as defined the the elbow plots, as well as the centroids found for the sillohuette centers and elbow centers.
         
+            
         Notes
-        ----------
+        -------
+
+
         
         Examples
-        ----------
+        ---------
+
         
         '''
+        max_clusters=max_clusters if max_clusters is not None else 10
+        data = data if data is not None else self.feature_matrix
         outfile_path=outfile_path if outfile_path is not None else os.getcwd()
-        optimal_k_silhouette_labels,optimal_k_elbow_labels,centers_sillohuette,centers_elbow=self.preform_clust_opt(outfile_path=outfile_path,data=self.feature_matrix)
+        optimal_k_silhouette_labels,optimal_k_elbow_labels,centers_sillohuette,centers_elbow=self.preform_clust_opt(outfile_path=outfile_path,data=data,max_clusters=max_clusters)
 
 
         return optimal_k_silhouette_labels,optimal_k_elbow_labels,centers_sillohuette,centers_elbow
     
-    def reduce_systems_representations(self,outfile_path=None,feature_matrix=None,method=None,n_components=None,colormappings=None,colormap=None,custom=None,min_dist=None,n_neighbors=None):
+    def reduce_systems_representations(self,feature_matrix=None,method=None,n_components=None,min_dist=None,n_neighbors=None):
         '''
         Parameters
         ----------
@@ -152,6 +175,16 @@ class systems_analysis:
             
         str:outfile_path,default=os.getcwd()
             path to where you would like to save your visualization
+        
+        min_dist:float,default=0.5
+            This is a UMAP-specific parameter. It controls how tightly UMAP is allowed to pack points together. 
+            Lower values will preserve more of the local clusters in the data whereas higher values will push 
+            points further apart.
+
+        n_neighbors:int,default=900
+            Another UMAP-specific parameter. It determines the number of neighboring points used in 
+            local approximations of the manifold. Larger values result in more global structure being preserved.
+
 
         
         Returns
@@ -192,12 +225,8 @@ class systems_analysis:
         
         '''
 
-        outfile_path = outfile_path if outfile_path is not None else os.getcwd()
         feature_matrix = feature_matrix if feature_matrix is not None else self.feature_matrix
         n_components=n_components if n_components is not None else 2
-        colormappings=colormappings if colormappings is not None else None
-        colormap=colormap if colormap is not None else cm.cividis
-        custom=custom if custom is not None else False
         method = method if method is not None else 'PCA'
         min_dist = min_dist if min_dist is not None else .5
         n_neighbors= n_neighbors if n_neighbors is not None else 900
@@ -305,7 +334,7 @@ class systems_analysis:
                 np.full(after, (np.max(optimal_k_elbow_labels)+1))                        # padding after
                 ])
 
-            print(len(labels_filled))
+            
 
             visualize_reduction(X_pca,
                             color_mappings=labels_filled,
@@ -559,7 +588,14 @@ class systems_analysis:
      
         '''
 
-        reduced_data = reduced_data if reduced_data is not None else self.reduce_systems_representations(method='PCA')
+        
+        if reduced_data is not None :
+            reduced_data = reduced_data 
+
+        if reduced_data is None:
+            x_pca,_,_ = self.reduce_systems_representations(method='PCA')
+            reduced_data=x_pca
+            
         num_systems = num_systems if num_systems is not None else self.num_systems
         
         if frames_per_sys is None:
@@ -583,7 +619,7 @@ class systems_analysis:
         return results
     
     #Algorithm wrappers 
-    def preform_clust_opt(self,outfile_path, max_clusters=None,data=None):
+    def preform_clust_opt(self,outfile_path, max_clusters=None, data=None):
         '''
         Parameters
         ----------
@@ -604,7 +640,7 @@ class systems_analysis:
         ----------
         
         '''
-        data=data if data is not None else self.feature_matrix
+        data = data if data is not None else self.feature_matrix
         outfile_path = outfile_path if outfile_path is not None else os.getcwd()
         max_clusters = max_clusters if max_clusters is not None else 10
         
@@ -693,4 +729,140 @@ class systems_analysis:
         print("weights shape:", weights.shape) 
         
         return X_pca,weights,explained_variance_ratio_
+
+class MSM_Modeller():
+
+    def __init__(self,labels,frame_list):
+        self.labels=labels if labels is not None else None
+        self.frame_list=frame_list if frame_list is not None else frame_list
+
+        self.transition_probability_matrix=None
+        self.lag=None
+
+    def create_transition_probability_matrix(self,labels=None,frame_list=None,lag=None):
+        '''Create probability matrix from input data (returns, and updates class attribute)
+
+        Parameters
+        ----------
+        labels:arraylike,shape=(n_labels,)
+            A list of labels pertaining to frames of molecular dynamics trajectories assigned particular substates
+
+        frame_list: listlike,shape=(data,)
+            A list of integers representing the number of frames present in each replicate. This should be in the order
+            of which the various versions of the system, and replicates where concatenated. 
+
+        
+        Returns
+        -------
+        transition_probability_matrix:arraylike;shape=(n_states+1,n_states+1)
+            A transition probability matrix created from the list of labels. Diagonals indicate
+            if it is likely to stay in the same state and off diagonals mark probabilities of transitions
+
+
+
+        
+        Notes
+        -----
+        Much in the spirit of our original matrices the first row and column of theese matrices contain
+        indexes mainly for ease of use and manipulation. Yes, in theory pandas dataframes could streamline this process
+        but, numpy arrays are just that much more efficient in most use cases,
+
+
+
+        Examples
+        --------
+
+        
+
+        '''
+
+
+        labels=labels if labels is not None else self.labels
+        frame_list=frame_list if frame_list is not None else self.frame_list
+        lag=lag if lag is not None else 1
+
+        #extract unique states and initiate transiiton probability matrix
+        unique_states=np.unique(labels)
+        number_of_states=len(unique_states)
+        transtion_prob_matrix=np.zeros(shape=(number_of_states,number_of_states))
+        
+        iterator=0
+        for trajectory_length in frame_list: # iterate through 
+            current_trajectory=labels[iterator:iterator+trajectory_length]
+            iterator=iterator+trajectory_length #update this 
+
+            for i in range(current_trajectory.shape[0]-lag):
+                current_state=current_trajectory[i]
+                next_state = current_trajectory[i+lag]
+                transtion_prob_matrix[current_state, next_state] += 1
+
+        row_sums = transtion_prob_matrix.sum(axis=1, keepdims=True)
+        transition_probs = transtion_prob_matrix / row_sums
+
+        final_transition_prob_matrix=np.zeros(shape=(number_of_states+1,number_of_states+1))
+        final_transition_prob_matrix[1:,1:]=transition_probs
+        final_transition_prob_matrix[0,1:],final_transition_prob_matrix[1:,0]=unique_states,unique_states
+
+        self.transition_probability_matrix=final_transition_prob_matrix
+        print(final_transition_prob_matrix)
+
+
+        return final_transition_prob_matrix
     
+
+    def evaluate_Chapman_Kolmogorov(self,transition_probability_matrix=None,n=None,labels=None,original_lag=None):
+        '''evaluate if the chapman kolmogorov test evaluates to true
+
+        Parameters
+        ----------
+        n:int,default=4
+            The original number of lags we used to compute the transition probability matrix
+        
+        transition_proability_matrix:arraylike,shape=(n_states+1,n_states+1),
+
+        n:int,default=4
+            The time lag we are using to compute our labels
+
+        labels:arraylike,default=self.labels
+            The list of labels we are using for the labeling of data from trajectories. 
+        
+        original_lag:int:default=1
+
+
+        Notes
+        -----
+
+        
+        Returns
+        -------
+
+
+
+        Examples
+        --------
+        
+        
+        '''
+
+        transition_probability_matrix=transition_probability_matrix if transition_probability_matrix is not None else self.create_transition_probability_matrix()
+        original_lag=original_lag if original_lag is not None else 1
+        n = n if n is not None else 4
+        labels=labels if labels is not None else self.labels
+
+        transition_prob_data=transition_probability_matrix[1:,1:]
+        post_timestep_data=np.linalg.matrix_power(transition_prob_data,n)
+        transition_probability_matrix[1:,1:]=post_timestep_data
+
+        total_lag=original_lag+n
+        matrix_from_total_lag = self.create_transition_probability_matrix(lag=total_lag)
+        diff=matrix_from_total_lag[1:,1:]-transition_probability_matrix[1:,1:]
+        frob = np.linalg.norm(diff, ord='fro')
+        return frob
+
+
+if __name__ == '__main__':
+
+    print('testing testing 1 2 3')
+
+
+
