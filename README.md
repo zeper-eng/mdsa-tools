@@ -6,7 +6,7 @@
 ![Downloads](https://img.shields.io/badge/downloads-blank-lightgrey)
 [![DOI](https://img.shields.io/badge/DOI--blue)]()
 
-## A pipeline for systems analysis of MD simulations:
+## A pipeline for :
 ![Alt text](/resources/Pipelineflic.png)
 
  Pictured is a directed graph describing the pipeline for our MD trajectory analysis. From left to right, we begin with a trajectory file, and convert it into a set of networks (one for each trajectory frame), which that can be represented as either graphs or adjacency matrices. Each frame adjacency is flattened into a vector by concatenating the matrix’s rows (vector reduction). The frame vectors are vertically concatenated to create a feature matrix that can be used as input to either K-means clustering or PCA, whose results can then be visualized using graphs, scatter plots, MDCcircos plots, (of residue H-bonding), or MD replicate maps of frame measurements of interest.
