@@ -41,26 +41,25 @@ replicatemap_from_labels(optimal_k_silhouette_labels_GCUresults,frame_list=frame
 replicatemap_from_labels(optimal_k_silhouette_labels_CGUresults,frame_list=frame_list,savepath='/Users/luis/Desktop/workspacetwo/manuscript_explorations/replicate_maps/CGU_embeddingspace_',title='CGU_substate_replicatemap')
 
 #Visualize embeddingspace results on embeddingspace 
-GCU_with_filler=np.concatenate((optimal_k_silhouette_labels_GCUresults,np.full(shape=(3200,),fill_value=10)))
-CGU_with_filler=np.concatenate((np.full(shape=(3200,),fill_value=10),optimal_k_silhouette_labels_CGUresults))
-
+GCU_with_filler=np.concatenate((optimal_k_silhouette_labels_GCUresults,np.full(shape=(3200,),fill_value=np.max(optimal_k_silhouette_labels_GCUresults)+1)))
+CGU_with_filler=np.concatenate((np.full(shape=(3200,),fill_value=np.max(optimal_k_silhouette_labels_CGUresults)+1),optimal_k_silhouette_labels_CGUresults))
 from utilities.Viz import visualize_reduction
-visualize_reduction(X_pca,color_mappings=CGU_with_filler,cmap=cm.plasma,savepath='/Users/luis/Desktop/workspacetwo/manuscript_explorations/embeddingspace_visualizations/CGU_embeddingspacecluster_visualizations')
-visualize_reduction(X_pca,color_mappings=GCU_with_filler,cmap=cm.plasma,savepath='/Users/luis/Desktop/workspacetwo/manuscript_explorations/embeddingspace_visualizations/GCU_embeddingspacecluster_visualizations')
+visualize_reduction(X_pca,color_mappings=CGU_with_filler,cmap=cm.magma,savepath='/Users/luis/Desktop/workspacetwo/manuscript_explorations/embeddingspace_visualizations/CGU_embeddingspacecluster_visualizations')
+visualize_reduction(X_pca,color_mappings=GCU_with_filler,cmap=cm.magma,savepath='/Users/luis/Desktop/workspacetwo/manuscript_explorations/embeddingspace_visualizations/GCU_embeddingspacecluster_visualizations')
 
+#Moving on to modelling the MSM
 from utilities.Analysis import MSM_Modeller
-
 frame_list*=2 #updating frame_list here
 MSM_GCU=MSM_Modeller(optimal_k_silhouette_labels_GCUresults,frame_list)
 MSM_CGU=MSM_Modeller(optimal_k_silhouette_labels_CGUresults,frame_list)
 
-transtion_prob_matrix_GCU = MSM_GCU.create_transition_probability_matrix()
-transtion_prob_matrix_CGU = MSM_CGU.create_transition_probability_matrix()
+MSM_GCU.create_transition_probability_matrix(lag=8)
+MSM_CGU.create_transition_probability_matrix(lag=8)
 
-print(transtion_prob_matrix_GCU)
-print(transtion_prob_matrix_CGU)
+res_GCU_frob = MSM_GCU.evaluate_Chapman_Kolmogorov(original_lag=8)
+res_CGU_frob = MSM_CGU.evaluate_Chapman_Kolmogorov(original_lag=8)
 
-np.save('/Users/luis/Desktop/workspacetwo/manuscript_explorations/transition_probability_matrices/transtion_prob_matrix_GCU',transtion_prob_matrix_GCU)
-np.save('/Users/luis/Desktop/workspacetwo/manuscript_explorations/transition_probability_matrices/transtion_prob_matrix_CGU',transtion_prob_matrix_CGU)
+print(res_GCU_frob)
+print(res_CGU_frob)
 
             

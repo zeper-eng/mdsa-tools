@@ -736,8 +736,12 @@ class MSM_Modeller():
         self.labels=labels if labels is not None else None
         self.frame_list=frame_list if frame_list is not None else frame_list
 
+        self.transition_probability_matrix=None
+        self.lag=None
+
     def create_transition_probability_matrix(self,labels=None,frame_list=None,lag=None):
-        '''Create probability matrix from input data
+        '''Create probability matrix from input data (returns, and updates class attribute)
+
         Parameters
         ----------
         labels:arraylike,shape=(n_labels,)
@@ -787,7 +791,7 @@ class MSM_Modeller():
             current_trajectory=labels[iterator:iterator+trajectory_length]
             iterator=iterator+trajectory_length #update this 
 
-            for i in range(current_trajectory.shape[0]-1):
+            for i in range(current_trajectory.shape[0]-lag):
                 current_state=current_trajectory[i]
                 next_state = current_trajectory[i+lag]
                 transtion_prob_matrix[current_state, next_state] += 1
@@ -799,15 +803,59 @@ class MSM_Modeller():
         final_transition_prob_matrix[1:,1:]=transition_probs
         final_transition_prob_matrix[0,1:],final_transition_prob_matrix[1:,0]=unique_states,unique_states
 
-        
+        self.transition_probability_matrix=final_transition_prob_matrix
+
         return final_transition_prob_matrix
     
-    def test_possible_lag_values(self,labels=None,frame_list=None):
 
-        labels = labels if labels is not None else self.labels
-        frame_list = frame_list if frame_list is not None else self.frame_list
+    def evaluate_Chapman_Kolmogorov(self,transition_probability_matrix=None,n=None,labels=None,original_lag=None):
+        '''evaluate if the chapman kolmogorov test evaluates to true
 
-        return
+        Parameters
+        ----------
+        n:int,default=4
+            The original number of lags we used to compute the transition probability matrix
+        
+        transition_proability_matrix:arraylike,shape=(n_states+1,n_states+1),
+
+        n:int,default=4
+            The time lag we are using to compute our labels
+
+        labels:arraylike,default=self.labels
+            The list of labels we are using for the labeling of data from trajectories. 
+        
+        original_lag:int:default=1
+
+
+        Notes
+        -----
+
+        
+        Returns
+        -------
+
+
+
+        Examples
+        --------
+        
+        
+        '''
+
+        transition_probability_matrix=transition_probability_matrix if transition_probability_matrix is not None else self.create_transition_probability_matrix()
+        original_lag=original_lag if original_lag is not None else 1
+        n = n if n is not None else 4
+        labels=labels if labels is not None else self.labels
+
+        transition_prob_data=transition_probability_matrix[1:,1:]
+        post_timestep_data=np.linalg.matrix_power(transition_prob_data,n)
+        transition_probability_matrix[1:,1:]=post_timestep_data
+
+        total_lag=original_lag+n
+        matrix_from_total_lag = self.create_transition_probability_matrix(lag=total_lag)
+        diff=matrix_from_total_lag[1:,1:]-transition_probability_matrix[1:,1:]
+        frob = np.linalg.norm(diff, ord='fro')
+        return frob
 
 
 if __name__ == '__main__':
