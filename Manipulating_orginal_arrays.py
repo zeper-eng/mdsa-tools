@@ -1,4 +1,4 @@
-from utilities.Analysis import systems_analysis
+from mdsa_tools.Analysis import systems_analysis
 import os
 import numpy as np
 from sklearn.decomposition import PCA
@@ -45,7 +45,7 @@ def extract_properties_from_table(pca_table):
 res_indexes,PC1_magnitude_dict,PC2_magnitude_dict = extract_properties_from_table(PCA_ranked_weights)
 
 
-from utilities.Viz import mdcircos_graph,make_MDCircos_object
+from mdsa_tools.Viz import mdcircos_graph,make_MDCircos_object
 
 pc1_circos_object=make_MDCircos_object(res_indexes)
 pc2_circos_object=make_MDCircos_object(res_indexes)

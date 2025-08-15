@@ -1,4 +1,4 @@
-from utilities.Analysis import systems_analysis
+from mdsa_tools.Analysis import systems_analysis
 import os
 import numpy as np
 from sklearn.decomposition import PCA
@@ -17,7 +17,7 @@ Systems_Analyzer = systems_analysis(all_systems)
 #Trying out our new MDCircos visualizations#
 ############################################
 PCA_ranked_weights=Systems_Analyzer.create_PCA_ranked_weights()
-from utilities.Viz import create_MDcircos_from_weightsdf
+from mdsa_tools.Viz import create_MDcircos_from_weightsdf
 create_MDcircos_from_weightsdf(PCA_ranked_weights)
 os._exit(0)
 
@@ -30,7 +30,7 @@ min max scaling even tho the magnitudes are technically supposed to add up to 1 
 
 '''
 
-from utilities.Viz import mdcircos_graph,make_MDCircos_object
+from mdsa_tools.Viz import mdcircos_graph,make_MDCircos_object
 
 PC1_magnitudes=PCA_ranked_weights[['Comparisons','PC1_magnitude','PC1_Weights']]
 

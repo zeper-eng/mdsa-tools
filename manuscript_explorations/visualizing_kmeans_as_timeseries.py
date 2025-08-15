@@ -1,4 +1,4 @@
-from utilities.Analysis import systems_analysis
+from mdsa_tools.Analysis import systems_analysis
 import numpy as np
 import matplotlib.cm as cm
 import os
@@ -15,7 +15,7 @@ Systems_Analyzer = systems_analysis(all_systems)
 optimal_k_silhouette_labels,optimal_k_elbow_labels,centers_sillohuette,centers_elbow=Systems_Analyzer.cluster_system_level('/Users/luis/Desktop/workspacetwo/test_output/systems_kmeans/',max_clusters=4)
 
 #Visualize as a replicate map
-from utilities.Viz import replicatemap_from_labels
+from mdsa_tools.Viz import replicatemap_from_labels
 frame_list=((([80] * 20) + ([160] * 10)) * 2)
 replicatemap_from_labels(optimal_k_silhouette_labels,frame_list)
 

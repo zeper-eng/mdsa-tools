@@ -572,7 +572,8 @@ def visualize_reduction(embedding_coordinates, color_mappings=None,
 
 def highlight_reps_in_embeddingspace(reduced_coordinates,
                     frame_list=((([80] * 20) + ([160] * 10)) * 2),
-                    outfilepath='/zfshomes/lperez/thesis_figures/PCA/test_one_rep'):
+                    outfilepath='/zfshomes/lperez/thesis_figures/PCA/test_one_rep',
+                    cmap=cm.magma_r):
     '''Visualizes and saves a replicates inside of embedding space
 
     Parameters
@@ -583,6 +584,9 @@ def highlight_reps_in_embeddingspace(reduced_coordinates,
     frame_list : list of int, optional
         A list holding integer counts of the number of frames in each replicate. 
         Default is (([80] * 20) + ([160] * 10)) * 2.
+    
+    cmap:matplotlib.cm.cmap:,default=magma_r
+        colormap of choice for highlighting replicates in embeddingspace
 
     Returns
     -------
@@ -600,9 +604,9 @@ def highlight_reps_in_embeddingspace(reduced_coordinates,
     rep_iterator = 0
     
     for entry in range(len(frame_list)):
-
-        colors = np.full(reduced_coordinates.shape[0], 'yellow')
-        colors[rep_iterator:rep_iterator+frame_list[entry]] = 'blue'  
+        
+        colors = np.full(shape=reduced_coordinates.shape[0],fill_value=0)
+        colors[rep_iterator:rep_iterator+frame_list[entry]] = np.arange(1,frame_list[entry]+1,1) 
 
         # ticks for scaling
         x_min, x_max = reduced_coordinates[:, 0].min(), reduced_coordinates[:, 0].max()
@@ -610,7 +614,7 @@ def highlight_reps_in_embeddingspace(reduced_coordinates,
         plt.xticks(np.arange(np.floor(x_min), np.ceil(x_max) + 1, 1))
         plt.yticks(np.arange(np.floor(y_min), np.ceil(y_max) + 1, 1))
 
-        plt.scatter(reduced_coordinates[:,0],reduced_coordinates[:,1],c=colors,s=5)
+        plt.scatter(reduced_coordinates[:,0],reduced_coordinates[:,1],c=colors,s=5,cmap=cmap)
         plt.grid(visible=False)
         plt.savefig(f"{outfilepath}_rep{entry}.png")
         plt.close()

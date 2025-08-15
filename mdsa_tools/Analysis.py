@@ -4,7 +4,7 @@ from sklearn.cluster import KMeans
 import numpy as np
 import os
 from sklearn.decomposition import PCA
-from utilities.Viz import visualize_reduction
+from mdsa_tools.Viz import visualize_reduction
 import pandas as pd
 import matplotlib.cm as cm
 import umap
@@ -666,7 +666,7 @@ class systems_analysis:
 
         
         #so we save unless your calling this specific optimization
-        from utilities.Viz import plot_elbow_scores,plot_sillohette_scores
+        from mdsa_tools.Viz import plot_elbow_scores,plot_sillohette_scores
 
         
         optimal_sillohuette=plot_sillohette_scores(cluster_range,silhouette_scores,outfile_path)

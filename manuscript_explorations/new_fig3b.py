@@ -1,5 +1,5 @@
 import numpy as np
-from utilities.Analysis import systems_analysis
+from mdsa_tools.Analysis import systems_analysis
 import os
 
 
@@ -15,7 +15,7 @@ Systems_Analyzer = systems_analysis(all_systems)
 X_pca,_,_=Systems_Analyzer.reduce_systems_representations() #you could do method=PCA/UMAP here
 print('PCA reduction succesful')
 
-from utilities.Viz import visualize_reduction
+from mdsa_tools.Viz import visualize_reduction
 import matplotlib.cm as cm
 system_labels=[1]*3200+[2]*3200
 visualize_reduction(X_pca,color_mappings=system_labels,savepath=os.getcwd()+'/new_fig3b',cmap=cm.plasma_r)
