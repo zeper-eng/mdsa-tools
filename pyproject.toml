@@ -17,6 +17,7 @@ dependencies = [
   "numpy",
   "pandas",
   "matplotlib",
+  "requests",
   "seaborn",
   "scikit-learn",
   "mdtraj<=1.10.3",
