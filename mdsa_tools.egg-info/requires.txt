@@ -4,5 +4,6 @@ matplotlib
 seaborn
 scikit-learn
 mdtraj<=1.10.3
+pytest-cov
 umap-learn
 python-circos

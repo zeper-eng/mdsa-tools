@@ -10,17 +10,27 @@ all_systems=[redone_CCU_GCU_fulltraj,redone_CCU_CGU_fulltraj]
 
 #For the paper we move forward with systems representations
 Systems_Analyzer = systems_analysis(all_systems)
-UMAP_coordinates=Systems_Analyzer.reduce_systems_representations(method='UMAP',n_components=2,n_neighbors=15,min_dist=0) #PCA
+UMAP_coordinates=Systems_Analyzer.reduce_systems_representations(method='UMAP',n_components=2,n_neighbors=100,min_dist=0) #PCA
+
+
+################
+#worm behavior#
+###############
+from mdsa_tools.Viz import highlight_reps_in_embeddingspace,highlight_crawl_directions,visualize_reduction
+frame_list=((([80] * 20) + ([160] * 10))*2)
+system_labels=(([1]*3200)+[2]*3200)
+colormappings=[np.arange(0,np.max(i),1) for i in frame_list]
+colormappings=np.concatenate(colormappings)
+visualize_reduction(UMAP_coordinates,color_mappings=system_labels,cmap=cm.magma_r,savepath='/Users/luis/Desktop/workspacetwo/manuscript_explorations/crawlspace/00n_point0mindist')#each system
+visualize_reduction(UMAP_coordinates,color_mappings=colormappings,cmap=cm.magma_r,savepath='/Users/luis/Desktop/workspacetwo/manuscript_explorations/crawlspace/00n_point0mindist_crawlspace')#all reps
+
+os._exit(0)
 
 ######################################
 #Lets highlight individual replicates#
 ######################################
 
-from mdsa_tools.Viz import highlight_reps_in_embeddingspace
-frame_list=((([80] * 20) + ([160] * 10))*2)
 highlight_reps_in_embeddingspace(UMAP_coordinates,frame_list,'/Users/luis/Desktop/workspacetwo/manuscript_explorations/umap_per_rep/')
-
-os._exit(0)
 #Contour embedding space 
 from mdsa_tools.Viz import contour_embedding_space
 contour_embedding_space('/Users/luis/Desktop/workspacetwo/manuscript_explorations/contour/contour_test_PCA',X_pca)#PCA

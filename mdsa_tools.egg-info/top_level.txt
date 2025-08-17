@@ -1,5 +1,8 @@
 batch_outfiles
+docs
 example_systems
 mdsa_tools
 resources
+test_env
 test_systems
+tests

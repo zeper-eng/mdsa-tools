@@ -1,6 +1,7 @@
 MANIFEST.in
 README.md
 pyproject.toml
+docs/source/conf.py
 mdsa_tools/Analysis.py
 mdsa_tools/Convenience.py
 mdsa_tools/Data_gen_hbond.py
@@ -11,3 +12,9 @@ mdsa_tools.egg-info/SOURCES.txt
 mdsa_tools.egg-info/dependency_links.txt
 mdsa_tools.egg-info/requires.txt
 mdsa_tools.egg-info/top_level.txt
+tests/__init__.py
+tests/conformationalspace.py
+tests/conftest.py
+tests/fixtures.py
+tests/systems_representations.py
+tests/visualization.py

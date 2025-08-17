@@ -2,7 +2,7 @@ import numpy as np
 import mdtraj as md
 from typing import Tuple, Dict
 
-class trajectory():
+class Generate_Networks():
     '''A wrapper class for creating and manipulating systems representations of our trajectories
     
     '''

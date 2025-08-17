@@ -597,10 +597,6 @@ def highlight_reps_in_embeddingspace(reduced_coordinates,
     Each replicate is plotted in its own subplot. A new row of plots begins every 30 replicates.
     '''
 
-    import numpy as np
-    import matplotlib.pyplot as plt
-    from matplotlib import cm
-
     rep_iterator = 0
     
     for entry in range(len(frame_list)):
@@ -622,6 +618,48 @@ def highlight_reps_in_embeddingspace(reduced_coordinates,
         rep_iterator+=frame_list[entry]
     
     return
+
+def highlight_crawl_directions(reduced_coordinates,
+                    frame_list=((([80] * 20) + ([160] * 10)) * 2),
+                    outfilepath='/zfshomes/lperez/thesis_figures/PCA/test_one_rep',
+                    cmap=cm.magma_r):
+    '''Visualizes and saves a replicates inside of embedding space
+
+    Parameters
+    ----------
+    X_pca : np.ndarray, shape=(n_samples, n_components)
+        The results of fitting a PCA analysis and using the .transform() method.
+
+    frame_list : list of int, optional
+        A list holding integer counts of the number of frames in each replicate. 
+        Default is (([80] * 20) + ([160] * 10)) * 2.
+    
+    cmap:matplotlib.cm.cmap:,default=magma_r
+        colormap of choice for highlighting replicates in embeddingspace
+
+    Returns
+    -------
+    None
+
+    Notes
+    -----
+    Each replicate is plotted in its own subplot. A new row of plots begins every 30 replicates.
+    '''
+
+    colormappings=[np.arange(0,np.max(i),1) for i in frame_list]
+    colormappings=np.concatenate(colormappings)
+    print(colormappings.shape)
+
+    plt.scatter(reduced_coordinates[:,0],reduced_coordinates[:,1],c=colormappings,s=5,cmap=cmap)
+    # ticks for scaling
+    x_min, x_max = reduced_coordinates[:, 0].min(), reduced_coordinates[:, 0].max()
+    y_min, y_max = reduced_coordinates[:, 1].min(), reduced_coordinates[:, 1].max()
+    plt.xticks(np.arange(np.floor(x_min), np.ceil(x_max) + 1, 1))
+    plt.yticks(np.arange(np.floor(y_min), np.ceil(y_max) + 1, 1))
+
+    plt.grid(visible=False)
+    plt.savefig(f"{outfilepath}_crawlhighlights.png")
+    plt.close()
 
 #Contour plots 
 def contour_embedding_space(outfile_path, embeddingspace_coordinates, levels=10, thresh=0, bw_adjust=.5,
