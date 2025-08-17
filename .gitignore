@@ -1,4 +1,5 @@
 docs/
+*.npy
 dist/
 *.ipynb*
 manuscript_explorations//*/*.npy
@@ -25,3 +26,4 @@ PDZ*
 PDZ_analysis.py
 P53Analysis.py
 compresserz/
+manuscript_explorations/shaved_pca_ns/*.npy*

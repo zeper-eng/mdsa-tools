@@ -2,7 +2,7 @@ import numpy as np
 import mdtraj as md
 from typing import Tuple, Dict
 
-class Generate_Networks():
+class TrajectoryProcessor():
     '''A wrapper class for creating and manipulating systems representations of our trajectories
     
     '''
@@ -46,7 +46,7 @@ class Generate_Networks():
         self.feature_matrix=None
         self.topology = self.trajectory.topology
 
-    def create_filtered_representations(self,residues_to_filter,systems_representation=None):
+    def create_filtered_representations(self,residues_to_keep,systems_representation=None):
         '''Filters arrray representations to contain only residues of interest
 
         Parameters
@@ -69,17 +69,23 @@ class Generate_Networks():
 
         
         '''
-        systems_representation=systems_representation if systems_representation is not None else self.system_representation
+        if systems_representation is not None:
+            systems_representation=systems_representation
+        if self.system_representation is not None:
+            systems_representation=self.system_representation
+        if self.system_representation is None:
+            self.create_system_representations()
+            systems_representation=self.system_representation
 
        
        
 
-        residues_to_filter = [0]+residues_to_filter 
+        residues_to_keep = [0]+residues_to_keep 
         if len(systems_representation.shape)==2:
 
             # Create a mask that marks the rows and columns to keep
-            row_mask = np.isin(systems_representation[:, 0], residues_to_filter)
-            col_mask = np.isin(systems_representation[0, :], residues_to_filter)
+            row_mask = np.isin(systems_representation[:, 0], residues_to_keep)
+            col_mask = np.isin(systems_representation[0, :], residues_to_keep)
 
             filtered_rows=systems_representation[row_mask,:]
             filtered_array=filtered_rows[:,col_mask]
@@ -96,8 +102,8 @@ class Generate_Networks():
 
                 if len(current_frame.shape)==2:
 
-                    row_mask = np.isin(current_frame[:, 0], residues_to_filter)
-                    col_mask = np.isin(current_frame[0, :], residues_to_filter)
+                    row_mask = np.isin(current_frame[:, 0], residues_to_keep)
+                    col_mask = np.isin(current_frame[0, :], residues_to_keep)
 
                     filtered_rows=current_frame[row_mask,:]
                     filtered_frame=filtered_rows[:,col_mask]
@@ -124,7 +130,7 @@ class Generate_Networks():
         Returns
         -------
         
-        template_array: np.ndarray, shape=(n_frames,n_residues,n_residues)
+        Systems: np.ndarray, shape=(n_frames,n_residues,n_residues)
             returns array containing adjacency matrices for every frame. Shape is dependent on residues in trajectory and number of frames.
 
         Examples

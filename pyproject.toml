@@ -50,3 +50,9 @@ exclude = [
   "environments*",
   "__pycache__*",
 ]
+
+# silencing depreciation warning we are using old MDtraj version as to not have to rewrite code
+[tool.pytest.ini_options]
+filterwarnings = [
+    "ignore::DeprecationWarning:mdtraj.*"
+]

@@ -41,8 +41,7 @@ class systems_analysis:
         
         self.num_systems=len(systems_representations) #this is useful later on for when we are doing system_specific operations
         self.systems_representations=systems_representations
-        self.indexes = systems_representations[0][0,0,1:]
-        self.feature_matrix=self.replicates_to_featurematrix(systems_representations)
+        self.indexes = systems_representations[0][0, 0, 1:]
 
         #this will be updated later and are defined within the functions themselves
         self.optimal_k_silhouette_labels=None
@@ -53,7 +52,7 @@ class systems_analysis:
         return
 
     #pre-processing
-    def replicates_to_featurematrix(self,arrays)->np.ndarray:
+    def replicates_to_featurematrix(self,arrays=None)->np.ndarray:
         """returns an array formatted for kmeans clustering with scipy
 
         Parameters
@@ -88,6 +87,7 @@ class systems_analysis:
         This results in the expected formatting for scipy's kmeans clustering implementation where each .
         
         """
+        arrays = arrays if arrays is not None else self.systems_representations
         
         #Concatenate arrays and define list to hold reformatted arrays
         try:
@@ -111,15 +111,16 @@ class systems_analysis:
             final_frames.append(flattened)
 
         final_frames = np.vstack(final_frames).astype(np.float32)
+        self.feature_matrix=final_frames#set global var as well
 
         return final_frames
 
     #Analyses
-    def cluster_system_level(self,outfile_path, max_clusters=None,data=None):
+    def cluster_system_level(self,outfile_path=None, max_clusters=None,data=None):
         '''
         Parameters
         ----------
-        data:np.ndarray,shape=(n_sample,n_features),
+        data:np.ndarray,shape=(n_sample,featuresures),
             A feature matrix of any kind, hopefully one provided from the rest of the pipeline but in theory, this is 
             just a scikit learn wrapper so you can plug anything you want really
 
@@ -129,7 +130,7 @@ class systems_analysis:
         outfile_path:str,default=os.getcwd()
             The path to where we would like to save the outputted labels (frame assignments of K-means)
         
-        data:arraylike,shape=(n_samples,n_features)
+        data:arraylike,shape=(n_samples,featuresures)
             Ideally this is the feature matrix provided as input at the top of the workflow but, its provided as a parameter incase
             you'd like to use theese in your own way.
         
@@ -144,8 +145,8 @@ class systems_analysis:
             
         Notes
         -------
-
-
+        We do assume you have atleast 10 frames worth of data... clustering any less than that
+        is a little out of the scope of this simple euclidean distance K-means clustering implementation.
         
         Examples
         ---------
@@ -250,7 +251,7 @@ class systems_analysis:
         
     def cluster_embeddingspace(self,outfile_path=None,feature_matrix=None,n=None,max_clusters=None,elbow_or_sillohuette=None):
         '''
-        This has been depreciated plz ignore lol
+        This has been depreciated for now
         
         '''
         
@@ -348,6 +349,9 @@ class systems_analysis:
         return 
     
     def create_pearsontest_for_kmeans_distributions(self,labels,coordinates,cluster_centers):
+        '''
+        Currently depreciated
+        '''
         '''A function that is meant for the 
 
         Parameters
@@ -355,7 +359,7 @@ class systems_analysis:
         labels:listlike
             A list or array of labels that tell us which cluster each sample belongs to
 
-        coordinates:array,shape=(n_samples,n_features)
+        coordinates:array,shape=(n_samples,featuresures)
             An array which tells us the coordinates of each sample so we can form distributions from them and run statistical tests
             (pearson corellation coefficient)
         
@@ -427,7 +431,7 @@ class systems_analysis:
         Parameters
         ----------
 
-        weights : np.ndarray, shape = (n_components, n_features)
+        weights : np.ndarray, shape = (n_components, featuresures)
             PCA component loadings (rows = components, columns = features). If None, this function
             calls `reduce_systems_representations()` to compute PCA (default n=2) and uses the
             returned `weights`.
@@ -493,66 +497,6 @@ class systems_analysis:
         dataframe=pd.DataFrame(dataframe).round(3)
         
         return dataframe
-
-    def create_contour_plot(self,outfile_path=None,feature_matrix=None):
-        '''
-        Parameters
-        ----------
-
-        Notes
-        -----
-
-        Examples
-        --------
-
-
-        Returns
-        -------
-        
-        '''
-        feature_matrix=feature_matrix if feature_matrix is not None else self.feature_matrix
-        outfile_path = outfile_path if outfile_path is not None else os.getcwd()
-        
-        X_pca,weights,explained_variance_ratio_=self.run_PCA(feature_matrix,2)
-        
-        import seaborn as sns
-        import matplotlib.pyplot as plt
-
-
-
-        '''
-        Since we are not explicitly setting an h seaborn automatically picks one using scotts rule or silvermans rule
-        the param would be bandwidth and can be adjusted using bw_adjust=.05 for instance creating narrower kernels
-
-        bandwidth-> spread of the KDE (shape of the landscape)
-
-        levels-> controls where to draw the contour lines (which KDE values)
-            We arent setting levels so it can really be whatever at that point
-            
-        thresh-> hides regiosn below this KDE value (cut-off for noise)
-
-        fill=true fills betweent he contours
-
-        cbar = true
-
-
-        '''
-        sns.kdeplot(
-            x=X_pca[:, 0],  # PC1
-            y=X_pca[:, 1],  # PC2
-            fill=True,      # shaded contours
-            cmap="cviridis",
-            thresh=0,#only plots regions where values are greater than some threshold 
-            cbar=True
-        )
-
-
-
-
-
-        
-
-        return
 
     def cluster_individual_systems_in_embeddingspace(self, reduced_data=None, frames_per_sys=None, num_systems=None):
         '''cluster individual systems in embedding space in order to identify potential conformations
@@ -623,7 +567,7 @@ class systems_analysis:
         '''
         Parameters
         ----------
-        data:np.ndarray,shape=(n_sample,n_features),
+        data:np.ndarray,shape=(n_sample,featuresures),
             A feature matrix of any kind, hopefully one provided from the rest of the pipeline but in theory, this is 
             just a scikit learn wrapper so you can plug anything you want really
         
@@ -721,14 +665,14 @@ class systems_analysis:
         new_values=pca.components_ 
         X_pca = pca.transform(feature_matrix)
         weights = pca.components_
-        explained_variance_ratio_ = pca.explained_variance_ratio_
+        explained_variances = pca.explained_variance_ratio_
 
         print("X_pca shape (new data):",X_pca.shape)
-        print(f"the total explained variance ratio is {np.sum(explained_variance_ratio_)}")
-        print(f"the total explained variance of PC's is {explained_variance_ratio_}")
+        print(f"the total explained variance{np.sum(explained_variances)}")
+        print(f"the total explained variance of PC's is {explained_variances}")
         print("weights shape:", weights.shape) 
         
-        return X_pca,weights,explained_variance_ratio_
+        return X_pca,weights,explained_variances
 
 class MSM_Modeller():
 
