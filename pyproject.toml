@@ -56,3 +56,8 @@ exclude = [
 filterwarnings = [
     "ignore::DeprecationWarning:mdtraj.*"
 ]
+
+[project.optional-dependencies]
+dev = [
+    "pytest",
+]
