@@ -61,4 +61,10 @@ filterwarnings = [
 [project.optional-dependencies]
 dev = [
     "pytest",
+    
 ]
+
+    [project.optional-dependencies]
+docs = [
+    "sphinx",
+    "myst-parser"]
