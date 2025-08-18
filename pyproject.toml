@@ -4,67 +4,49 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "mdsa-tools"
-version = "1.0.2"
+version = "0.1.3"
 description = "The Weir Labs H-bond Systems Analyses modules!"
 readme = "README.md"
 requires-python = ">=3.9"
-license = {text = "MIT"}
-authors = [
-  { name = "Luis Perez", email = "lperez@wesleyan.edu" }
+license = { text = "MIT" }
+authors = [{ name = "Luis Perez", email = "lperez@wesleyan.edu" }]
+classifiers = [
+  "Programming Language :: Python :: 3",
+  "Operating System :: OS Independent"
 ]
 
 dependencies = [
   "numpy",
   "pandas",
   "matplotlib",
-  "requests",
   "seaborn",
   "scikit-learn",
   "mdtraj<=1.10.3",
-  "pytest-cov",
   "umap-learn",
   "python-circos"
 ]
 
-classifiers = [
-  "Programming Language :: Python :: 3",
-  "Operating System :: OS Independent"
+[project.optional-dependencies]
+dev = [
+  "ruff",
+  "pytest",
+  "pytest-cov"
+]
+docs = [
+  "sphinx>=8",
+  "furo",
+  "myst-parser",   # ← you were missing this in CI
+  "sphinx-copybutton"
+]
+test = [
+  "pytest",
+  "pytest-cov"
 ]
 
-
 [tool.setuptools]
-include-package-data = true
+include-package-data = false
+
 
 [tool.setuptools.packages.find]
 where = ["."]
-exclude = [
-  "Tests*",
-  "examples*",
-  "luis_working*",
-  "manuscript_explorations*",
-  "build*",
-  "dist*",
-  "test_output*",
-  "compresserz*",
-  "PDBs*",
-  "figures*",
-  "environments*",
-  "__pycache__*",
-]
-
-# silencing depreciation warning we are using old MDtraj version as to not have to rewrite code
-[tool.pytest.ini_options]
-filterwarnings = [
-    "ignore::DeprecationWarning:mdtraj.*"
-]
-
-[project.optional-dependencies]
-dev = [
-    "pytest",
-    
-]
-
-    [project.optional-dependencies]
-docs = [
-    "sphinx",
-    "myst-parser"]
+exclude = ["Tests*", "examples*", "luis_working*", "manuscript_explor*"]
