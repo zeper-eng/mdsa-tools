@@ -1,6 +1,6 @@
 Metadata-Version: 2.4
 Name: mdsa-tools
-Version: 1.0.3
+Version: 1.0.4
 Summary: The Weir Labs H-bond Systems Analyses modules!
 Author-email: Luis Perez <lperez@wesleyan.edu>
 License: MIT
@@ -62,6 +62,7 @@ At the Weir Lab at Wesleyan University, we perform molecular dynamics (MD) simul
 
 
 ## Quickstart example (see examples for more use-cases;contour plots, UMAP, MSM, etc):
+
 Google collab viewer: [![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/zeper-eng/mdsa-tools/blob/main/notebooks/mdsa_tools_demo.ipynb) Jupyter notebook env: [![Binder](https://mybinder.org/badge_logo.svg)](
 https://mybinder.org/v2/gh/zeper-eng/mdsa-tools/HEAD?labpath=notebooks/mdsa_tools_demo.ipynb)
 
@@ -70,20 +71,34 @@ from mdsa_tools.Data_gen_hbond import trajectory
 from mdsa_tools.Analysis import systems_analysis
 import numpy as np
 
-# --- Load trajectories (replace with your own paths) ---
-top1 = "/path/to/system1.prmtop"
-traj1 = "/path/to/system1.mdcrd"
-top2 = "/path/to/system2.prmtop"
-traj2 = "/path/to/system2.mdcrd"
+# In house test with our own trajectories
 
-sys1 = trajectory(trajectory_path=traj1, topology_path=top1).create_system_representations()
-sys2 = trajectory(trajectory_path=traj2, topology_path=top2).create_system_representations()
+system_one_topology = '/Users/luis/Desktop/workspace/PDBs/5JUP_N2_CGU_nowat.prmtop'
+system_one_trajectory = '/Users/luis/Desktop/workspace/PDBs/CCU_CGU_10frames.mdcrd'
 
-# Optionally save for reuse
-# np.save("example_systems/system_one.npy", sys1)
-# np.save("example_systems/system_two.npy", sys2)
+system_two_topology = '/Users/luis/Desktop/workspace/PDBs/5JUP_N2_GCU_nowat.prmtop'
+system_two_trajectory = '/Users/luis/Desktop/workspace/PDBs/CCU_GCU_10frames.mdcrd'
 
-# --- Analyze ---
+test_trajectory_one = trajectory(
+    trajectory_path=system_one_trajectory,
+    topology_path=system_one_topology
+)
+test_trajectory_two = trajectory(
+    trajectory_path=system_two_trajectory,
+    topology_path=system_two_topology
+)
+
+# now that they're loaded, make system representations
+test_system_one_ = test_trajectory_one.create_system_representations()
+test_system_two_ = test_trajectory_two.create_system_representations()
+
+# save for reuse
+np.save('/Users/luis/Desktop/workspacetwo/example_systems/test_system_one', test_system_one_)
+np.save('/Users/luis/Desktop/workspacetwo/example_systems/test_system_two', test_system_two_)
+
+###
+### Analysis
+###
 analyzer = systems_analysis([sys1, sys2])
 
 # Clustering
@@ -92,7 +107,7 @@ sil_labels, elbow_labels, sil_centers, elbow_centers = analyzer.cluster_system_l
 )
 print("Clustering successfully completed.")
 
-# Dimensionality reduction (PCA or UMAP); color by cluster labels
+# Dimensional reduction (PCA or UMAP); color by cluster labels
 analyzer.reduce_systems_representations(
     outfile_path="out/PCA/test_", 
     method="PCA",

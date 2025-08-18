@@ -1,3 +1,7 @@
+
+## [1.0.2-5]-2025-08-15
+many bug fixes and else that missed pypi
+
 ## [1.0.1]-2025-08-15
 Removed error in pyproject.toml
 
