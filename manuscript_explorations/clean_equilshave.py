@@ -90,7 +90,7 @@ long_optimal_k_silhouette_labels_GCUresults,long_optimal_k_silhouette_labels_CGU
 rmsd_shavings_all=[]
 slice_names=[]
 
-for i in range(0,60,10):
+for i in range(0,100,10):
     mask=build_shave_mask(persys_frame_list,i)
     onesysmask=build_shave_mask(onesys_frame_list,i)
     #building our much needed masks
