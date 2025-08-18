@@ -17,12 +17,30 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
-      - run: pip install -e . sphinx sphinx-autodoc-typehints
-      - run: sphinx-build -b html docs/source docs/_build/html
-      - uses: actions/upload-pages-artifact@v3
+
+      # Install your package and doc deps (either A or B)
+
+      # A) If you have docs/requirements.txt (recommended):
+      - name: Install deps
+        run: |
+          pip install -e .
+          pip install -r docs/requirements.txt
+
+      # B) OR inline (delete the A block above and use this instead):
+      # - name: Install deps
+      #   run: |
+      #     pip install -e .
+      #     pip install sphinx sphinx-autodoc-typehints myst-parser nbsphinx
+
+      - name: Build Sphinx
+        run: sphinx-build -b html docs/source docs/_build/html
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
         with:
           path: docs/_build/html
 
@@ -31,35 +49,7 @@ jobs:
     runs-on: ubuntu-latest
     environment:
       name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - id: deployment
         uses: actions/deploy-pages@v4
 
-- run: |
-    pip install -e .
-    pip install -r docs/requirements.txt
-- run: |
-    pip install -e .
-    pip install -r docs/requirements.txt
-- run: |
-    pip install -e .
-    pip install -r docs/requirements.txt
-- run: |
-    pip install -e .
-    pip install -r docs/requirements.txt
-- run: |
-    pip install -e .
-    pip install -r docs/requirements.txt
-- run: |
-    pip install -e .
-    pip install -r docs/requirements.txt
-- run: |
-    pip install -e .
-    pip install -r docs/requirements.txt
-- run: |
-    pip install -e .
-    pip install -r docs/requirements.txt
-- run: |
-    pip install -e .
-    pip install -r docs/requirements.txt
