@@ -25,7 +25,12 @@ pip install mdsa-tools
 ```
 
 
-()
+## Systems Problem Area:
+
+![System panel](https://raw.githubusercontent.com/zeper-eng/workspace/main/resources/PanelA_summerposter.png)
+At the Weir Lab at Wesleyan University, we perform molecular dynamics (MD) simulations of a ribosomal subsystem to study tuning of protein translation by the CAR interaction surface- a ribosomal interface identified by the lab that interacts with the +1 codon (poised to enter the ribosome A site). Our "computational genetics" research focuses on modifying adjacent codon identities at the A-site and the +1 positions to model how changes at these sites influence the behavior of the CAR surface and corellate with translation rate variations.
+
+
 ## Quickstart example (see examples for more use-cases;contour plots, UMAP, MSM, etc):
 ```python
 from mdsa_tools.Data_gen_hbond import trajectory as traj
@@ -79,14 +84,6 @@ print('PCA reduction succesful')
 
 
 ```
-
-## Systems Problem Area:
-
-![System panel](https://raw.githubusercontent.com/zeper-eng/workspace/main/resources/PanelA_summerposter.png)
-At the Weir Lab at Wesleyan University, we perform molecular dynamics (MD) simulations of a ribosomal subsystem to study tuning of protein translation by the CAR interaction surface- a ribosomal interface identified by the lab that interacts with the +1 codon (poised to enter the ribosome A site). Our "computational genetics" research focuses on modifying adjacent codon identities at the A-site and the +1 positions to model how changes at these sites influence the behavior of the CAR surface and corellate with translation rate variations.
-
-
-
 
 
 
