@@ -13,6 +13,7 @@ extensions = [
     "sphinx.ext.viewcode",
     "myst_parser",    
     "nbsphinx",
+    
 ]
 
 autosummary_generate = True
@@ -25,8 +26,9 @@ autodoc_mock_imports = ["mdtraj", "umap", "python_circos", "matplotlib", "seabor
 templates_path = ["_templates"]
 exclude_patterns = ["_build", "**.ipynb_checkpoints"]
 
-# -- Options for HTML output --------------------------------------------------
 
 html_theme = "alabaster"   # or "sphinx_rtd_theme" if you install it
 html_static_path = ["_static"]
 
+nbsphinx_execute = "never"
+nbsphinx_allow_errors = True
