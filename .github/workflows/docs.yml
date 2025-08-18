@@ -4,19 +4,9 @@ on:
   push:
     branches: [ main ]
 
-# (Optional) you can also put permissions at the workflow level:
-# permissions:
-#   contents: read
-#   pages: write
-#   id-token: write
-
 jobs:
-  build:
+  docs:
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      pages: write
-      id-token: write
     steps:
       - uses: actions/checkout@v4
 
@@ -24,39 +14,25 @@ jobs:
         with:
           python-version: '3.11'
 
-      - name: Install docs deps
+      - name: Show conf + requirements
+        run: |
+          ls -la
+          ls -la docs
+          ls -la docs/source
+          cat docs/requirements.txt
+
+      - name: Install docs deps (same env)
         run: |
           python -m pip install -U pip
-          pip install -r docs/requirements.txt
-          pip install -e .  # if using autodoc
+          python -m pip install -r docs/requirements.txt
+          # if you use autodoc/import your package:
+          python -m pip install -e .
 
-      - name: Build Sphinx HTML
-        run: sphinx-build -b html docs/source docs/_build/html
+      - name: Sanity check imports (same env)
+        run: |
+          python -c "import nbsphinx, myst_parser, sphinx; print('OK:', nbsphinx.__version__, sphinx.__version__)"
 
-      - name: Configure Pages
-        uses: actions/configure-pages@v5
-
-      - name: Sanity check artifact
-        run: ls -R docs/_build/html | head -n 200
-
-      - name: Upload Pages artifact
-        uses: actions/upload-pages-artifact@v3
-        with:
-          path: docs/_build/html
-
-  deploy:
-    needs: build
-    runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    concurrency:
-      group: "pages"
-      cancel-in-progress: false
-    permissions:
-      pages: write
-      id-token: write
-    steps:
-      - id: deployment
-        uses: actions/deploy-pages@v4
+      - name: Build Sphinx HTML (same env)
+        run: |
+          python -m sphinx -b html docs/source docs/_build/html
 
