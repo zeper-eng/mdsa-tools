@@ -12,7 +12,6 @@ extensions = [
     "sphinx.ext.autosummary",
     "sphinx.ext.viewcode",
     "myst_parser",    
-    "nbsphinx",
     
 ]
 
