@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>mdsa_tools.Data_gen_hbond module &#8212; mdsa-tools Documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=5ecbeea2" />
+    <link rel="stylesheet" type="text/css" href="../_static/basic.css?v=b08954a9" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css?v=27fed22d" />
+    <script src="../_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="mdsa_tools.Viz module" href="mdsa_tools.Viz.html" />
+    <link rel="prev" title="mdsa_tools.Convenience module" href="mdsa_tools.Convenience.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="module-mdsa_tools.Data_gen_hbond">
+<span id="mdsa-tools-data-gen-hbond-module"></span><h1>mdsa_tools.Data_gen_hbond module<a class="headerlink" href="#module-mdsa_tools.Data_gen_hbond" title="Link to this heading">¶</a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="mdsa_tools.Data_gen_hbond.TrajectoryProcessor">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mdsa_tools.Data_gen_hbond.</span></span><span class="sig-name descname"><span class="pre">TrajectoryProcessor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">trajectory_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">topology_path</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mdsa_tools/Data_gen_hbond.html#TrajectoryProcessor"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mdsa_tools.Data_gen_hbond.TrajectoryProcessor" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>A wrapper class for creating and manipulating systems representations of our trajectories</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="mdsa_tools.Data_gen_hbond.TrajectoryProcessor.Process_trajectory">
+<span class="sig-name descname"><span class="pre">Process_trajectory</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">trajectory</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">array_template</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">atom_to_residue</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">granularity</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span></span></span><a class="reference internal" href="../_modules/mdsa_tools/Data_gen_hbond.html#TrajectoryProcessor.Process_trajectory"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mdsa_tools.Data_gen_hbond.TrajectoryProcessor.Process_trajectory" title="Link to this definition">¶</a></dt>
+<dd><p>returns a call to the now modified array template which has been filled in with data</p>
+<p>Processes an individual frame of template array and fills in hydrogen bonding values.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>trajectory</strong> (<em>md.trajectory</em>)</p></li>
+<li><p><strong>array_template</strong> (<em>np.ndarray</em><em>,</em><em>shape=</em><em>(</em><em>n_residues</em><em>,</em><em>n_residues</em><em>,</em><em>n_frames</em><em>)</em>) – This is an empty array of shape (n_residues,n_residues,n_frames) where we have
+n_frames worth of adjacency matrices of size n_residues*n_residues</p></li>
+<li><p><strong>atom_to_residue</strong> (<em>Dict</em><em>, </em><em>Dict</em><em>[</em><em>atom_index</em><em>]</em><em>=residue_index</em>) – Dictionary containing atom to residue index mappings</p></li>
+<li><p><strong>frame</strong> (<em>int</em>) – Integer for indexing what frame we are iterating over in array</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>array_template</strong> – A reference to the original array. It is updating the same array in memory but, in theory
+it is done for throughness.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>np.ndarray,shape=(n_frames,n_residues,n_residues)</p>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<p class="rubric">Notes</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mdsa_tools.Data_gen_hbond.TrajectoryProcessor.create_attributes">
+<span class="sig-name descname"><span class="pre">create_attributes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">trajectory</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">granularity</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">ndarray</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/mdsa_tools/Data_gen_hbond.html#TrajectoryProcessor.create_attributes"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mdsa_tools.Data_gen_hbond.TrajectoryProcessor.create_attributes" title="Link to this definition">¶</a></dt>
+<dd><p>returns atom to residue dictionary and template array for processing</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>trajectory</strong> (<em>mdtraj.Trajectory</em>)</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><strong>atom_to_residue</strong> (<em>Dict, atom_to_residue[atom_index]=residue_index</em>) – Dictionary containing atom to residue mappings</p></li>
+<li><p><strong>template_array</strong> (<em>np.ndarray, shape=(n_frames,n_residues,n_residues)</em>) – returns array containing adjacency matrices for every frame. Shape is dependent on residues in trajectory and number of frames.</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<p class="rubric">Notes</p>
+<p>This atom to residue dictionary is important as the function we will use for extracting hydrogen bonding information
+returns hydrogen bonds at the atomic level, and we need it at the residue level for this particular “systems”
+representation.</p>
+<p>The template array is so we only create one datastructure to modify later improving efficiency.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mdsa_tools.Data_gen_hbond.TrajectoryProcessor.create_filtered_representations">
+<span class="sig-name descname"><span class="pre">create_filtered_representations</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">residues_to_keep</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">systems_representation</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mdsa_tools/Data_gen_hbond.html#TrajectoryProcessor.create_filtered_representations"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mdsa_tools.Data_gen_hbond.TrajectoryProcessor.create_filtered_representations" title="Link to this definition">¶</a></dt>
+<dd><p>Filters arrray representations to contain only residues of interest</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>systems_representation</strong> (<em>np.ndarray</em><em>, </em><em>shape=</em><em>(</em><em>n_frames</em><em>,</em><em>n_residues</em><em>,</em><em>n_residues</em><em>)</em>) – Array containing adjacency matrices for every frame. Shape is dependent on residues in trajectory and number of frames.</p></li>
+<li><p><strong>res_of_interest</strong> – An array containing residues of interest</p></li>
+</ul>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<p class="rubric">Notes</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mdsa_tools.Data_gen_hbond.TrajectoryProcessor.create_system_representations">
+<span class="sig-name descname"><span class="pre">create_system_representations</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">trajectory</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">granularity</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mdsa_tools/Data_gen_hbond.html#TrajectoryProcessor.create_system_representations"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mdsa_tools.Data_gen_hbond.TrajectoryProcessor.create_system_representations" title="Link to this definition">¶</a></dt>
+<dd><p>Wraps operations for creating systems representations into a nice single method</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>trajectory</strong> (<em>mdtraj.Trajectory:</em>) – An mdtraj trajectory object that should have in theory been created when you load in the class but, can also be included in the
+argument</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>Systems</strong> – returns array containing adjacency matrices for every frame. Shape is dependent on residues in trajectory and number of frames.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>np.ndarray, shape=(n_frames,n_residues,n_residues)</p>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt;</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="mdsa_tools.Data_gen_hbond.cpptraj_hbond_import">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mdsa_tools.Data_gen_hbond.</span></span><span class="sig-name descname"><span class="pre">cpptraj_hbond_import</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filepath</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">topology</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mdsa_tools/Data_gen_hbond.html#cpptraj_hbond_import"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mdsa_tools.Data_gen_hbond.cpptraj_hbond_import" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="mdsa_tools.Data_gen_hbond.cpptraj_hbond_import.create_cpptraj_attributes">
+<span class="sig-name descname"><span class="pre">create_cpptraj_attributes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">topology</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">granularity</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mdsa_tools/Data_gen_hbond.html#cpptraj_hbond_import.create_cpptraj_attributes"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mdsa_tools.Data_gen_hbond.cpptraj_hbond_import.create_cpptraj_attributes" title="Link to this definition">¶</a></dt>
+<dd><p>returns atom to residue dictionary and template array for processing</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>trajectory</strong> (<em>mdtraj.Trajectory</em>)</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><strong>atom_to_residue</strong> (<em>Dict, atom_to_residue[atom_index]=residue_index</em>) – Dictionary containing atom to residue mappings</p></li>
+<li><p><strong>template_array</strong> (<em>np.ndarray, shape=(n_frames,n_residues,n_residues)</em>) – returns array containing adjacency matrices for every frame. Shape is dependent on residues in trajectory and number of frames.</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<p class="rubric">Notes</p>
+<p>This atom to residue dictionary is important as the function we will use for extracting hydrogen bonding information
+returns hydrogen bonds at the atomic level, and we need it at the residue level for this particular “systems”
+representation.</p>
+<p>The template array is so we only create one datastructure to modify later improving efficiency.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mdsa_tools.Data_gen_hbond.cpptraj_hbond_import.create_systems_rep">
+<span class="sig-name descname"><span class="pre">create_systems_rep</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">topology</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">indices</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mdsa_tools/Data_gen_hbond.html#cpptraj_hbond_import.create_systems_rep"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mdsa_tools.Data_gen_hbond.cpptraj_hbond_import.create_systems_rep" title="Link to this definition">¶</a></dt>
+<dd><p>Filling in the matrix</p>
+<p class="rubric">Notes</p>
+<p class="rubric">Examples</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mdsa_tools.Data_gen_hbond.cpptraj_hbond_import.extract_headers">
+<span class="sig-name descname"><span class="pre">extract_headers</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filepath</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/mdsa_tools/Data_gen_hbond.html#cpptraj_hbond_import.extract_headers"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mdsa_tools.Data_gen_hbond.cpptraj_hbond_import.extract_headers" title="Link to this definition">¶</a></dt>
+<dd><p>Smaller module for importing files from cpptraj</p>
+<p class="rubric">Notes</p>
+<p class="rubric">Examples</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../index.html">Project name not set</a></h1>
+
+
+
+
+
+
+
+
+
+<search id="searchbox" style="display: none" role="search">
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="Search"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script><h3>Navigation</h3>
+<p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="modules.html">mdsa_tools</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="mdsa_tools.html">mdsa_tools package</a></li>
+</ul>
+</li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+  <li><a href="modules.html">mdsa_tools</a><ul>
+  <li><a href="mdsa_tools.html">mdsa_tools package</a><ul>
+      <li>Previous: <a href="mdsa_tools.Convenience.html" title="previous chapter">mdsa_tools.Convenience module</a></li>
+      <li>Next: <a href="mdsa_tools.Viz.html" title="next chapter">mdsa_tools.Viz module</a></li>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &#169;.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 8.2.3</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 1.0.0</a>
+      
+      |
+      <a href="../_sources/_api/mdsa_tools.Data_gen_hbond.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>
