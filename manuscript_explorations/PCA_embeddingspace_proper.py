@@ -18,8 +18,7 @@ contour_embedding_space('/Users/luis/Desktop/workspacetwo/manuscript_exploration
 #Cluster embedding space (PCA)
 optimal_k_silhouette_labels_GCUresults,optimal_k_elbow_labels_GCUresults,centers_sillohuette_GCUresults,centers_elbow_GCUresults=Systems_Analyzer.cluster_system_level(data=X_pca[0:3200,:],outfile_path='/Users/luis/Desktop/workspacetwo/manuscript_explorations//embeddingspace_kmeanslabels/GCU')
 optimal_k_silhouette_labels_CGUresults,optimal_k_elbow_labels_CGUresults,centers_sillohuette_CGUresults,centers_elbow_CGUresults=Systems_Analyzer.cluster_system_level(data=X_pca[3200:,:],outfile_path='/Users/luis/Desktop/workspacetwo/manuscript_explorations//embeddingspace_kmeanslabels/CGU')
-print(optimal_k_silhouette_labels_GCUresults.shape)
-print(optimal_k_silhouette_labels_CGUresults.shape)
+
 
 #################################################################################################
 ## We will need the breakdown of which frames belong to which set of trajectories moving forward#
@@ -28,8 +27,6 @@ print(optimal_k_silhouette_labels_CGUresults.shape)
 #################################################################################################
 
 frame_list=((([80] * 20) + ([160] * 10)))
-print(len(frame_list))
-print(sum(frame_list))
 
 #############################
 #rest of worklow begins here#
