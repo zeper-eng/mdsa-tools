@@ -1,20 +1,22 @@
 name: Docs
+
 on:
   push:
     branches: [ main ]
 
-permissions:
-  contents: read
-  pages: write
-  id-token: write
-
-concurrency:
-  group: "pages"
-  cancel-in-progress: true
+# (Optional) you can also put permissions at the workflow level:
+# permissions:
+#   contents: read
+#   pages: write
+#   id-token: write
 
 jobs:
   build:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
     steps:
       - uses: actions/checkout@v4
 
@@ -22,22 +24,20 @@ jobs:
         with:
           python-version: '3.11'
 
-      # Install your package and doc deps (either A or B)
-
-      # A) If you have docs/requirements.txt (recommended):
-      - name: Install deps
+      - name: Install docs deps
         run: |
-          pip install -e .
+          python -m pip install -U pip
           pip install -r docs/requirements.txt
+          pip install -e .  # if using autodoc
 
-      # B) OR inline (delete the A block above and use this instead):
-      # - name: Install deps
-      #   run: |
-      #     pip install -e .
-      #     pip install sphinx sphinx-autodoc-typehints myst-parser nbsphinx
-
-      - name: Build Sphinx
+      - name: Build Sphinx HTML
         run: sphinx-build -b html docs/source docs/_build/html
+
+      - name: Configure Pages
+        uses: actions/configure-pages@v5
+
+      - name: Sanity check artifact
+        run: ls -R docs/_build/html | head -n 200
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
@@ -49,6 +49,13 @@ jobs:
     runs-on: ubuntu-latest
     environment:
       name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    concurrency:
+      group: "pages"
+      cancel-in-progress: false
+    permissions:
+      pages: write
+      id-token: write
     steps:
       - id: deployment
         uses: actions/deploy-pages@v4

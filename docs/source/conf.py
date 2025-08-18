@@ -2,7 +2,7 @@
 
 project = "mdsa-tools"
 author = "Weir Lab"
-release = "0.1"
+release = "0.1.4"
 
 # -- General config -----------------------------------------------------------
 
@@ -11,8 +11,8 @@ extensions = [
     "sphinx.ext.napoleon",
     "sphinx.ext.autosummary",
     "sphinx.ext.viewcode",
-    "myst_parser",     # if you have Markdown in docs
-    "nbsphinx",        # if you render notebooks
+    "myst_parser",    
+    "nbsphinx",
 ]
 
 autosummary_generate = True
