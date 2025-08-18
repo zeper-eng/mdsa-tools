@@ -1,7 +1,6 @@
 # mdsa-tools: Tools for systems-level analysis of Molecular Dynamics (MD) simulations
 
-![CI (Docs)](https://github.com/zeper-eng/mdsa-tools/actions/workflows/docs.yml/badge.svg?branch=main)
-[![Read the Docs](https://readthedocs.org/projects/mdsa-tools/badge/?version=latest)](https://mdsa-tools.readthedocs.io/en/latest/)
+[![Docs Build](https://github.com/zeper-eng/mdsa-tools/actions/workflows/docs.yml/badge.svg?branch=main)](https://mdsa-tools.readthedocs.io/en/latest/)
 ![Last commit](https://img.shields.io/github/last-commit/zeper-eng/mdsa-tools)
 [![PyPI version](https://img.shields.io/pypi/v/mdsa-tools.svg)](https://pypi.org/project/mdsa-tools/)
 [![Python versions](https://img.shields.io/pypi/pyversions/mdsa-tools.svg)](https://pypi.org/project/mdsa-tools/)
