@@ -13,8 +13,8 @@ mdsa_tools.egg-info/dependency_links.txt
 mdsa_tools.egg-info/requires.txt
 mdsa_tools.egg-info/top_level.txt
 tests/__init__.py
-tests/conformationalspace.py
 tests/conftest.py
-tests/fixtures.py
-tests/systems_representations.py
-tests/visualization.py
+tests/test_analysis.py
+tests/test_cpptraj_import.py
+tests/test_data_gen.py
+tests/test_visualization.py

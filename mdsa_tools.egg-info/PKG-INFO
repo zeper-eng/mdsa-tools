@@ -1,6 +1,6 @@
 Metadata-Version: 2.4
 Name: mdsa-tools
-Version: 1.0.2
+Version: 1.0.3
 Summary: The Weir Labs H-bond Systems Analyses modules!
 Author-email: Luis Perez <lperez@wesleyan.edu>
 License: MIT
@@ -14,87 +14,45 @@ Requires-Dist: matplotlib
 Requires-Dist: seaborn
 Requires-Dist: scikit-learn
 Requires-Dist: mdtraj<=1.10.3
-Requires-Dist: pytest-cov
 Requires-Dist: umap-learn
 Requires-Dist: python-circos
+Requires-Dist: requests
+Provides-Extra: dev
+Requires-Dist: ruff; extra == "dev"
+Requires-Dist: pytest; extra == "dev"
+Requires-Dist: pytest-cov; extra == "dev"
+Provides-Extra: docs
+Requires-Dist: sphinx>=8; extra == "docs"
+Requires-Dist: furo; extra == "docs"
+Requires-Dist: myst-parser; extra == "docs"
+Requires-Dist: sphinx-copybutton; extra == "docs"
+Provides-Extra: test
+Requires-Dist: pytest; extra == "test"
+Requires-Dist: pytest-cov; extra == "test"
 
-# mdsa-tools: A set of tools for performing systems analyses of Molecular Dynamics (MD) simulations.
+# mdsa-tools: Tools for systems-level analysis of Molecular Dynamics (MD) simulations
 
-![CI](https://img.shields.io/badge/CI-passing-brightgreen)
-![Last commit](https://img.shields.io/github/last-commit/zeper-eng/workspace)
+![CI (Docs)](https://github.com/zeper-eng/mdsa-tools/actions/workflows/docs.yml/badge.svg?branch=main)
+[![Read the Docs](https://readthedocs.org/projects/mdsa-tools/badge/?version=latest)](https://mdsa-tools.readthedocs.io/en/latest/)
+![Last commit](https://img.shields.io/github/last-commit/zeper-eng/mdsa-tools)
 [![PyPI version](https://img.shields.io/pypi/v/mdsa-tools.svg)](https://pypi.org/project/mdsa-tools/)
 [![Python versions](https://img.shields.io/pypi/pyversions/mdsa-tools.svg)](https://pypi.org/project/mdsa-tools/)
-[![License](https://img.shields.io/pypi/l/mdsa-tools.svg)](https://github.com/<user>/<repo>/blob/main/LICENSE)
-[![DOI](https://img.shields.io/badge/DOI--blue)]()
+[![License](https://img.shields.io/pypi/l/mdsa-tools.svg)](https://github.com/zeper-eng/mdsa-tools/blob/main/LICENSE)
 
-## A pipeline for performing systems analyses:
+## Pipeline overview
 ![Pipeline](https://raw.githubusercontent.com/zeper-eng/workspace/main/resources/Pipelineflic.png)
 
- Pictured is a directed graph describing the pipeline for our MD trajectory analysis. From left to right, we begin with a trajectory file, and convert it into a set of networks (one for each trajectory frame), which that can be represented as either graphs or adjacency matrices. Each frame adjacency is flattened into a vector by concatenating the matrix’s rows (vector reduction). The frame vectors are vertically concatenated to create a feature matrix that can be used as input to either K-means clustering or PCA, whose results can then be visualized using graphs, scatter plots, MDCcircos plots, (of residue H-bonding), or MD replicate maps of frame measurements of interest.
+We start from an MD trajectory and generate per-frame interaction networks (graphs/adjacency matrices). Adjacencies are flattened (row-wise) into vectors; stacking these per-frame vectors yields a feature matrix suitable for clustering (e.g., k-means) and dimensionality reduction (PCA/UMAP). Results can be visualized with graphs, scatter plots, MDCcircos plots (residue H-bonding), or replicate maps of frame-level measurements of interest.
 
+An additional module uses cluster assignments as candidate substates for Markov state model (MSM) analysis.
 
- We also provide an additional module for taking theese various results and using clustering results as input substates for markov state model analyses.
-
-## Use pip install to get started:
+## Install
 
 ```bash
-
 pip install mdsa-tools
-
-```
-
-## Quickstart example (see examples for more use-cases;contour plots, UMAP, MSM, etc):
-```python
-from mdsa_tools.Data_gen_hbond import trajectory as traj
-import numpy as np
-import os
-
-##########
-#Datagen#
-#########
-
-#load in and test trajectory
-system_one_topology = '/Users/luis/Desktop/workspace/PDBs/5JUP_N2_CGU_nowat.prmtop'
-system_one_trajectory = '/Users/luis/Desktop/workspace/PDBs/CCU_CGU_10frames.mdcrd' 
-
-
-system_two_topology = '/Users/luis/Desktop/workspace/PDBs/5JUP_N2_GCU_nowat.prmtop'
-system_two_trajectory = '/Users/luis/Desktop/workspace/PDBs/CCU_GCU_10frames.mdcrd' 
-
-
-test_trajectory_one = traj(trajectory_path=system_one_trajectory,topology_path=system_one_topology)
-test_trajectory_two = traj(trajectory_path=system_two_trajectory,topology_path=system_two_topology)
-
-
-#now that its loaded in try to make object
-test_system_one_ = test_trajectory_one.create_system_representations()
-test_system_two_ = test_trajectory_two.create_system_representations()
-
-
-np.save('/Users/luis/Desktop/workspacetwo/example_systems/test_system_one',test_system_one_)
-np.save('/Users/luis/Desktop/workspacetwo/example_systems/test_system_two',test_system_two_)
-
-
-
-###############
-#   ANALYSIS  #
-###############
-
-from mdsa_tools.Analysis import systems_analysis
-
-all_systems=[test_system_one_,test_system_two_]
-Systems_Analyzer = systems_analysis(all_systems)
-
-#Clustering and visualizing clusters 
-optimal_k_silhouette_labels,optimal_k_elbow_labels,centers_sillohuette,centers_elbow = Systems_Analyzer.cluster_system_level(outfile_path='/Users/luis/Desktop/workspacetwo/manuscript_explorations/syskmeans/',max_clusters=25)
-print('clustering succesfully completed')
-
-Systems_Analyzer.reduce_systems_representations(outfile_path='/Users/luis/Desktop/workspace/test_output/PCA/test_' colormappings=optimal_k_silhouette_labels) #you could do method=PCA/UMAP here
-print('PCA reduction succesful')
-
-
-
-
+# Optional:
+# pip install "mdsa-tools[docs]"   # if you want to build the docs locally
+# pip install "mdsa-tools[examples]"  # if you define this extra for demo deps
 ```
 
 ## Systems Problem Area:
@@ -103,6 +61,45 @@ print('PCA reduction succesful')
 At the Weir Lab at Wesleyan University, we perform molecular dynamics (MD) simulations of a ribosomal subsystem to study tuning of protein translation by the CAR interaction surface- a ribosomal interface identified by the lab that interacts with the +1 codon (poised to enter the ribosome A site). Our "computational genetics" research focuses on modifying adjacent codon identities at the A-site and the +1 positions to model how changes at these sites influence the behavior of the CAR surface and corellate with translation rate variations.
 
 
+## Quickstart example (see examples for more use-cases;contour plots, UMAP, MSM, etc):
+Google collab viewer: [![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/zeper-eng/mdsa-tools/blob/main/notebooks/mdsa_tools_demo.ipynb) Jupyter notebook env: [![Binder](https://mybinder.org/badge_logo.svg)](
+https://mybinder.org/v2/gh/zeper-eng/mdsa-tools/HEAD?labpath=notebooks/mdsa_tools_demo.ipynb)
+
+```python
+from mdsa_tools.Data_gen_hbond import trajectory
+from mdsa_tools.Analysis import systems_analysis
+import numpy as np
+
+# --- Load trajectories (replace with your own paths) ---
+top1 = "/path/to/system1.prmtop"
+traj1 = "/path/to/system1.mdcrd"
+top2 = "/path/to/system2.prmtop"
+traj2 = "/path/to/system2.mdcrd"
+
+sys1 = trajectory(trajectory_path=traj1, topology_path=top1).create_system_representations()
+sys2 = trajectory(trajectory_path=traj2, topology_path=top2).create_system_representations()
+
+# Optionally save for reuse
+# np.save("example_systems/system_one.npy", sys1)
+# np.save("example_systems/system_two.npy", sys2)
+
+# --- Analyze ---
+analyzer = systems_analysis([sys1, sys2])
+
+# Clustering
+sil_labels, elbow_labels, sil_centers, elbow_centers = analyzer.cluster_system_level(
+    outfile_path="out/syskmeans/", max_clusters=25
+)
+print("Clustering successfully completed.")
+
+# Dimensionality reduction (PCA or UMAP); color by cluster labels
+analyzer.reduce_systems_representations(
+    outfile_path="out/PCA/test_", 
+    method="PCA",
+    colormappings=sil_labels
+)
+print("PCA reduction successful.")
+```
 
 
 
