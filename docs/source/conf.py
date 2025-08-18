@@ -1,3 +1,6 @@
+extensions += ["nbsphinx"]
+nbsphinx_execute = "never"   # don’t run heavy code on RTD
+
 # docs/source/conf.py
 import os, sys
 sys.path.insert(0, os.path.abspath("../.."))  # adjust if needed

@@ -32,6 +32,10 @@ At the Weir Lab at Wesleyan University, we perform molecular dynamics (MD) simul
 
 
 ## Quickstart example (see examples for more use-cases;contour plots, UMAP, MSM, etc):
+
+Google collab viewer: [![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/zeper-eng/mdsa-tools/blob/main/notebooks/mdsa_tools_demo.ipynb) Jupyter notebook env: [![Binder](https://mybinder.org/badge_logo.svg)](
+https://mybinder.org/v2/gh/zeper-eng/mdsa-tools/HEAD?labpath=notebooks/mdsa_tools_demo.ipynb)
+
 ```python
 from mdsa_tools.Data_gen_hbond import trajectory as traj
 import numpy as np
@@ -80,10 +84,8 @@ print('clustering succesfully completed')
 Systems_Analyzer.reduce_systems_representations(outfile_path='/Users/luis/Desktop/workspace/test_output/PCA/test_' colormappings=optimal_k_silhouette_labels) #you could do method=PCA/UMAP here
 print('PCA reduction succesful')
 
-
-
-
 ```
+
 
 
 
