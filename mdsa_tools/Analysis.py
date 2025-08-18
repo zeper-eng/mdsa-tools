@@ -47,6 +47,7 @@ class systems_analysis:
         self.optimal_k_silhouette_labels=None
         self.optimal_k_elbow_labels=None
         self.pca_weights=None
+        self.feature_matrix=None
 
 
         return
@@ -226,7 +227,14 @@ class systems_analysis:
         
         '''
 
-        feature_matrix = feature_matrix if feature_matrix is not None else self.feature_matrix
+        if feature_matrix is not None:
+            feature_matrix = feature_matrix 
+        if self.feature_matrix is not None:
+            feature_matrix=self.feature_matrix
+        if self.feature_matrix is None:
+            self.replicates_to_featurematrix()
+            feature_matrix=self.feature_matrix
+
         n_components=n_components if n_components is not None else 2
         method = method if method is not None else 'PCA'
         min_dist = min_dist if min_dist is not None else .5

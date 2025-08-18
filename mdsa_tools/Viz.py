@@ -10,7 +10,10 @@ import seaborn as sns
 
 
 #Replicate maps
-def replicatemap_from_labels(labels,frame_list,savepath=None,title=None, xlabel=None, ylabel=None) -> np.ndarray:
+def replicatemap_from_labels(labels,frame_list,savepath=None,title=None,
+                              xlabel=None, ylabel=None,
+                             cbar_label=None,
+                             cmap=None) -> np.ndarray:
     '''returns an array consisting of a re-formatted list of labels through which to view a set.
 
     Parameters
@@ -52,6 +55,7 @@ def replicatemap_from_labels(labels,frame_list,savepath=None,title=None, xlabel=
     
 
     '''
+    cmap=cmap if cmap is not None else cm.magma_r
 
     savepath=savepath if savepath is not None else os.getcwd()
 
@@ -72,14 +76,21 @@ def replicatemap_from_labels(labels,frame_list,savepath=None,title=None, xlabel=
     y_spacing_factor = 10 
     x_spacing_factor = 10
 
-    plt.scatter(
+    scatter=plt.scatter(
                 x=final_coordinates[:,1] * x_spacing_factor,
                 y=final_coordinates[:,0] * y_spacing_factor,
                 c=final_coordinates[:,2],
                 s=1,
                 marker='s',
-                cmap=cm.plasma_r)
+                cmap=cmap)
     
+    #cbar and cbar ticks
+    cbar = plt.colorbar(scatter, ax=plt.gca(), shrink=0.8, pad=0.02)
+    cbar.set_label(cbar_label if cbar_label is not None else 'Value', fontsize=10)
+    unique_vals = np.unique(final_coordinates[:, 2])
+    cbar.set_ticks(unique_vals)
+    cbar.set_ticklabels([str(int(u)) for u in unique_vals])
+
     #personal preferences
     plt.grid(visible=False)
     currentaax=plt.gca()
@@ -120,76 +131,84 @@ def replicatemap_from_labels(labels,frame_list,savepath=None,title=None, xlabel=
     return 
 
 #K-means Cross-validation metrics
-def plot_sillohette_scores(cluster_range, silhouette_scores, outfile_path="sillohette_method.png"):
-    '''quickly plot sillouhette scores afte running kmeans
+def plot_sillohette_scores(cluster_range, silhouette_scores, outfile_path="sillohette_method.png",
+                           title=None, xlabel=None, ylabel=None):
+    """
+    Plot silhouette scores over k and mark the maximum.
+
     Parameters
     ----------
+    cluster_range : array-like
+        k values evaluated.
+
+    silhouette_scores : array-like
+        Silhouette score per k.
+
+    outfile_path : str, default="sillohette_method.png"
+        Path prefix where figure is saved (suffix 'sillohuette_plot' is appended).
+
+    title, xlabel, ylabel : str or None
+        Optional title/axis labels.
 
     Returns
     -------
-
-    Notes
-    -----
-
-
-    Examples
-    --------
-
-    '''
-    # Optimal k is where the silhouette score is highest
-
+    optimal_k_sil : int
+        k with max silhouette score.
+    """
     optimal_k_sil = cluster_range[np.argmax(silhouette_scores)]#return index 
-
     # Plot Silhouette Scores
     plt.figure(figsize=(8, 5))
     plt.plot(cluster_range, silhouette_scores, marker='o', linestyle='-')
     plt.axvline(optimal_k_sil, color='red', linestyle='--', linewidth=2, label=f'Optimal k = {optimal_k_sil}')
-    
-    plt.xlabel('Number of Clusters (k)')
-    plt.ylabel('Silhouette Score')
-    plt.title('Silhouette Score for optimal K')
+
+    plt.xlabel(xlabel if xlabel is not None else 'Number of Clusters (k)')
+    plt.ylabel(ylabel if ylabel is not None else 'Silhouette Score')
+    plt.title(title if title is not None else 'Silhouette Score for optimal K')
     plt.legend()
     plt.grid(True)
-    plt.savefig(outfile_path+'sillohuette_plot', dpi=300)
+    plt.savefig(outfile_path + 'sillohuette_plot', dpi=300)
     plt.close()
-
     return optimal_k_sil
- 
-def plot_elbow_scores(cluster_range, inertia_scores, outfile_path="elbow_method.png"):
-    '''quickly plot sillouhette scores afte running kmeans
+
+def plot_elbow_scores(cluster_range, inertia_scores, outfile_path="elbow_method.png",
+                      title=None, xlabel=None, ylabel=None):
+    """
+    Plot inertia over k and mark elbow via second derivative.
+
     Parameters
     ----------
+    cluster_range : array-like
+        k values evaluated.
+
+    inertia_scores : array-like
+        KMeans inertia per k.
+
+    outfile_path : str, default="elbow_method.png"
+        Path prefix where figure is saved (suffix 'elbow_plot' is appended).
+
+    title, xlabel, ylabel : str or None
+        Optional title/axis labels.
 
     Returns
     -------
+    optimal_k : int
+        Estimated elbow k.
+    """
+    diff = np.diff(inertia_scores)
+    diff2 = np.diff(diff)
+    optimal_k = cluster_range[np.argmin(diff2) + 1]
 
-    Notes
-    -----
-
-
-    Examples
-    --------
-
-    '''
-
-    # Find the elbow point using the difference in inertia
-    diff = np.diff(inertia_scores)  # First derivative
-    diff2 = np.diff(diff)  # Second derivative (change in slope)
-    optimal_k = cluster_range[np.argmin(diff2)+1]  # +1 because diff2 is one step shorter
-
-    # Plot the Elbow Method
     plt.figure(figsize=(8, 5))
     plt.plot(cluster_range, inertia_scores, marker='o', linestyle='-')
     plt.axvline(optimal_k, color='red', linestyle='--', linewidth=2, label=f'Optimal k = {optimal_k}')
 
-    plt.xlabel('Number of Clusters (k)')
-    plt.ylabel('Inertia (Sum of Squared Distances)')
-    plt.title('Elbow Method for Optimal k')
+    plt.xlabel(xlabel if xlabel is not None else 'Number of Clusters (k)')
+    plt.ylabel(ylabel if ylabel is not None else 'Inertia (Sum of Squared Distances)')
+    plt.title(title if title is not None else 'Elbow Method for Optimal k')
     plt.legend()
     plt.grid(True)
-    plt.savefig(outfile_path+'elbow_plot', dpi=300)  # Save the figure
+    plt.savefig(outfile_path + 'elbow_plot', dpi=300)
     plt.close()
-
 
     return optimal_k
 
@@ -498,15 +517,18 @@ def create_2d_color_mappings(labels=([80]*20)+([160]*10),
 def visualize_reduction(embedding_coordinates, color_mappings=None, 
                   custom=False, 
                   savepath=os.getcwd(), 
-                  title="Dimensional Reduction of (PCA) of GCU and CGU Systems", 
+                  title=None, 
                   colors_list=['purple', 'orange', 'green', 'yellow', 'blue', 'red', 'pink', 'cyan', 'grey','brown'],
                   cmap=None,
                   legend_labels=None,
                   axis_one_label=None,
-                  axis_two_label=None):
+                  axis_two_label=None,
+                  cbar_label=None):
 
     axis_one_label=None if axis_one_label is not None else 'Embedding Space Axis 1'
     axis_two_label=None if axis_two_label is not None else 'Embedding Space Axis 2'
+    title=title if title is not None else "Dimensional Reduction of (PCA) of GCU and CGU Systems"
+    cbar_label=cbar_label if cbar_label is not None else "Value"
 
     labels_font_dict = {
         'family': 'monospace',
@@ -551,7 +573,7 @@ def visualize_reduction(embedding_coordinates, color_mappings=None,
         cbar = plt.colorbar(cm.ScalarMappable(norm=norm, cmap=cmap), ax=ax,
                             ticks=cbar_ticks, shrink=0.8, aspect=30, pad=0.02)
         
-        cbar.set_label("Value", fontdict=labels_font_dict,
+        cbar.set_label(cbar_label, fontdict=labels_font_dict,
                        rotation=270, labelpad=25)
         
         cbar.ax.set_yticklabels([str(t) for t in cbar_ticks])

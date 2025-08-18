@@ -46,5 +46,3 @@ def test_pca_ranked_weights(analyzer):
     assert ranked_weights["Comparisons"].str.contains(r"^\d+-\d+$").all()
 
     return
-
-
