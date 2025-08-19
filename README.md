@@ -1,4 +1,5 @@
-# __mdsa-tools__: Tools for systems-level analysis of Molecular Dynamics (MD) simulations
+# __mdsa-tools__
+Tools for systems-level analysis of Molecular Dynamics (MD) simulations
 
 [![Docs Build](https://github.com/zeper-eng/mdsa-tools/actions/workflows/docs.yml/badge.svg?branch=main)](https://mdsa-tools.readthedocs.io/en/latest/)
 ![Last commit](https://img.shields.io/github/last-commit/zeper-eng/mdsa-tools)
