@@ -110,6 +110,7 @@ for i in range(0,100,10):
         masked_PCA_labels_GCU,
         centers_sillohuette_GCUresults
     )
+    
     df_temp = pd.DataFrame(rmsd_results, columns=["cluster", "RMSD"])
     df_temp["slice"] = f"shaved_{i*2}ns"
     rmsd_shavings_all.append(df_temp)
