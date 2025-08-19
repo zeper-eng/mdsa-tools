@@ -3,13 +3,14 @@ import numpy as np
 import matplotlib.cm as cm
 import os
 
+
 #Pipeline setup assumed as in: Data Generation
 redone_CCU_GCU_fulltraj=np.load('/Users/luis/Downloads/redone_unrestrained_CCU_GCU_Trajectory_array.npy',allow_pickle=True)
 redone_CCU_CGU_fulltraj=np.load('/Users/luis/Downloads/redone_unrestrained_CCU_CGU_Trajectory_array.npy',allow_pickle=True)
 
 #For the paper we move forward with systems representations
 all_systems=[redone_CCU_GCU_fulltraj,redone_CCU_CGU_fulltraj]
-Systems_Analyzer = systems_analysis(all_systems)
+Systems_Analyzer = systems_analysis(all_systems,)
 X_pca,_,_=Systems_Analyzer.reduce_systems_representations(method='PCA',n_components=2) #PCA
 
 global_frame_list=((([80] * 20) + ([160] * 10))*2)

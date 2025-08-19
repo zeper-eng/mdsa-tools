@@ -14,17 +14,25 @@ class systems_analysis:
     '''A big wrapper for conveniently storing a lot of our analysis methods
     '''
 
-    def __init__(self,systems_representations):
+    def __init__(self,systems_representations,replicate_distribution):
         '''
         Parameters
         ----------
         systems_representations:list, expected=list[array_1,...,array_n-1] where each array is an np.ndarray with shape=(n_frames,n_residues,n_residues)
             Each array should have the shape as described above, where each frame has an adjacency matrix of pairwise
             comparisons between all residues. The only axis that can differ between arrays is the number of frames (n_frames).
+        
+        frame_list: listlike,shape=(data,)
+            A list of integers representing the number of frames present in each replicate. This should be in the order
+            of which the various versions of the system, and replicates where concatenated.
+        
 
         Returns
         -------
         None its an init
+
+        
+
 
         Notes
         -----
@@ -41,13 +49,7 @@ class systems_analysis:
         
         self.num_systems=len(systems_representations) #this is useful later on for when we are doing system_specific operations
         self.systems_representations=systems_representations
-        self.indexes = systems_representations[0][0, 0, 1:]
-
-        #this will be updated later and are defined within the functions themselves
-        self.optimal_k_silhouette_labels=None
-        self.optimal_k_elbow_labels=None
-        self.pca_weights=None
-        self.feature_matrix=None
+        self.indexes = systems_representations[0][0, 0, 1:] #bc list then 3d array
 
 
         return
@@ -257,7 +259,7 @@ class systems_analysis:
         elif method != 'PCA' and method != 'UMAP':
             print('No valid method supplied for dimensional reduction ')
         
-    def cluster_embeddingspace(self,outfile_path=None,feature_matrix=None,n=None,max_clusters=None,elbow_or_sillohuette=None):
+    def cluster_embeddingspace(self, reduced_coordinates=None,outfile_path=None,num_systems=None,val_metric=None):
         '''
         This has been depreciated for now
         
@@ -271,7 +273,7 @@ class systems_analysis:
         outfilepath:str
             path to save
 
-        featurematrix:np.Ndarray,default=self.featurematrix
+        reduced_coordinates:np.Ndarray,default=self.reduced_coordinates,shape=
             A feature matrix to be used for analysis
         
         n:int,default=2
@@ -280,6 +282,9 @@ class systems_analysis:
         max_clusters:int,default=10
             The defualt number
 
+        val_metric:str,default='sillohuete'
+            The validation metric you would like to use for picking an "ideal number of clusters'
+            
 
 
         Returns
@@ -298,63 +303,26 @@ class systems_analysis:
         '''
 
         outfile_path = outfile_path if outfile_path is not None else os.getcwd()
-        feature_matrix = feature_matrix if feature_matrix is not None else self.feature_matrix
-        n=n if n is not None else 2
-        max_clusters=max_clusters if max_clusters is not None else 10
-        elbow_or_sillohuette=elbow_or_sillohuette if elbow_or_sillohuette is not None else 'sillohuette'
+        num_systems = num_systems if num_systems is not None else self.num_systems
+        val_metric=val_metric if val_metric is not None else 'sillohuette'
         
-        X_pca,weights,explained_variance_ratio_=self.run_PCA(feature_matrix,n)
+        if reduced_coordinates is None:
+            reduced_coordinates,_,_=self.reduce_systems_representations()
+
         
         #grab the number of rows we need and then iterate through X_pca run kmeans and visualize using our initial values
-        rows_per_system=X_pca.shape[0]/self.num_systems
+        individual_systems=np.array_split(reduced_coordinates, num_systems,axis=0)
+        candidate_states_per_system=[]
+        for i in individual_systems:
+            optimal_k_silhouette_labels,optimal_k_elbow_labels,centers_sillohuette,centers_elbow=self.preform_clust_opt(outfile_path,data=i)
+            if val_metric=='sillohuette':
+                candidate_states_per_system.append([optimal_k_silhouette_labels,centers_sillohuette])
+            if val_metric=='elbow':
+                candidate_states_per_system.append([optimal_k_elbow_labels,centers_elbow])
 
-        index=0
 
+        return candidate_states_per_system
 
-        for i in range(self.num_systems):
-            # padding before and after so we can still visualize them all on the same scale
-            before = index
-            full_path=outfile_path+f"_lowdimclust_sys_{i+1}"
-            current_system_frames = X_pca[index:index + int(rows_per_system), :]
-           
-            optimal_k_silhouette_labels,optimal_k_elbow_labels,centers_sillohuette,centers_elbow=self.preform_clust_opt(outfile_path=full_path,data=current_system_frames,max_clusters=max_clusters)
-       
-            if elbow_or_sillohuette == 'sillohuette':
-                corelation_dataframe = self.create_pearsontest_for_kmeans_distributions(optimal_k_silhouette_labels,current_system_frames,centers_sillohuette)
-                print(f"corelation_dataframe for system {i}\n{corelation_dataframe}")
-                after = X_pca.shape[0] - (index + len(optimal_k_silhouette_labels))
-
-                #this is where we use the previous spot for markings
-                labels_filled = np.concatenate([
-                np.full(before,(np.max(optimal_k_silhouette_labels)+1)),                      # padding before
-                optimal_k_silhouette_labels,              # actual cluster labels
-                np.full(after,(np.max(optimal_k_silhouette_labels)+1))                        # padding after
-                ])
-
-            elif elbow_or_sillohuette == 'elbow':
-                corelation_dataframe = self.create_pearsontest_for_kmeans_distributions(optimal_k_elbow_labels,current_system_frames,centers_elbow)
-                print(f"corelation_dataframe for system {i}\n{corelation_dataframe}")
-                after = X_pca.shape[0] - (index + len(optimal_k_elbow_labels))
-
-                #this is where we use the previous spot for markings
-                labels_filled = np.concatenate([
-                np.full(before, (np.max(optimal_k_elbow_labels)+1)),                      # padding before
-                optimal_k_elbow_labels,              # actual cluster labels
-                np.full(after, (np.max(optimal_k_elbow_labels)+1))                        # padding after
-                ])
-
-            
-
-            visualize_reduction(X_pca,
-                            color_mappings=labels_filled,
-                            savepath=full_path,
-                            title=f'optimal sillohuette clustering in embedding space for system {i}',
-                            custom=False)
-            index+=int(rows_per_system)
-        
-        self.pca_weights=weights
-
-        return 
     
     def create_pearsontest_for_kmeans_distributions(self,labels,coordinates,cluster_centers):
         '''
@@ -670,7 +638,6 @@ class systems_analysis:
 
         pca=PCA(n_components=n)
         pca.fit(feature_matrix)
-        new_values=pca.components_ 
         X_pca = pca.transform(feature_matrix)
         weights = pca.components_
         explained_variances = pca.explained_variance_ratio_
@@ -682,134 +649,6 @@ class systems_analysis:
         
         return X_pca,weights,explained_variances
 
-class MSM_Modeller():
-
-    def __init__(self,labels,frame_list):
-        self.labels=labels if labels is not None else None
-        self.frame_list=frame_list if frame_list is not None else frame_list
-
-        self.transition_probability_matrix=None
-        self.lag=None
-
-    def create_transition_probability_matrix(self,labels=None,frame_list=None,lag=None):
-        '''Create probability matrix from input data (returns, and updates class attribute)
-
-        Parameters
-        ----------
-        labels:arraylike,shape=(n_labels,)
-            A list of labels pertaining to frames of molecular dynamics trajectories assigned particular substates
-
-        frame_list: listlike,shape=(data,)
-            A list of integers representing the number of frames present in each replicate. This should be in the order
-            of which the various versions of the system, and replicates where concatenated. 
-
-        
-        Returns
-        -------
-        transition_probability_matrix:arraylike;shape=(n_states+1,n_states+1)
-            A transition probability matrix created from the list of labels. Diagonals indicate
-            if it is likely to stay in the same state and off diagonals mark probabilities of transitions
-
-
-
-        
-        Notes
-        -----
-        Much in the spirit of our original matrices the first row and column of theese matrices contain
-        indexes mainly for ease of use and manipulation. Yes, in theory pandas dataframes could streamline this process
-        but, numpy arrays are just that much more efficient in most use cases,
-
-
-
-        Examples
-        --------
-
-        
-
-        '''
-
-
-        labels=labels if labels is not None else self.labels
-        frame_list=frame_list if frame_list is not None else self.frame_list
-        lag=lag if lag is not None else 1
-
-        #extract unique states and initiate transiiton probability matrix
-        unique_states=np.unique(labels)
-        number_of_states=len(unique_states)
-        transtion_prob_matrix=np.zeros(shape=(number_of_states,number_of_states))
-        
-        iterator=0
-        for trajectory_length in frame_list: # iterate through 
-            current_trajectory=labels[iterator:iterator+trajectory_length]
-            iterator=iterator+trajectory_length #update this 
-
-            for i in range(current_trajectory.shape[0]-lag):
-                current_state=current_trajectory[i]
-                next_state = current_trajectory[i+lag]
-                transtion_prob_matrix[current_state, next_state] += 1
-
-        row_sums = transtion_prob_matrix.sum(axis=1, keepdims=True)
-        transition_probs = transtion_prob_matrix / row_sums
-
-        final_transition_prob_matrix=np.zeros(shape=(number_of_states+1,number_of_states+1))
-        final_transition_prob_matrix[1:,1:]=transition_probs
-        final_transition_prob_matrix[0,1:],final_transition_prob_matrix[1:,0]=unique_states,unique_states
-
-        self.transition_probability_matrix=final_transition_prob_matrix
-        print(final_transition_prob_matrix)
-
-
-        return final_transition_prob_matrix
-    
-
-    def evaluate_Chapman_Kolmogorov(self,transition_probability_matrix=None,n=None,labels=None,original_lag=None):
-        '''evaluate if the chapman kolmogorov test evaluates to true
-
-        Parameters
-        ----------
-        n:int,default=4
-            The original number of lags we used to compute the transition probability matrix
-        
-        transition_proability_matrix:arraylike,shape=(n_states+1,n_states+1),
-
-        n:int,default=4
-            The time lag we are using to compute our labels
-
-        labels:arraylike,default=self.labels
-            The list of labels we are using for the labeling of data from trajectories. 
-        
-        original_lag:int:default=1
-
-
-        Notes
-        -----
-
-        
-        Returns
-        -------
-
-
-
-        Examples
-        --------
-        
-        
-        '''
-
-        transition_probability_matrix=transition_probability_matrix if transition_probability_matrix is not None else self.create_transition_probability_matrix()
-        original_lag=original_lag if original_lag is not None else 1
-        n = n if n is not None else 4
-        labels=labels if labels is not None else self.labels
-
-        transition_prob_data=transition_probability_matrix[1:,1:]
-        post_timestep_data=np.linalg.matrix_power(transition_prob_data,n)
-        transition_probability_matrix[1:,1:]=post_timestep_data
-
-        total_lag=original_lag+n
-        matrix_from_total_lag = self.create_transition_probability_matrix(lag=total_lag)
-        diff=matrix_from_total_lag[1:,1:]-transition_probability_matrix[1:,1:]
-        frob = np.linalg.norm(diff, ord='fro')
-        return frob
 
 
 if __name__ == '__main__':

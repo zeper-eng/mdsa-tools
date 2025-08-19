@@ -10,7 +10,7 @@ all_systems=[redone_CCU_GCU_fulltraj,redone_CCU_CGU_fulltraj]
 
 #For the paper we move forward with systems representations
 Systems_Analyzer = systems_analysis(all_systems)
-UMAP_coordinates=Systems_Analyzer.reduce_systems_representations(method='UMAP',n_components=2,n_neighbors=100,min_dist=0) #PCA
+UMAP_coordinates=Systems_Analyzer.reduce_systems_representations(method='UMAP',n_components=2,n_neighbors=15,min_dist=.5) #PCA
 
 
 ################
@@ -21,8 +21,13 @@ frame_list=((([80] * 20) + ([160] * 10))*2)
 system_labels=(([1]*3200)+[2]*3200)
 colormappings=[np.arange(0,np.max(i),1) for i in frame_list]
 colormappings=np.concatenate(colormappings)
-visualize_reduction(UMAP_coordinates,color_mappings=system_labels,cmap=cm.magma_r,savepath='/Users/luis/Desktop/workspacetwo/manuscript_explorations/crawlspace/00n_point0mindist')#each system
-visualize_reduction(UMAP_coordinates,color_mappings=colormappings,cmap=cm.magma_r,savepath='/Users/luis/Desktop/workspacetwo/manuscript_explorations/crawlspace/00n_point0mindist_crawlspace')#all reps
+embeddingspace_worms_GCU=np.load('/Users/luis/Desktop/workspacetwo/manuscript_explorations/embeddingspace_kmeanslabels/CGUkluster_labels_2clust.npy')
+embeddingspace_worms_CGU=np.load('/Users/luis/Desktop/workspacetwo/manuscript_explorations/embeddingspace_kmeanslabels/GCUkluster_labels_5clust.npy')
+
+embeddingworms=np.array([embeddingspace_worms_GCU,embeddingspace_worms_CGU])
+
+visualize_reduction(UMAP_coordinates[0:3200,:],color_mappings=system_labels,cmap=cm.tab10,savepath='/Users/luis/Desktop/workspacetwo/manuscript_explorations/crawlspace/15n_point5mindist')#each system
+visualize_reduction(UMAP_coordinates[3200:,:],color_mappings=embeddingworms,cmap=cm.tab10,savepath='/Users/luis/Desktop/workspacetwo/manuscript_explorations/crawlspace/embeddingspaceworms')#all reps
 
 os._exit(0)
 

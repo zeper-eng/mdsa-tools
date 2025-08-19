@@ -46,6 +46,7 @@ restrained_residues = [
     476, 477, 478, 479, 490, 491,
     492, 493, 494
 ]
+
 unrestrained_residues = [
     res for res in range(1, 495) if res not in restrained_residues
 ]

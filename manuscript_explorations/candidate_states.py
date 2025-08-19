@@ -4,21 +4,6 @@ import matplotlib.cm as cm
 import os
 import pandas as pd
 
-############################
-#functions for this process#
-############################
-def build_shave_mask(frame_list,skip):
-    mask=np.concatenate([np.arange(L) >= skip for L in frame_list])#build true false mask based on initial skips (bc arange goes 1,2,3,4 etc)
-    return mask
-
-def rmsd_from_centers(X, labels, centers):
-    results = []
-    for k in np.unique(labels):
-        m = (labels == k)  # mask frames belonging to cluster k
-        d = np.linalg.norm(X[m] - centers[int(k)], axis=1)
-        rmsd = float(np.sqrt(np.mean(d**2)))
-        results.append((int(k), rmsd))
-    return results
 
 #Pipeline setup assumed as in: Data Generation
 redone_CCU_GCU_fulltraj=np.load('/Users/luis/Downloads/redone_unrestrained_CCU_GCU_Trajectory_array.npy',allow_pickle=True)
@@ -29,11 +14,29 @@ persys_frame_list=((([80] * 20) + ([160] * 10))*2)
 
 #For the paper we move forward with systems representations
 all_systems=[redone_CCU_GCU_fulltraj,redone_CCU_CGU_fulltraj]
-Systems_Analyzer = systems_analysis(all_systems)
-X_pca,_,_=Systems_Analyzer.reduce_systems_representations(method='PCA',n_components=2) #PCA
+Systems_Analyzer = systems_analysis(systems_representations=all_systems,replicate_distribution=persys_frame_list)
+Systems_Analyzer.replicates_to_featurematrix()
+X_pca,_ ,_=Systems_Analyzer.reduce_systems_representations()
 candidate_states_per_system=Systems_Analyzer.cluster_embeddingspace()
 
+#visualize candidate states
+from mdsa_tools.Viz import visualize_candidate_states
+visualize_candidate_states(candidate_states_per_system,X_pca,cmap=cm.inferno_r)
 
+
+
+os._exit(0)
+X_pca,_,_=Systems_Analyzer.reduce_systems_representations(method='PCA',n_components=2) #PCA
+
+
+
+os._exit(0)
+
+###
+###Unique Case
+###
+optimal_k_silhouette_labels_GCUresults,optimal_k_elbow_labels_GCUresults,centers_sillohuette_GCUresults,centers_elbow_GCUresults=Systems_Analyzer.cluster_system_level(data=X_pca[0:3200,:],outfile_path='/Users/luis/Desktop/workspacetwo/manuscript_explorations//embeddingspace_kmeanslabels/GCU')
+optimal_k_silhouette_labels_CGUresults,optimal_k_elbow_labels_CGUresults,centers_sillohuette_CGUresults,centers_elbow_CGUresults=Systems_Analyzer.cluster_system_level(data=X_pca[3200:,:],outfile_path='/Users/luis/Desktop/workspacetwo/manuscript_explorations//embeddingspace_kmeanslabels/CGU')
 
 rmsd_shavings_all=[]
 slice_names=[]

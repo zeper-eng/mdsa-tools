@@ -592,6 +592,33 @@ def visualize_reduction(embedding_coordinates, color_mappings=None,
     plt.savefig(savepath, dpi=500)
     plt.close()
 
+def visualize_candidate_states(candidate_states,reduced_coordinates,savepath=None,cmap=None):
+    '''visualize the candidate states discovered by clustering embedding space
+
+    Parameters
+    ----------
+    candidatestates=arraylike,default=mdsa_tools.Analysis.cluster_embeddingspace(),shape=(number_of_systems_)
+        A list of arrays holding, each array in every system contains the cluster assignments and labels returned
+        from the system analysis module's preform_clust_opt() operation.
+    
+    Reduced_cooridinates:
+
+    cmap:
+        cmap
+    
+    '''
+    savepath=savepath if savepath is not None else os.getcwd()
+    frames_per_sys=np.array_split(reduced_coordinates,len(candidate_states))
+
+    
+    for i in range(len(candidate_states)):
+        labels,_ = candidate_states[i][0],candidate_states[i][1]
+        from mdsa_tools.Viz import visualize_reduction
+        visualize_reduction(frames_per_sys[i],cmap=cmap,color_mappings=labels,savepath=f'{savepath}/system_{i}')
+
+
+    return
+    
 def highlight_reps_in_embeddingspace(reduced_coordinates,
                     frame_list=((([80] * 20) + ([160] * 10)) * 2),
                     outfilepath='/zfshomes/lperez/thesis_figures/PCA/test_one_rep',
