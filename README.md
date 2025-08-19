@@ -1,4 +1,4 @@
-# mdsa-tools: Tools for systems-level analysis of Molecular Dynamics (MD) simulations
+# __mdsa-tools__: Tools for systems-level analysis of Molecular Dynamics (MD) simulations
 
 [![Docs Build](https://github.com/zeper-eng/mdsa-tools/actions/workflows/docs.yml/badge.svg?branch=main)](https://mdsa-tools.readthedocs.io/en/latest/)
 ![Last commit](https://img.shields.io/github/last-commit/zeper-eng/mdsa-tools)
@@ -6,11 +6,11 @@
 [![License](https://img.shields.io/pypi/l/mdsa-tools.svg)](https://github.com/zeper-eng/mdsa-tools/blob/main/LICENSE)
 
 ## Pipeline overview
+A set of tools for producing and analyzing systems representations (networks) of Molecular Dynamics (MD) simulations. 
+
 ![Pipeline](https://raw.githubusercontent.com/zeper-eng/workspace/main/resources/Pipelineflic.png)
 
-We start from an MD trajectory and generate per-frame interaction networks (graphs/adjacency matrices). Adjacencies are flattened (row-wise) into vectors; stacking these per-frame vectors yields a feature matrix suitable for clustering (e.g., k-means) and dimensionality reduction (PCA/UMAP). Results can be visualized with graphs, scatter plots, MDCcircos plots (residue H-bonding), or replicate maps of frame-level measurements of interest.
-
-An additional module uses cluster assignments as candidate substates for Markov state model (MSM) analysis.
+We start from an MD trajectory and generate per-frame interaction networks (graphs/adjacency matrices). Adjacencies are flattened (row-wise) into vectors; stacking these per-frame vectors yields a feature matrix suitable for clustering (e.g., k-means) and dimensionality reduction (PCA/UMAP). Results can be visualized with graphs, scatter plots, MDCcircos plots (residue H-bonding), or replicate maps of frame-level measurements of interest. These clustered states can then serve as candidate substates for constructing and analyzing Markov state models (MSMs), enabling exploration of long-timescale dynamics and transition pathways.
 
 ## Install
 
@@ -24,7 +24,8 @@ pip install mdsa-tools
 ## Systems Problem Area:
 
 ![System panel](https://raw.githubusercontent.com/zeper-eng/workspace/main/resources/PanelA_summerposter.png)
-At the Weir Lab at Wesleyan University, we perform molecular dynamics (MD) simulations of a ribosomal subsystem to study tuning of protein translation by the CAR interaction surface- a ribosomal interface identified by the lab that interacts with the +1 codon (poised to enter the ribosome A site). Our "computational genetics" research focuses on modifying adjacent codon identities at the A-site and the +1 positions to model how changes at these sites influence the behavior of the CAR surface and corellate with translation rate variations.
+
+In the Weir Group at Wesleyan University, we perform molecular dynamics (MD) simulations of a ribosomal subsystem to study tuning of protein translation by the CAR interaction surface- a ribosomal interface identified by the lab that interacts with the +1 codon (poised to enter the ribosome A site). Our "computational genetics" research focuses on modifying adjacent codon identities at the A-site and the +1 positions to model how changes at these sites influence the behavior of the CAR surface and corellate with translation rate variations.
 
 
 ## Quickstart example (see examples for more use-cases;contour plots, UMAP, MSM, etc):
