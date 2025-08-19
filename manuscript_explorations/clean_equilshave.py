@@ -102,8 +102,8 @@ for i in range(0,100,10):
     CGU_with_filler=np.concatenate((np.full(shape=masked_PCA_labels_GCU.shape[0],fill_value=np.max(masked_PCA_labels_CGU)+1),masked_PCA_labels_CGU))
     
     #visualize
-    visualize_reduction(masked_coordinates,color_mappings=GCU_with_filler,cmap=cm.magma,savepath=f'/Users/luis/Desktop/workspacetwo/manuscript_explorations/shaved_pca_ns/all_GCU_onlyshaved{i*2}_ns_PCA')#each system
-    visualize_reduction(masked_coordinates,color_mappings=CGU_with_filler,cmap=cm.magma,savepath=f'/Users/luis/Desktop/workspacetwo/manuscript_explorations/shaved_pca_ns/all_CGU_onlyshaved{i*2}_ns_PCA')#each system
+    visualize_reduction(masked_coordinates,color_mappings=GCU_with_filler,cmap=cm.magma,savepath=f'/Users/luis/Desktop/workspacetwo/manuscript_explorations/shaved_pca_ns/long_GCU_onlyshaved{i*2}_ns_PCA')#each system
+    visualize_reduction(masked_coordinates,color_mappings=CGU_with_filler,cmap=cm.magma,savepath=f'/Users/luis/Desktop/workspacetwo/manuscript_explorations/shaved_pca_ns/long_CGU_onlyshaved{i*2}_ns_PCA')#each system
 
     rmsd_results = rmsd_from_centers(
         masked_coordinates[:masked_PCA_labels_GCU.shape[0]],
