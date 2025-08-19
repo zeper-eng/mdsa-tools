@@ -64,8 +64,8 @@ def replicatemap_from_labels(labels,frame_list,savepath=None,title=None,
     final_coordinates=[]
 
     for i in range(len(frame_list)):
-        current_replicate_coordinates=np.full(shape=(frame_list[i],),fill_value=i+1) #make list of 11111 then 22222 for each rep
-        frame_positions=np.arange(1,frame_list[i]+1)
+        current_replicate_coordinates=np.full(shape=(frame_list[i],),fill_value=i) #make list of 11111 then 22222 for each rep
+        frame_positions=np.arange(1,frame_list[i])
         frame_values=labels[iterator:iterator+frame_list[i]]
         replicate_block = np.stack([current_replicate_coordinates, frame_positions, frame_values], axis=1)
         final_coordinates.append(replicate_block)
@@ -73,8 +73,8 @@ def replicatemap_from_labels(labels,frame_list,savepath=None,title=None,
     
     final_coordinates = np.vstack(final_coordinates)
 
-    y_spacing_factor = 10 
-    x_spacing_factor = 10
+    y_spacing_factor = 1
+    x_spacing_factor = 1
 
     scatter=plt.scatter(
                 x=final_coordinates[:,1] * x_spacing_factor,
@@ -104,13 +104,13 @@ def replicatemap_from_labels(labels,frame_list,savepath=None,title=None,
     n_frames = int(final_coordinates[:, 1].max())
 
     #Setting Ticks
-    x_ticks_labels = np.arange(0, n_frames+10, 10)
+    x_ticks_labels = np.arange(0, n_frames,10) 
     x_ticks_locations = x_ticks_labels * x_spacing_factor
     ax.set_xticks(x_ticks_locations)
     ax.set_xticklabels([str(i) for i in x_ticks_labels],fontsize=8)
 
 
-    y_ticks_labels = np.arange(0, n_reps+10,10)
+    y_ticks_labels = np.arange(0,final_coordinates.shape[0],final_coordinates.shape[0]/10) if final_coordinates.shape[0] else np.arange(0, 2, 1)
     y_ticks_locations = y_ticks_labels * y_spacing_factor
     ax.set_yticks(y_ticks_locations)
     ax.set_yticklabels([str(i) for i in y_ticks_labels], fontsize=8)
