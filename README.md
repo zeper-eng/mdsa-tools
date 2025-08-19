@@ -6,7 +6,6 @@
 
 Tools for systems-level analysis of Molecular Dynamics (MD) simulations
 ## Pipeline overview
-A set of tools for producing and analyzing systems representations (networks) of Molecular Dynamics (MD) simulations. 
 
 ![Pipeline](https://raw.githubusercontent.com/zeper-eng/workspace/main/resources/Pipelineflic.png)
 
