@@ -2,7 +2,7 @@
 
 
 
-# __mdsa-tools__ [![Docs Build](https://github.com/zeper-eng/mdsa-tools/actions/workflows/docs.yml/badge.svg?branch=main)](https://mdsa-tools.readthedocs.io/en/latest/)![Last commit](https://img.shields.io/github/last-commit/zeper-eng/mdsa-tools)[![PyPI version](https://img.shields.io/pypi/v/mdsa-tools.svg)](https://pypi.org/project/mdsa-tools/)[![License](https://img.shields.io/pypi/l/mdsa-tools.svg)](https://github.com/zeper-eng/mdsa-tools/blob/main/LICENSE)
+# __mdsa-tools__ [![Docs Build](https://github.com/zeper-eng/mdsa-tools/actions/workflows/docs.yml/badge.svg?branch=main)](https://mdsa-tools.readthedocs.io/en/latest/)[![CI](https://github.com/zeper-eng/mdsa-tools/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/zeper-eng/mdsa-tools/actions/workflows/ci.yml)[![PyPI version](https://img.shields.io/pypi/v/mdsa-tools.svg)](https://pypi.org/project/mdsa-tools/)[![License](https://img.shields.io/pypi/l/mdsa-tools.svg)](https://github.com/zeper-eng/mdsa-tools/blob/main/LICENSE)
 
 Tools for systems-level analysis of Molecular Dynamics (MD) simulations
 ## Pipeline overview
