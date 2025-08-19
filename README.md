@@ -37,55 +37,59 @@ https://mybinder.org/v2/gh/zeper-eng/mdsa-tools/HEAD?labpath=notebooks/Quick_Sta
 https://nbviewer.org/github/zeper-eng/mdsa-tools/blob/main/notebooks/Quick_Start.ipynb)
 
 ```python
-from mdsa_tools.Data_gen_hbond import trajectory
-from mdsa_tools.Analysis import systems_analysis
+from mdsa_tools.Data_gen_hbond import TrajectoryProcessor as tp
 import numpy as np
+import os
 
-# In house test with our own trajectories
+#load in and test trajectory
+system_one_topology = '../PDBs/5JUP_N2_CGU_nowat.prmtop'
+system_one_trajectory = '../PDBs/CCU_CGU_10frames.mdcrd'
 
-system_one_topology = '/Users/luis/Desktop/workspace/PDBs/5JUP_N2_CGU_nowat.prmtop'
-system_one_trajectory = '/Users/luis/Desktop/workspace/PDBs/CCU_CGU_10frames.mdcrd'
 
-system_two_topology = '/Users/luis/Desktop/workspace/PDBs/5JUP_N2_GCU_nowat.prmtop'
-system_two_trajectory = '/Users/luis/Desktop/workspace/PDBs/CCU_GCU_10frames.mdcrd'
+system_two_topology = '../PDBs/5JUP_N2_GCU_nowat.prmtop'
+system_two_trajectory = '../PDBs/CCU_GCU_10frames.mdcrd'
 
-test_trajectory_one = trajectory(
-    trajectory_path=system_one_trajectory,
-    topology_path=system_one_topology
-)
-test_trajectory_two = trajectory(
-    trajectory_path=system_two_trajectory,
-    topology_path=system_two_topology
-)
 
-# now that they're loaded, make system representations
+test_trajectory_one = tp(trajectory_path=system_one_trajectory,topology_path=system_one_topology)
+test_trajectory_two = tp(trajectory_path=system_two_trajectory,topology_path=system_two_topology)
+
+
+#now that its loaded in try to make object
 test_system_one_ = test_trajectory_one.create_system_representations()
 test_system_two_ = test_trajectory_two.create_system_representations()
 
-# save for reuse
-np.save('/Users/luis/Desktop/workspacetwo/example_systems/test_system_one', test_system_one_)
-np.save('/Users/luis/Desktop/workspacetwo/example_systems/test_system_two', test_system_two_)
+
+np.save('test_system_one',test_system_one_)
+np.save('test_system_two',test_system_two_)
 
 ###
 ### Analysis
 ###
-analyzer = systems_analysis([sys1, sys2])
 
-# Clustering
-sil_labels, elbow_labels, sil_centers, elbow_centers = analyzer.cluster_system_level(
-    outfile_path="out/syskmeans/", max_clusters=25
-)
-print("Clustering successfully completed.")
+from mdsa_tools.Analysis import systems_analysis
 
-# Dimensional reduction (PCA or UMAP); color by cluster labels
-analyzer.reduce_systems_representations(
-    outfile_path="out/PCA/test_", 
-    method="PCA",
-    colormappings=sil_labels
-)
-print("PCA reduction successful.")
-```
+all_systems=[test_system_one_,test_system_two_]
+Systems_Analyzer = systems_analysis(all_systems)
+
+#transform adjacency matrices preform clsutering and dimensional reduction and visualizing clusters
+Systems_Analyzer.replicates_to_featurematrix()
+optimal_k_silhouette_labels,optimal_k_elbow_labels,centers_sillohuette,centers_elbow = Systems_Analyzer.cluster_system_level(outfile_path='./test_',max_clusters=5)
+print('clustering succesfully completed')
+X_pca,weights,explained_variance_ratio_=Systems_Analyzer.reduce_systems_representations(method='PCA') #you could do method=PCA/UMAP here
+print('reduction succesful')
 
 
+###
+### Visualization
+###
 
+import matplotlib.cm as cm
+from mdsa_tools.Viz import visualize_reduction
+#visualize embedding space with original clusters
+visualize_reduction(X_pca,color_mappings=optimal_k_silhouette_labels,savepath='./PCA_',cmap=cm.plasma_r)
+
+#If they exist map transitions between the various cluster assignments
+from mdsa_tools.Viz import replicatemap_from_labels
+
+replicatemap_from_labels(cmap=cm.plasma_r,frame_list=[9]*2,labels=optimal_k_silhouette_labels,savepath='./Repmap_')#9 frames each so 
 
