@@ -91,27 +91,33 @@ class MSM_Modeller():
             #now we can check the cohesion over time 1
             rmsd_window_all=[]
 
+            offset=0
             for j in range(len(frame_scale)):#iterate through frames of replicates in system
                 framelength=frame_scale[j]
+                coords_rep = current_coordinates[offset:offset+framelength]
+                labels_rep = labels[offset:offset+framelength]
+
                 for start in range(0, framelength - window + 1, window):
                     end = start + window
                     rmsd_results = self.rmsd_from_centers(
-                        current_coordinates[start:end, :],
-                        labels[start:end],
-                        centers
+                    coords_rep[start:end, :],
+                    labels_rep[start:end],
+                    centers
                     )   
                     
                     df_temp = pd.DataFrame(rmsd_results, columns=["cluster", "RMSD"])
                     df_temp["window"] = np.full(shape=(len(rmsd_results)),fill_value=start//window)
                     df_temp["replicate"] = np.full(shape=len(rmsd_results),fill_value=j)
                     rmsd_window_all.append(df_temp)
+
+                offset += framelength
                 
             rmsd_window_all = pd.concat(rmsd_window_all, ignore_index=True)
             rmsd_window_all['system']=np.full(shape=(rmsd_window_all.shape[0]),fill_value=i)
             rmsd_df_per_system.append(rmsd_window_all)
             
         rmsd_df_per_system=pd.concat(rmsd_df_per_system, ignore_index=True)
-        
+
         return rmsd_df_per_system
 
     def create_transition_probability_matrix(self,labels=None,frame_list=None,lag=None):
