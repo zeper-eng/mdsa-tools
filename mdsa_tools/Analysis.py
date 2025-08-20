@@ -323,7 +323,6 @@ class systems_analysis:
 
         return candidate_states_per_system
 
-    
     def create_pearsontest_for_kmeans_distributions(self,labels,coordinates,cluster_centers):
         '''
         Currently depreciated
@@ -474,70 +473,7 @@ class systems_analysis:
         
         return dataframe
 
-    def cluster_individual_systems_in_embeddingspace(self, reduced_data=None, frames_per_sys=None, num_systems=None):
-        '''cluster individual systems in embedding space in order to identify potential conformations
-
-        Parameters
-        ----------
-        reduced_data:arraylike,shape=(n_samples,2)
-            Data that has been reduced using a dimensional reduction method such as PCA, UMAP, TSNE, etc.
-            If None, the function will use the UMAP reduction from self.reduce_systems_representations().
-
-        frames_per_sys:int
-            The number of frames contained per one version of the system you are exploring.
-            If None, the function will use the number of frames from the first system in self.systems_representations.
-        
-        num_systems:int
-            The number of different systems (e.g., simulations, replicates) being analyzed.
-            If None, the function will use the value stored in self.num_systems.
-
-        Returns
-        -------
-        results:list,shape=(n_systems,)
-            Returns the results as a list of arrays that you can iterate through, where each array
-            contains the cluster labels for a single system, padded with a high value.
-
-        Notes
-        -----
-        This function assumes you have the same number of frames per system. It first performs 
-        clustering on each system individually and then pads the resulting labels to the original
-        total size, making them easy to visualize against the full embedding space.
-
-        Examples
-        --------
-     
-        '''
-
-        
-        if reduced_data is not None :
-            reduced_data = reduced_data 
-
-        if reduced_data is None:
-            x_pca,_,_ = self.reduce_systems_representations(method='PCA')
-            reduced_data=x_pca
-            
-        num_systems = num_systems if num_systems is not None else self.num_systems
-        
-        if frames_per_sys is None:
-            frames_per_sys = self.systems_representations[0].shape[0]
-        
-        iterator = 0
-        results = []
-         
-        
-        for i in range(num_systems):
-
-            current_sys_data = reduced_data[iterator : iterator + frames_per_sys, :]
-            optimal_k_silhouette_labels, _, _, _ = self.preform_clust_opt(outfile_path=f"embeddingspace_system_{i}_clust", data=current_sys_data)
-            empty_sys = np.full(reduced_data.shape[0], 10)
-            empty_sys[iterator : iterator + frames_per_sys] = optimal_k_silhouette_labels
-            
-            results.append(empty_sys)
-            
-            iterator += frames_per_sys
-        
-        return results
-    
+ 
     #Algorithm wrappers 
     def preform_clust_opt(self,outfile_path, max_clusters=None, data=None):
         '''

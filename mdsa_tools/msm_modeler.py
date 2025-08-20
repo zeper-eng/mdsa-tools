@@ -1,9 +1,10 @@
 import numpy as np
 import os
+import pandas as pd
 
 class MSM_Modeller():
 
-    def __init__(self,candidate_states):
+    def __init__(self,candidate_states,reduced_coordinates,frame_scale):
         '''A module for evaluating and modelling the candidate states and subsequent MSM of an emebddingspace.
 
         
@@ -23,10 +24,9 @@ class MSM_Modeller():
         --------
 
         '''
-        self.candidate_states=candidate_states
-        self.transition_probability_matrix=None
-        self.reduced_coordinates=None
-        self.lag=None
+        self.candidate_states=candidate_states if candidate_states is not None else None 
+        self.reduced_coordinates=reduced_coordinates if reduced_coordinates is not None else None 
+        self.frame_scale=frame_scale if frame_scale is not None else None 
 
     def rmsd_from_centers(self, X, labels, centers):
         results = []
@@ -37,24 +37,82 @@ class MSM_Modeller():
             results.append((int(k), rmsd))
         return results
 
-    def evaluate_cohesion(candidate_states,reduced_coordinates):
+    def evaluate_cohesion(self,candidate_states=None,reduced_coordinates=None,frame_scale=None,window=None):
         '''evaluate whether trajectories are temporally settling into the candidate states
         
+        Paramters
+        ---------
         candidatestates=arraylike,default=mdsa_tools.Analysis.cluster_embeddingspace(),shape=(number_of_systems_)
             A list of arrays holding, each array in every system contains the cluster assignments and labels returned
             from the system analysis module's preform_clust_opt() operation.
         
-        '''
+        reduced coordinates =arraylike,shape=(n_samples,2)
+            The results of either Principal Components Analysis or UMAP reduction to 2 new dimensions.
         
-        savepath=savepath if savepath is not None else os.getcwd()
-        frames_per_sys=np.array_split(reduced_coordinates,len(candidate_states))
+        frame_scale:list of int, optional
+            A list holding integer counts of the number of frames in each replicate. 
+            Default is (([80] * 20) + ([160] * 10)) * 2.
+        
+        
+            
+        
+        Returns
+        -------
 
-        for i in range(len(candidate_states)):
-            labels,_ = candidate_states[i][0],candidate_states[i][1]
 
 
-    
-        return
+        Notes
+        -----
+
+
+
+
+        Examples
+        --------
+
+
+
+        
+        '''
+        candidate_states=candidate_states if candidate_states is not None else self.candidate_states
+        reduced_coordinates=reduced_coordinates if reduced_coordinates is not None else self.reduced_coordinates
+        frame_scale=frame_scale if frame_scale is not None else self.frame_scale
+        window = window if window is not None else 10
+
+        cords_per_sys=np.array_split(reduced_coordinates,len(candidate_states))
+
+
+        rmsd_df_per_system=[]
+
+
+        for i in range(len(candidate_states)):#iterate through system
+            labels,centers = candidate_states[i][0],candidate_states[i][1] #grab labels and center of current system
+            current_coordinates=cords_per_sys[i]
+            #now we can check the cohesion over time 1
+            rmsd_window_all=[]
+
+            for j in range(len(frame_scale)):#iterate through frames of replicates in system
+                framelength=frame_scale[j]
+                for start in range(0, framelength - window + 1, window):
+                    end = start + window
+                    rmsd_results = self.rmsd_from_centers(
+                        current_coordinates[start:end, :],
+                        labels[start:end],
+                        centers
+                    )   
+                    
+                    df_temp = pd.DataFrame(rmsd_results, columns=["cluster", "RMSD"])
+                    df_temp["window"] = np.full(shape=(len(rmsd_results)),fill_value=start//window)
+                    df_temp["replicate"] = np.full(shape=len(rmsd_results),fill_value=j)
+                    rmsd_window_all.append(df_temp)
+                
+            rmsd_window_all = pd.concat(rmsd_window_all, ignore_index=True)
+            rmsd_window_all['system']=np.full(shape=(rmsd_window_all.shape[0]),fill_value=i)
+            rmsd_df_per_system.append(rmsd_window_all)
+            
+        rmsd_df_per_system=pd.concat(rmsd_df_per_system, ignore_index=True)
+        
+        return rmsd_df_per_system
 
     def create_transition_probability_matrix(self,labels=None,frame_list=None,lag=None):
         '''Create probability matrix from input data (returns, and updates class attribute)
