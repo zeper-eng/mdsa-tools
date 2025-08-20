@@ -50,9 +50,15 @@ class systems_analysis:
         self.num_systems=len(systems_representations) #this is useful later on for when we are doing system_specific operations
         self.systems_representations=systems_representations
         self.indexes = systems_representations[0][0, 0, 1:] #bc list then 3d array
-
-
+        
+        if replicate_distribution is not None:
+            self.replicate_distribution=replicate_distribution
+            
+        if replicate_distribution is None:
+            self.replicate_distribution=np.arange(0,systems_representations[0].shape[0])
+        
         return
+
 
     #pre-processing
     def replicates_to_featurematrix(self,arrays=None)->np.ndarray:

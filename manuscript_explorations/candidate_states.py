@@ -26,9 +26,7 @@ from mdsa_tools.msm_modeler import MSM_Modeller as msm
 
 MSM_modeler=msm(candidate_states_per_system,X_pca,persys_frame_list)
 RMSD_dataframe=MSM_modeler.evaluate_cohesion()
-RMSD_dataframe.to_csv('RMSD_dataframe',)
-print(RMSD_dataframe)
-os._exit(0)
+RMSD_dataframe.to_csv('RMSD_dataframe.csv')
 X_pca,_,_=Systems_Analyzer.reduce_systems_representations(method='PCA',n_components=2) #PCA
 
 
