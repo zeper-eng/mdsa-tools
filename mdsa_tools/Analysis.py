@@ -14,7 +14,7 @@ class systems_analysis:
     '''A big wrapper for conveniently storing a lot of our analysis methods
     '''
 
-    def __init__(self,systems_representations,replicate_distribution):
+    def __init__(self,systems_representations=None,replicate_distribution=None):
         '''
         Parameters
         ----------
