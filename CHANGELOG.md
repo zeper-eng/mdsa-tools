@@ -1,3 +1,5 @@
+## [1.0.6]-2025-08-15
+Built in analyses for finding candidate states for msm, msm module incorporation, lots of bugfixes and new tests
 
 ## [1.0.2-5]-2025-08-15
 many bug fixes and else that missed pypi

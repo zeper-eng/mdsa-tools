@@ -318,6 +318,7 @@ class systems_analysis:
         
         #grab the number of rows we need and then iterate through X_pca run kmeans and visualize using our initial values
         individual_systems=np.array_split(reduced_coordinates, num_systems,axis=0)
+        print(individual_systems[0].shape)
         candidate_states_per_system=[]
         for i in individual_systems:
             optimal_k_silhouette_labels,optimal_k_elbow_labels,centers_sillohuette,centers_elbow=self.preform_clust_opt(outfile_path,data=i)

@@ -1,6 +1,6 @@
 Metadata-Version: 2.4
 Name: mdsa-tools
-Version: 1.0.4
+Version: 1.0.6
 Summary: The Weir Labs H-bond Systems Analyses modules!
 Author-email: Luis Perez <lperez@wesleyan.edu>
 License: MIT
@@ -72,6 +72,10 @@ https://nbviewer.org/github/zeper-eng/mdsa-tools/blob/main/notebooks/Quick_Start
 from mdsa_tools.Data_gen_hbond import TrajectoryProcessor as tp
 import numpy as np
 import os
+
+###
+### Datagen
+###
 
 #load in and test trajectory
 system_one_topology = '../PDBs/5JUP_N2_CGU_nowat.prmtop'

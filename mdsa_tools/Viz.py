@@ -563,7 +563,7 @@ def visualize_reduction(embedding_coordinates, color_mappings=None,
     else:
         # Use provided colormap, fallback to red
         norm = Normalize(vmin=np.min(color_mappings), vmax=np.max(color_mappings))
-        cmap = cmap if cmap is not None else plt.get_cmap('Reds')
+        cmap = cmap if cmap is not None else cm.magma_r
 
         ax.scatter(embedding_coordinates[:, 0], embedding_coordinates[:, 1],
                              c=color_mappings, cmap=cmap, norm=norm, alpha=0.6)
@@ -591,6 +591,7 @@ def visualize_reduction(embedding_coordinates, color_mappings=None,
     plt.tight_layout()
     plt.savefig(savepath, dpi=500)
     plt.close()
+    return
 
 def visualize_candidate_states(candidate_states,reduced_coordinates,savepath=None,cmap=None):
     '''visualize the candidate states discovered by clustering embedding space

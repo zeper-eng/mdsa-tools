@@ -24,7 +24,7 @@ test_system_two_ = test_trajectory_two.create_system_representations()
 print(test_system_one_[0])
 print(test_system_two_[0])
 
-os._exit(0)
+
 
 
 np.save('/Users/luis/Desktop/workspacetwo/example_systems/test_system_one',test_system_one_)

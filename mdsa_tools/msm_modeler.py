@@ -35,9 +35,10 @@ class MSM_Modeller():
             d = np.linalg.norm(X[m] - centers[int(k)], axis=1)
             rmsd = float(np.sqrt(np.mean(d**2)))
             results.append((int(k), rmsd))
+        results=np.array(results)
         return results
 
-    def evaluate_cohesion(self,candidate_states=None,reduced_coordinates=None,frame_scale=None,window=None):
+    def evaluate_cohesion(self,candidate_states=None,reduced_coordinates=None,frame_scale=None,window_size=None):
         '''evaluate whether trajectories are temporally settling into the candidate states
         
         Paramters
@@ -77,7 +78,7 @@ class MSM_Modeller():
         candidate_states=candidate_states if candidate_states is not None else self.candidate_states
         reduced_coordinates=reduced_coordinates if reduced_coordinates is not None else self.reduced_coordinates
         frame_scale=frame_scale if frame_scale is not None else self.frame_scale
-        window = window if window is not None else 10
+        window_size = window_size if window_size is not None else 10
 
         cords_per_sys=np.array_split(reduced_coordinates,len(candidate_states))
 
@@ -88,36 +89,53 @@ class MSM_Modeller():
         for i in range(len(candidate_states)):#iterate through system
             labels,centers = candidate_states[i][0],candidate_states[i][1] #grab labels and center of current system
             current_coordinates=cords_per_sys[i]
-            #now we can check the cohesion over time 1
-            rmsd_window_all=[]
 
-            offset=0
-            for j in range(len(frame_scale)):#iterate through frames of replicates in system
-                framelength=frame_scale[j]
-                coords_rep = current_coordinates[offset:offset+framelength]
-                labels_rep = labels[offset:offset+framelength]
+            rmsd_window_all=[]            
+            
+            window_iterator=0
+            num_windows=np.max(frame_scale)//window_size
+            print(f'\nwindow_iterator {window_iterator}, num_windows {num_windows}')
+            start=0
+            for j in range(num_windows):
+                start+=window_size*j
+                window_df_all=[]
 
-                for start in range(0, framelength - window + 1, window):
-                    end = start + window
-                    rmsd_results = self.rmsd_from_centers(
-                    coords_rep[start:end, :],
-                    labels_rep[start:end],
-                    centers
-                    )   
+                for k in range(len(frame_scale)):
                     
-                    df_temp = pd.DataFrame(rmsd_results, columns=["cluster", "RMSD"])
-                    df_temp["window"] = np.full(shape=(len(rmsd_results)),fill_value=start//window)
-                    df_temp["replicate"] = np.full(shape=len(rmsd_results),fill_value=j)
-                    rmsd_window_all.append(df_temp)
+                    current_replicate_length=frame_scale[k]
+                    if j * window_size >= current_replicate_length:
+                        # keep 'start' aligned for the next replicate
+                        start += current_replicate_length
+                        # print(f"SKIP rep={k}, win={j} (rep_len={current_replicate_length})")
+                        continue
+                    end=start+window_size
+                    rmsd_results = self.rmsd_from_centers(
+                    current_coordinates[start:end,:],
+                    labels[start:end],
+                    centers
+                    )
+                    print(f"current_window:{j}, current replicate:{k}")
+                    print(f"current_start:{start}, current end:{end}")
+                    windowdf=pd.DataFrame(rmsd_results,columns=('cluster','rmsd'))
+                    windowdf['window'] = j
+                    windowdf["system"] = i
+                    windowdf["length"] = current_replicate_length
+                    window_df_all.append(windowdf)
+                    start+=current_replicate_length#move forward in replicate 
 
-                offset += framelength
+                start=0
+
+                rmsd_concat = pd.concat(window_df_all, ignore_index=True)
+                avg_equal_by_window = (rmsd_concat
+                .groupby(['length','system','window','cluster'])['rmsd'].mean())     # mean within cluster
+                rmsd_window_all.append(avg_equal_by_window)
                 
-            rmsd_window_all = pd.concat(rmsd_window_all, ignore_index=True)
-            rmsd_window_all['system']=np.full(shape=(rmsd_window_all.shape[0]),fill_value=i)
+            
+            rmsd_window_all=pd.concat(rmsd_window_all)
             rmsd_df_per_system.append(rmsd_window_all)
             
-        rmsd_df_per_system=pd.concat(rmsd_df_per_system, ignore_index=True)
-
+        rmsd_df_per_system=pd.concat(rmsd_df_per_system)     
+        print(rmsd_df_per_system) 
         return rmsd_df_per_system
 
     def create_transition_probability_matrix(self,labels=None,frame_list=None,lag=None):
