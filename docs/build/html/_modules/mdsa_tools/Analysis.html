@@ -1,0 +1,951 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>mdsa_tools.Analysis &#8212; mdsa-tools Documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=5ecbeea2" />
+    <link rel="stylesheet" type="text/css" href="../../_static/basic.css?v=b08954a9" />
+    <link rel="stylesheet" type="text/css" href="../../_static/alabaster.css?v=27fed22d" />
+    <script src="../../_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="../../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <h1>Source code for mdsa_tools.Analysis</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.metrics</span><span class="w"> </span><span class="kn">import</span> <span class="n">silhouette_score</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.cluster</span><span class="w"> </span><span class="kn">import</span> <span class="n">KMeans</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.decomposition</span><span class="w"> </span><span class="kn">import</span> <span class="n">PCA</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">mdsa_tools.Viz</span><span class="w"> </span><span class="kn">import</span> <span class="n">visualize_reduction</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.cm</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">cm</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">umap</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+
+<div class="viewcode-block" id="systems_analysis">
+<a class="viewcode-back" href="../../_autosummary/mdsa_tools.Analysis.html#mdsa_tools.Analysis.systems_analysis">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">systems_analysis</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&#39;&#39;&#39;A big wrapper for conveniently storing a lot of our analysis methods</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">systems_representations</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        systems_representations:list, expected=list[array_1,...,array_n-1] where each array is an np.ndarray with shape=(n_frames,n_residues,n_residues)</span>
+<span class="sd">            Each array should have the shape as described above, where each frame has an adjacency matrix of pairwise</span>
+<span class="sd">            comparisons between all residues. The only axis that can differ between arrays is the number of frames (n_frames).</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        None its an init</span>
+
+<span class="sd">        Notes</span>
+<span class="sd">        -----</span>
+<span class="sd">        -automatically will convert list of arrays into a feature matrix so its easy to build it in</span>
+<span class="sd">        -Additionally this for now expects systems of the same size for automation, if you want to run some of the downstream tasks</span>
+<span class="sd">        you will most likely have to do it yourself if you are trying to analyze differently sized (in terms of frames) systems</span>
+<span class="sd">        -Although since really this is a more general systems perspective on molecular dynamics its a great bouncing point for any systems project you may</span>
+<span class="sd">        have in mind</span>
+
+
+<span class="sd">        Examples</span>
+<span class="sd">        --------</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">num_systems</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">systems_representations</span><span class="p">)</span> <span class="c1">#this is useful later on for when we are doing system_specific operations</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">systems_representations</span><span class="o">=</span><span class="n">systems_representations</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">indexes</span> <span class="o">=</span> <span class="n">systems_representations</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">:]</span>
+
+        <span class="c1">#this will be updated later and are defined within the functions themselves</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">optimal_k_silhouette_labels</span><span class="o">=</span><span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">optimal_k_elbow_labels</span><span class="o">=</span><span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pca_weights</span><span class="o">=</span><span class="kc">None</span>
+
+
+        <span class="k">return</span>
+
+    <span class="c1">#pre-processing</span>
+<div class="viewcode-block" id="systems_analysis.replicates_to_featurematrix">
+<a class="viewcode-back" href="../../_autosummary/mdsa_tools.Analysis.html#mdsa_tools.Analysis.systems_analysis.replicates_to_featurematrix">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">replicates_to_featurematrix</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">arrays</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span><span class="o">-&gt;</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;returns an array formatted for kmeans clustering with scipy</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        arrays:list, expected=list[array_1,...,array_n-1] where each array is an np.ndarray with shape=(n_frames,n_residues,n_residues)</span>
+<span class="sd">            Each array should have the shape as described above, where each frame has an adjacency matrix of pairwise</span>
+<span class="sd">            comparisons between all residues. The only axis that can differ between arrays is the number of frames (n_frames).</span>
+
+<span class="sd">            </span>
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        array:np.ndarray,shape=(sum(n_frames),n_residues*n_residues) where the sum of n_frames refers to the total number of frames.</span>
+<span class="sd">            Each row of the new matrix represents a flattened adjacency matrix for each frame, and the frames are stacked</span>
+<span class="sd">            in such a way that each of the original arrays follow each other sequentially.</span>
+
+
+<span class="sd">        Examples</span>
+<span class="sd">        --------</span>
+<span class="sd">        &gt;&gt;&gt;CCU_GCU_fulltraj=np.load(&#39;/zfshomes/lperez/presentation_directory/CCU_GCU_Trajectory_array.npy&#39;,allow_pickle=True)</span>
+<span class="sd">        &gt;&gt;&gt;CCU_CGU_fulltraj=np.load(&#39;/zfshomes/lperez/presentation_directory/CCU_CGU_Trajectory_array.npy&#39;,allow_pickle=True)</span>
+<span class="sd">        &gt;&gt;&gt;arrays=[CCU_GCU_fulltraj,CCU_CGU_fulltraj]</span>
+<span class="sd">        &gt;&gt;&gt;Kmeans_replicatearray=format_replicate_for_clust(arrays)</span>
+<span class="sd">            </span>
+<span class="sd">            </span>
+<span class="sd">        Notes</span>
+<span class="sd">        -----</span>
+<span class="sd">        First we concatenate all of our arrays into one large array. This does however rely on the premise that the only difference</span>
+<span class="sd">        between our arrays is the number of frames (n_frames). This holds true conceptually because if we have a different</span>
+<span class="sd">        number of pairwise residue comparisons we would not have comparable networks, or &quot;systems&quot;.</span>
+
+<span class="sd">        The goal is to flatten each adjacency matrix into a 1 dimensional vector and then stack all frames.</span>
+<span class="sd">        This results in the expected formatting for scipy&#39;s kmeans clustering implementation where each .</span>
+<span class="sd">        </span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">arrays</span> <span class="o">=</span> <span class="n">arrays</span> <span class="k">if</span> <span class="n">arrays</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">systems_representations</span>
+        
+        <span class="c1">#Concatenate arrays and define list to hold reformatted arrays</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">concatenated_array</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">arrays</span><span class="p">))</span>
+        <span class="k">except</span><span class="p">(</span><span class="ne">ValueError</span><span class="p">,</span> <span class="ne">TypeError</span><span class="p">):</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;its really best if you input a list but the program will move on with the assumption you have given just a single arrray as input&quot;</span><span class="p">)</span>
+            <span class="n">concatenated_array</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">arrays</span><span class="p">)</span>
+
+        <span class="n">final_frames</span><span class="o">=</span><span class="p">[]</span>
+        <span class="n">frame_num</span><span class="p">,</span> <span class="n">n_residues</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">concatenated_array</span><span class="o">.</span><span class="n">shape</span>
+
+        <span class="c1"># Get indices for upper triangle (excluding diagonal)</span>
+        <span class="n">triu_idx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">triu_indices</span><span class="p">(</span><span class="n">n_residues</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="n">k</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>  <span class="c1"># -1 due to [1:,1:] slice below</span>
+
+
+        <span class="n">final_frames</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">frame_num</span><span class="p">):</span>
+            <span class="n">current_frame</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">concatenated_array</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">1</span><span class="p">:,</span> <span class="mi">1</span><span class="p">:])</span>
+            <span class="c1"># Extract upper triangle only</span>
+            <span class="n">flattened</span> <span class="o">=</span> <span class="n">current_frame</span><span class="p">[</span><span class="n">triu_idx</span><span class="p">]</span>
+            <span class="n">final_frames</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">flattened</span><span class="p">)</span>
+
+        <span class="n">final_frames</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">(</span><span class="n">final_frames</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">feature_matrix</span><span class="o">=</span><span class="n">final_frames</span><span class="c1">#set global var as well</span>
+
+        <span class="k">return</span> <span class="n">final_frames</span></div>
+
+
+    <span class="c1">#Analyses</span>
+<div class="viewcode-block" id="systems_analysis.cluster_system_level">
+<a class="viewcode-back" href="../../_autosummary/mdsa_tools.Analysis.html#mdsa_tools.Analysis.systems_analysis.cluster_system_level">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">cluster_system_level</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">outfile_path</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">max_clusters</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">data</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        data:np.ndarray,shape=(n_sample,featuresures),</span>
+<span class="sd">            A feature matrix of any kind, hopefully one provided from the rest of the pipeline but in theory, this is </span>
+<span class="sd">            just a scikit learn wrapper so you can plug anything you want really</span>
+
+<span class="sd">        max_clusters:int,default=10</span>
+<span class="sd">            The maximum number of initial centroids we are iterating through while optimizing sillohuette scores and elbow plots.</span>
+<span class="sd">        </span>
+<span class="sd">        outfile_path:str,default=os.getcwd()</span>
+<span class="sd">            The path to where we would like to save the outputted labels (frame assignments of K-means)</span>
+<span class="sd">        </span>
+<span class="sd">        data:arraylike,shape=(n_samples,featuresures)</span>
+<span class="sd">            Ideally this is the feature matrix provided as input at the top of the workflow but, its provided as a parameter incase</span>
+<span class="sd">            you&#39;d like to use theese in your own way.</span>
+<span class="sd">        </span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        ----------</span>
+<span class="sd">        (optimal_k_silhouette_labels,optimal_k_elbow_labels,centers_sillohuette,centers_elbow):tuple,shape=(4)</span>
+<span class="sd">            A tuple holding all of the objects created by the clustering of our systems representations. In order from left to right</span>
+<span class="sd">            the labels from the optimal number of initial centroids as defined by sillohuette score analysis; then the labels from optimal</span>
+<span class="sd">            clustering as defined the the elbow plots, as well as the centroids found for the sillohuette centers and elbow centers.</span>
+<span class="sd">        </span>
+<span class="sd">            </span>
+<span class="sd">        Notes</span>
+<span class="sd">        -------</span>
+<span class="sd">        We do assume you have atleast 10 frames worth of data... clustering any less than that</span>
+<span class="sd">        is a little out of the scope of this simple euclidean distance K-means clustering implementation.</span>
+<span class="sd">        </span>
+<span class="sd">        Examples</span>
+<span class="sd">        ---------</span>
+
+<span class="sd">        </span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">max_clusters</span><span class="o">=</span><span class="n">max_clusters</span> <span class="k">if</span> <span class="n">max_clusters</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="mi">10</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">data</span> <span class="k">if</span> <span class="n">data</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">feature_matrix</span>
+        <span class="n">outfile_path</span><span class="o">=</span><span class="n">outfile_path</span> <span class="k">if</span> <span class="n">outfile_path</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">()</span>
+        <span class="n">optimal_k_silhouette_labels</span><span class="p">,</span><span class="n">optimal_k_elbow_labels</span><span class="p">,</span><span class="n">centers_sillohuette</span><span class="p">,</span><span class="n">centers_elbow</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">preform_clust_opt</span><span class="p">(</span><span class="n">outfile_path</span><span class="o">=</span><span class="n">outfile_path</span><span class="p">,</span><span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">,</span><span class="n">max_clusters</span><span class="o">=</span><span class="n">max_clusters</span><span class="p">)</span>
+
+
+        <span class="k">return</span> <span class="n">optimal_k_silhouette_labels</span><span class="p">,</span><span class="n">optimal_k_elbow_labels</span><span class="p">,</span><span class="n">centers_sillohuette</span><span class="p">,</span><span class="n">centers_elbow</span></div>
+
+    
+<div class="viewcode-block" id="systems_analysis.reduce_systems_representations">
+<a class="viewcode-back" href="../../_autosummary/mdsa_tools.Analysis.html#mdsa_tools.Analysis.systems_analysis.reduce_systems_representations">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">reduce_systems_representations</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">feature_matrix</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">method</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">n_components</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">min_dist</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">n_neighbors</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        feature_matrix:np.ndarray,shape=(sum(n_frames),n_residues*n_residues) where the sum of n_frames refers to the total number of frames.</span>
+<span class="sd">            Each row of the new matrix represents a flattened adjacency matrix for each frame, and the frames are stacked</span>
+<span class="sd">            in such a way that each of the original arrays follow each other sequentially.</span>
+<span class="sd">        </span>
+<span class="sd">            </span>
+<span class="sd">        n_components:int,default=2</span>
+<span class="sd">            The number of principal components you would like to reduce your dataset down to</span>
+<span class="sd">        </span>
+<span class="sd">            </span>
+<span class="sd">        str:outfile_path,default=os.getcwd()</span>
+<span class="sd">            path to where you would like to save your visualization</span>
+<span class="sd">        </span>
+<span class="sd">        min_dist:float,default=0.5</span>
+<span class="sd">            This is a UMAP-specific parameter. It controls how tightly UMAP is allowed to pack points together. </span>
+<span class="sd">            Lower values will preserve more of the local clusters in the data whereas higher values will push </span>
+<span class="sd">            points further apart.</span>
+
+<span class="sd">        n_neighbors:int,default=900</span>
+<span class="sd">            Another UMAP-specific parameter. It determines the number of neighboring points used in </span>
+<span class="sd">            local approximations of the manifold. Larger values result in more global structure being preserved.</span>
+
+
+<span class="sd">        </span>
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        X_pca,weights,explained_variance_ratio_</span>
+
+<span class="sd">        X_PCA:np.ndarray,shape=(n_samples,n_components)</span>
+<span class="sd">            An array returned by the PCA module in scikit-learns vs.cluster module. Essentially it is the x and y coordinates</span>
+<span class="sd">            of every sample from the original feature matrix now reduced into the principal component embedding space.</span>
+<span class="sd">            ---As in the output from scikit learns module PCA() from the cluster.vq() module check in later for link---</span>
+
+<span class="sd">            In theory it should be (n_sampels,2) since we are generally reducing to two principal components but, if you choose to </span>
+<span class="sd">            use a different number of principal components this would be a different # thus, the signature is broad</span>
+
+
+<span class="sd">        weights:shape=(n_samples,n_components)</span>
+<span class="sd">            The loadings for each principal component. Theese can be thought of as eigenvector components and they are the raw values </span>
+<span class="sd">            they have not been **2 for magnitude measurements yet. This is a seperate function in this module called create_PCA_ranked_weights.</span>
+
+<span class="sd">        explained_variance_ratio_:int,</span>
+<span class="sd">            The explained variance ratio of the principal components. This is just a fraction since we are using two principal components</span>
+<span class="sd">            but, if you choose to use more it would be slightly different. </span>
+<span class="sd">            **Check back here**    </span>
+<span class="sd">        </span>
+<span class="sd">       </span>
+
+
+<span class="sd">        Notes</span>
+<span class="sd">        -----</span>
+<span class="sd">        You should include a pre-fix in your outfile path as the image will be saved with the ending</span>
+<span class="sd">        &quot;PCA_reduction&quot; so a good example input is</span>
+
+<span class="sd">        &quot;/users/userone/desktop/project/output/test_&quot;</span>
+
+<span class="sd">        Examples</span>
+<span class="sd">        --------</span>
+
+<span class="sd">        </span>
+<span class="sd">        &#39;&#39;&#39;</span>
+
+        <span class="n">feature_matrix</span> <span class="o">=</span> <span class="n">feature_matrix</span> <span class="k">if</span> <span class="n">feature_matrix</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">feature_matrix</span>
+        <span class="n">n_components</span><span class="o">=</span><span class="n">n_components</span> <span class="k">if</span> <span class="n">n_components</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="mi">2</span>
+        <span class="n">method</span> <span class="o">=</span> <span class="n">method</span> <span class="k">if</span> <span class="n">method</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="s1">&#39;PCA&#39;</span>
+        <span class="n">min_dist</span> <span class="o">=</span> <span class="n">min_dist</span> <span class="k">if</span> <span class="n">min_dist</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="mf">.5</span>
+        <span class="n">n_neighbors</span><span class="o">=</span> <span class="n">n_neighbors</span> <span class="k">if</span> <span class="n">n_neighbors</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="mi">900</span>
+
+        <span class="k">if</span> <span class="n">method</span><span class="o">==</span><span class="s1">&#39;PCA&#39;</span><span class="p">:</span>
+        
+            <span class="n">X_pca</span><span class="p">,</span><span class="n">weights</span><span class="p">,</span><span class="n">explained_variance_ratio_</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">run_PCA</span><span class="p">(</span><span class="n">feature_matrix</span><span class="p">,</span><span class="n">n_components</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">X_pca</span><span class="p">,</span><span class="n">weights</span><span class="p">,</span><span class="n">explained_variance_ratio_</span>
+            
+        <span class="k">if</span> <span class="n">method</span><span class="o">==</span><span class="s1">&#39;UMAP&#39;</span><span class="p">:</span>
+
+            <span class="c1"># Initialize UMAP</span>
+            <span class="n">reducer</span> <span class="o">=</span> <span class="n">umap</span><span class="o">.</span><span class="n">UMAP</span><span class="p">(</span><span class="n">n_components</span><span class="o">=</span><span class="n">n_components</span><span class="p">,</span><span class="n">n_neighbors</span><span class="o">=</span><span class="n">n_neighbors</span><span class="p">,</span><span class="n">min_dist</span><span class="o">=</span><span class="mf">.5</span><span class="p">)</span>
+            <span class="n">embedding</span> <span class="o">=</span> <span class="n">reducer</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">feature_matrix</span><span class="p">)</span>
+
+            <span class="k">return</span> <span class="n">embedding</span>
+            
+            
+        <span class="k">elif</span> <span class="n">method</span> <span class="o">!=</span> <span class="s1">&#39;PCA&#39;</span> <span class="ow">and</span> <span class="n">method</span> <span class="o">!=</span> <span class="s1">&#39;UMAP&#39;</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;No valid method supplied for dimensional reduction &#39;</span><span class="p">)</span></div>
+
+        
+<div class="viewcode-block" id="systems_analysis.cluster_embeddingspace">
+<a class="viewcode-back" href="../../_autosummary/mdsa_tools.Analysis.html#mdsa_tools.Analysis.systems_analysis.cluster_embeddingspace">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">cluster_embeddingspace</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">outfile_path</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">feature_matrix</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">n</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">max_clusters</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">elbow_or_sillohuette</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        This has been depreciated for now</span>
+<span class="sd">        </span>
+<span class="sd">        &#39;&#39;&#39;</span>
+<span class="w">        </span>
+<span class="w">        </span>
+<span class="w">        </span><span class="sd">&#39;&#39;&#39;A function for looking at conformational states in embedding space</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        outfilepath:str</span>
+<span class="sd">            path to save</span>
+
+<span class="sd">        featurematrix:np.Ndarray,default=self.featurematrix</span>
+<span class="sd">            A feature matrix to be used for analysis</span>
+<span class="sd">        </span>
+<span class="sd">        n:int,default=2</span>
+<span class="sd">            number of principal components to reduce to</span>
+<span class="sd">        </span>
+<span class="sd">        max_clusters:int,default=10</span>
+<span class="sd">            The defualt number</span>
+
+
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+
+
+
+<span class="sd">        Notes</span>
+<span class="sd">        -----</span>
+
+
+
+<span class="sd">        Examples</span>
+<span class="sd">        --------</span>
+
+<span class="sd">        &#39;&#39;&#39;</span>
+
+        <span class="n">outfile_path</span> <span class="o">=</span> <span class="n">outfile_path</span> <span class="k">if</span> <span class="n">outfile_path</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">()</span>
+        <span class="n">feature_matrix</span> <span class="o">=</span> <span class="n">feature_matrix</span> <span class="k">if</span> <span class="n">feature_matrix</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">feature_matrix</span>
+        <span class="n">n</span><span class="o">=</span><span class="n">n</span> <span class="k">if</span> <span class="n">n</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="mi">2</span>
+        <span class="n">max_clusters</span><span class="o">=</span><span class="n">max_clusters</span> <span class="k">if</span> <span class="n">max_clusters</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="mi">10</span>
+        <span class="n">elbow_or_sillohuette</span><span class="o">=</span><span class="n">elbow_or_sillohuette</span> <span class="k">if</span> <span class="n">elbow_or_sillohuette</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="s1">&#39;sillohuette&#39;</span>
+        
+        <span class="n">X_pca</span><span class="p">,</span><span class="n">weights</span><span class="p">,</span><span class="n">explained_variance_ratio_</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">run_PCA</span><span class="p">(</span><span class="n">feature_matrix</span><span class="p">,</span><span class="n">n</span><span class="p">)</span>
+        
+        <span class="c1">#grab the number of rows we need and then iterate through X_pca run kmeans and visualize using our initial values</span>
+        <span class="n">rows_per_system</span><span class="o">=</span><span class="n">X_pca</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">num_systems</span>
+
+        <span class="n">index</span><span class="o">=</span><span class="mi">0</span>
+
+
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">num_systems</span><span class="p">):</span>
+            <span class="c1"># padding before and after so we can still visualize them all on the same scale</span>
+            <span class="n">before</span> <span class="o">=</span> <span class="n">index</span>
+            <span class="n">full_path</span><span class="o">=</span><span class="n">outfile_path</span><span class="o">+</span><span class="sa">f</span><span class="s2">&quot;_lowdimclust_sys_</span><span class="si">{</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="n">current_system_frames</span> <span class="o">=</span> <span class="n">X_pca</span><span class="p">[</span><span class="n">index</span><span class="p">:</span><span class="n">index</span> <span class="o">+</span> <span class="nb">int</span><span class="p">(</span><span class="n">rows_per_system</span><span class="p">),</span> <span class="p">:]</span>
+           
+            <span class="n">optimal_k_silhouette_labels</span><span class="p">,</span><span class="n">optimal_k_elbow_labels</span><span class="p">,</span><span class="n">centers_sillohuette</span><span class="p">,</span><span class="n">centers_elbow</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">preform_clust_opt</span><span class="p">(</span><span class="n">outfile_path</span><span class="o">=</span><span class="n">full_path</span><span class="p">,</span><span class="n">data</span><span class="o">=</span><span class="n">current_system_frames</span><span class="p">,</span><span class="n">max_clusters</span><span class="o">=</span><span class="n">max_clusters</span><span class="p">)</span>
+       
+            <span class="k">if</span> <span class="n">elbow_or_sillohuette</span> <span class="o">==</span> <span class="s1">&#39;sillohuette&#39;</span><span class="p">:</span>
+                <span class="n">corelation_dataframe</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">create_pearsontest_for_kmeans_distributions</span><span class="p">(</span><span class="n">optimal_k_silhouette_labels</span><span class="p">,</span><span class="n">current_system_frames</span><span class="p">,</span><span class="n">centers_sillohuette</span><span class="p">)</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;corelation_dataframe for system </span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="se">\n</span><span class="si">{</span><span class="n">corelation_dataframe</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                <span class="n">after</span> <span class="o">=</span> <span class="n">X_pca</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="p">(</span><span class="n">index</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">optimal_k_silhouette_labels</span><span class="p">))</span>
+
+                <span class="c1">#this is where we use the previous spot for markings</span>
+                <span class="n">labels_filled</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([</span>
+                <span class="n">np</span><span class="o">.</span><span class="n">full</span><span class="p">(</span><span class="n">before</span><span class="p">,(</span><span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">optimal_k_silhouette_labels</span><span class="p">)</span><span class="o">+</span><span class="mi">1</span><span class="p">)),</span>                      <span class="c1"># padding before</span>
+                <span class="n">optimal_k_silhouette_labels</span><span class="p">,</span>              <span class="c1"># actual cluster labels</span>
+                <span class="n">np</span><span class="o">.</span><span class="n">full</span><span class="p">(</span><span class="n">after</span><span class="p">,(</span><span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">optimal_k_silhouette_labels</span><span class="p">)</span><span class="o">+</span><span class="mi">1</span><span class="p">))</span>                        <span class="c1"># padding after</span>
+                <span class="p">])</span>
+
+            <span class="k">elif</span> <span class="n">elbow_or_sillohuette</span> <span class="o">==</span> <span class="s1">&#39;elbow&#39;</span><span class="p">:</span>
+                <span class="n">corelation_dataframe</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">create_pearsontest_for_kmeans_distributions</span><span class="p">(</span><span class="n">optimal_k_elbow_labels</span><span class="p">,</span><span class="n">current_system_frames</span><span class="p">,</span><span class="n">centers_elbow</span><span class="p">)</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;corelation_dataframe for system </span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="se">\n</span><span class="si">{</span><span class="n">corelation_dataframe</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                <span class="n">after</span> <span class="o">=</span> <span class="n">X_pca</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="p">(</span><span class="n">index</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">optimal_k_elbow_labels</span><span class="p">))</span>
+
+                <span class="c1">#this is where we use the previous spot for markings</span>
+                <span class="n">labels_filled</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([</span>
+                <span class="n">np</span><span class="o">.</span><span class="n">full</span><span class="p">(</span><span class="n">before</span><span class="p">,</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">optimal_k_elbow_labels</span><span class="p">)</span><span class="o">+</span><span class="mi">1</span><span class="p">)),</span>                      <span class="c1"># padding before</span>
+                <span class="n">optimal_k_elbow_labels</span><span class="p">,</span>              <span class="c1"># actual cluster labels</span>
+                <span class="n">np</span><span class="o">.</span><span class="n">full</span><span class="p">(</span><span class="n">after</span><span class="p">,</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">optimal_k_elbow_labels</span><span class="p">)</span><span class="o">+</span><span class="mi">1</span><span class="p">))</span>                        <span class="c1"># padding after</span>
+                <span class="p">])</span>
+
+            
+
+            <span class="n">visualize_reduction</span><span class="p">(</span><span class="n">X_pca</span><span class="p">,</span>
+                            <span class="n">color_mappings</span><span class="o">=</span><span class="n">labels_filled</span><span class="p">,</span>
+                            <span class="n">savepath</span><span class="o">=</span><span class="n">full_path</span><span class="p">,</span>
+                            <span class="n">title</span><span class="o">=</span><span class="sa">f</span><span class="s1">&#39;optimal sillohuette clustering in embedding space for system </span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span>
+                            <span class="n">custom</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+            <span class="n">index</span><span class="o">+=</span><span class="nb">int</span><span class="p">(</span><span class="n">rows_per_system</span><span class="p">)</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">pca_weights</span><span class="o">=</span><span class="n">weights</span>
+
+        <span class="k">return</span> </div>
+
+    
+<div class="viewcode-block" id="systems_analysis.create_pearsontest_for_kmeans_distributions">
+<a class="viewcode-back" href="../../_autosummary/mdsa_tools.Analysis.html#mdsa_tools.Analysis.systems_analysis.create_pearsontest_for_kmeans_distributions">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">create_pearsontest_for_kmeans_distributions</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">labels</span><span class="p">,</span><span class="n">coordinates</span><span class="p">,</span><span class="n">cluster_centers</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Currently depreciated</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+<span class="w">        </span><span class="sd">&#39;&#39;&#39;A function that is meant for the </span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        labels:listlike</span>
+<span class="sd">            A list or array of labels that tell us which cluster each sample belongs to</span>
+
+<span class="sd">        coordinates:array,shape=(n_samples,featuresures)</span>
+<span class="sd">            An array which tells us the coordinates of each sample so we can form distributions from them and run statistical tests</span>
+<span class="sd">            (pearson corellation coefficient)</span>
+<span class="sd">        </span>
+<span class="sd">        cluster_centers:listlike,shape=k</span>
+<span class="sd">            A list of arrays which tell us the coordinates for each cluster center so that we can calculate distributions</span>
+<span class="sd">            to them</span>
+
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+
+
+
+
+<span class="sd">        Notes</span>
+<span class="sd">        -----</span>
+
+
+
+<span class="sd">        Examples</span>
+<span class="sd">        --------</span>
+
+
+<span class="sd">        </span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">distances</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">coordinates</span> <span class="o">-</span> <span class="n">cluster_centers</span><span class="p">[</span><span class="n">labels</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span> <span class="c1">#euclidean distances to centroid</span>
+
+        <span class="c1">#extracting everything by the group its a part of</span>
+        <span class="n">dist_by_cluster</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">cluster_id</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">labels</span><span class="p">):</span>
+            <span class="n">dist_by_cluster</span><span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">cluster_id</span><span class="p">)]</span> <span class="o">=</span> <span class="n">distances</span><span class="p">[</span><span class="n">labels</span> <span class="o">==</span> <span class="n">cluster_id</span><span class="p">]</span>
+
+        <span class="c1">#find minimum distance</span>
+        <span class="n">lengths</span> <span class="o">=</span> <span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">dist_by_cluster</span><span class="o">.</span><span class="n">values</span><span class="p">()]</span>
+        <span class="c1">#print(lengths)</span>
+        <span class="n">shortest_length</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">lengths</span><span class="p">)</span>
+        <span class="c1">#print(shortest_length)</span>
+
+
+        <span class="c1">#form final list</span>
+        <span class="n">final_distributions</span><span class="o">=</span><span class="p">[]</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">dist_by_cluster</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+            <span class="n">current_distribution</span><span class="o">=</span><span class="n">i</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="n">shortest_length</span><span class="p">,]</span>
+            <span class="n">final_distributions</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">current_distribution</span><span class="p">)</span>
+        
+        <span class="kn">from</span><span class="w"> </span><span class="nn">scipy.stats</span><span class="w"> </span><span class="kn">import</span> <span class="n">pearsonr</span>
+        <span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+        
+        <span class="n">correlations</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">final_distributions</span><span class="p">)):</span>
+            <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="n">final_distributions</span><span class="p">)):</span>
+                <span class="n">r_value</span><span class="p">,</span> <span class="n">p_value</span> <span class="o">=</span> <span class="n">pearsonr</span><span class="p">(</span><span class="n">final_distributions</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">final_distributions</span><span class="p">[</span><span class="n">j</span><span class="p">])</span>
+                <span class="n">correlations</span><span class="o">.</span><span class="n">append</span><span class="p">({</span>
+                    <span class="s2">&quot;cluster_i&quot;</span><span class="p">:</span> <span class="n">i</span><span class="p">,</span>
+                    <span class="s2">&quot;cluster_j&quot;</span><span class="p">:</span> <span class="n">j</span><span class="p">,</span>
+                    <span class="s2">&quot;pearson_r&quot;</span><span class="p">:</span> <span class="n">r_value</span><span class="p">,</span>
+                    <span class="s2">&quot;p_value&quot;</span><span class="p">:</span> <span class="n">p_value</span>
+                <span class="p">})</span>
+
+        <span class="n">correlation_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">correlations</span><span class="p">)</span>
+        
+
+        <span class="k">return</span> <span class="n">correlation_df</span></div>
+
+       
+<div class="viewcode-block" id="systems_analysis.create_PCA_ranked_weights">
+<a class="viewcode-back" href="../../_autosummary/mdsa_tools.Analysis.html#mdsa_tools.Analysis.systems_analysis.create_PCA_ranked_weights">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">create_PCA_ranked_weights</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">outfile_path</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">weights</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">indexes</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&#39;&#39;&#39;Create a ranked table of PCA feature weights for the first two principal components.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+
+<span class="sd">        weights : np.ndarray, shape = (n_components, featuresures)</span>
+<span class="sd">            PCA component loadings (rows = components, columns = features). If None, this function</span>
+<span class="sd">            calls `reduce_systems_representations()` to compute PCA (default n=2) and uses the</span>
+<span class="sd">            returned `weights`.</span>
+<span class="sd">        indexes : array-like of int</span>
+<span class="sd">            Residue indices used to label pairwise comparisons. If None, uses `self.indexes`.</span>
+<span class="sd">            These indices define the order used to generate upper-triangle residue–residue</span>
+<span class="sd">            comparison labels (e.g., &quot;12-47&quot;).</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        pandas.DataFrame</span>
+<span class="sd">            A table mapping each feature (upper-triangle residue pair) to its PCA weights and</span>
+<span class="sd">            magnitudes. Columns:</span>
+<span class="sd">                - &#39;Comparisons&#39;     : str, &quot;i-j&quot; residue pair label</span>
+<span class="sd">                - &#39;PC1_Weights&#39;     : float, raw loading for PC1</span>
+<span class="sd">                - &#39;PC2_Weights&#39;     : float, raw loading for PC2</span>
+<span class="sd">                - &#39;PC1_magnitude&#39;   : float, (PC1_Weights)**2</span>
+<span class="sd">                - &#39;PC2_magnitude&#39;   : float, (PC2_Weights)**2</span>
+<span class="sd">                - &#39;PC1_mag_norm&#39;    : float, min–max normalized PC1_magnitude to [0,1] (within PC1)</span>
+<span class="sd">                - &#39;PC2_mag_norm&#39;    : float, min–max normalized PC2_magnitude to [0,1] (within PC2)</span>
+
+<span class="sd">        Notes</span>
+<span class="sd">        -----</span>
+<span class="sd">        - Only the upper triangle (excluding the diagonal) of the residue–residue matrix is used,</span>
+<span class="sd">        so each row corresponds to a unique residue pair.</span>
+<span class="sd">        - “Weights” are PCA component loadings (eigenvector entries). Squaring gives a magnitude</span>
+<span class="sd">        that is convenient for ranking feature importance within a component (sign is discarded).</span>
+<span class="sd">        - The min–max normalization is performed **within each component** to [0,1] and is intended</span>
+<span class="sd">        for visualization/ranking. Do not compare these normalized values across different PCA</span>
+<span class="sd">        runs unless you control scaling consistently.</span>
+<span class="sd">        - This function assumes at least two components are available; it reports PC1 and PC2.</span>
+
+<span class="sd">        Examples</span>
+<span class="sd">        --------</span>
+<span class="sd">        &gt;&gt;&gt; sa = systems_analysis([traj_array_sys1, traj_array_sys2])</span>
+<span class="sd">        &gt;&gt;&gt; df = sa.create_PCA_ranked_weights()</span>
+<span class="sd">        &gt;&gt;&gt; df.head()</span>
+
+<span class="sd">        &#39;&#39;&#39;</span>
+
+        <span class="k">if</span> <span class="n">weights</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">_</span><span class="p">,</span><span class="n">weights</span><span class="p">,</span><span class="n">_</span> <span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">reduce_systems_representations</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">weights</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">weights</span><span class="o">=</span><span class="n">weights</span>
+
+        <span class="n">outfile_path</span> <span class="o">=</span> <span class="n">outfile_path</span> <span class="k">if</span> <span class="n">outfile_path</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">()</span>
+        <span class="n">indexes</span><span class="o">=</span><span class="n">indexes</span> <span class="k">if</span> <span class="n">indexes</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">indexes</span>
+
+        <span class="c1"># grab only upper triangle</span>
+        <span class="n">triu_idx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">triu_indices</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">indexes</span><span class="p">),</span> <span class="n">k</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+        <span class="c1"># Generate comparison labels (no array values needed)</span>
+        <span class="n">comparisons</span> <span class="o">=</span> <span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">indexes</span><span class="p">[</span><span class="n">i</span><span class="p">]))</span><span class="si">}</span><span class="s2">-</span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">indexes</span><span class="p">[</span><span class="n">j</span><span class="p">]))</span><span class="si">}</span><span class="s2">&quot;</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="o">*</span><span class="n">triu_idx</span><span class="p">)]</span>
+        <span class="n">dataframe</span><span class="o">=</span><span class="p">{</span>
+            <span class="s1">&#39;Comparisons&#39;</span><span class="p">:</span><span class="n">comparisons</span><span class="p">,</span>
+            <span class="s1">&#39;PC1_Weights&#39;</span><span class="p">:</span><span class="n">weights</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+            <span class="s1">&#39;PC2_Weights&#39;</span><span class="p">:</span><span class="n">weights</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
+            <span class="s1">&#39;PC1_magnitude&#39;</span><span class="p">:</span><span class="n">weights</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">**</span><span class="mi">2</span><span class="p">,</span>
+            <span class="s1">&#39;PC2_magnitude&#39;</span><span class="p">:</span><span class="n">weights</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">**</span><span class="mi">2</span><span class="p">,</span>
+        
+        <span class="p">}</span>
+
+        <span class="n">dataframe</span><span class="o">=</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">dataframe</span><span class="p">)</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+        
+        <span class="k">return</span> <span class="n">dataframe</span></div>
+
+
+<div class="viewcode-block" id="systems_analysis.cluster_individual_systems_in_embeddingspace">
+<a class="viewcode-back" href="../../_autosummary/mdsa_tools.Analysis.html#mdsa_tools.Analysis.systems_analysis.cluster_individual_systems_in_embeddingspace">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">cluster_individual_systems_in_embeddingspace</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">reduced_data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">frames_per_sys</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">num_systems</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&#39;&#39;&#39;cluster individual systems in embedding space in order to identify potential conformations</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        reduced_data:arraylike,shape=(n_samples,2)</span>
+<span class="sd">            Data that has been reduced using a dimensional reduction method such as PCA, UMAP, TSNE, etc.</span>
+<span class="sd">            If None, the function will use the UMAP reduction from self.reduce_systems_representations().</span>
+
+<span class="sd">        frames_per_sys:int</span>
+<span class="sd">            The number of frames contained per one version of the system you are exploring.</span>
+<span class="sd">            If None, the function will use the number of frames from the first system in self.systems_representations.</span>
+<span class="sd">        </span>
+<span class="sd">        num_systems:int</span>
+<span class="sd">            The number of different systems (e.g., simulations, replicates) being analyzed.</span>
+<span class="sd">            If None, the function will use the value stored in self.num_systems.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        results:list,shape=(n_systems,)</span>
+<span class="sd">            Returns the results as a list of arrays that you can iterate through, where each array</span>
+<span class="sd">            contains the cluster labels for a single system, padded with a high value.</span>
+
+<span class="sd">        Notes</span>
+<span class="sd">        -----</span>
+<span class="sd">        This function assumes you have the same number of frames per system. It first performs </span>
+<span class="sd">        clustering on each system individually and then pads the resulting labels to the original</span>
+<span class="sd">        total size, making them easy to visualize against the full embedding space.</span>
+
+<span class="sd">        Examples</span>
+<span class="sd">        --------</span>
+<span class="sd">     </span>
+<span class="sd">        &#39;&#39;&#39;</span>
+
+        
+        <span class="k">if</span> <span class="n">reduced_data</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="p">:</span>
+            <span class="n">reduced_data</span> <span class="o">=</span> <span class="n">reduced_data</span> 
+
+        <span class="k">if</span> <span class="n">reduced_data</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">x_pca</span><span class="p">,</span><span class="n">_</span><span class="p">,</span><span class="n">_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">reduce_systems_representations</span><span class="p">(</span><span class="n">method</span><span class="o">=</span><span class="s1">&#39;PCA&#39;</span><span class="p">)</span>
+            <span class="n">reduced_data</span><span class="o">=</span><span class="n">x_pca</span>
+            
+        <span class="n">num_systems</span> <span class="o">=</span> <span class="n">num_systems</span> <span class="k">if</span> <span class="n">num_systems</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_systems</span>
+        
+        <span class="k">if</span> <span class="n">frames_per_sys</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">frames_per_sys</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">systems_representations</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        
+        <span class="n">iterator</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">results</span> <span class="o">=</span> <span class="p">[]</span>
+         
+        
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_systems</span><span class="p">):</span>
+
+            <span class="n">current_sys_data</span> <span class="o">=</span> <span class="n">reduced_data</span><span class="p">[</span><span class="n">iterator</span> <span class="p">:</span> <span class="n">iterator</span> <span class="o">+</span> <span class="n">frames_per_sys</span><span class="p">,</span> <span class="p">:]</span>
+            <span class="n">optimal_k_silhouette_labels</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">preform_clust_opt</span><span class="p">(</span><span class="n">outfile_path</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;embeddingspace_system_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">_clust&quot;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">current_sys_data</span><span class="p">)</span>
+            <span class="n">empty_sys</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">full</span><span class="p">(</span><span class="n">reduced_data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mi">10</span><span class="p">)</span>
+            <span class="n">empty_sys</span><span class="p">[</span><span class="n">iterator</span> <span class="p">:</span> <span class="n">iterator</span> <span class="o">+</span> <span class="n">frames_per_sys</span><span class="p">]</span> <span class="o">=</span> <span class="n">optimal_k_silhouette_labels</span>
+            
+            <span class="n">results</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">empty_sys</span><span class="p">)</span>
+            
+            <span class="n">iterator</span> <span class="o">+=</span> <span class="n">frames_per_sys</span>
+        
+        <span class="k">return</span> <span class="n">results</span></div>
+
+    
+    <span class="c1">#Algorithm wrappers </span>
+<div class="viewcode-block" id="systems_analysis.preform_clust_opt">
+<a class="viewcode-back" href="../../_autosummary/mdsa_tools.Analysis.html#mdsa_tools.Analysis.systems_analysis.preform_clust_opt">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">preform_clust_opt</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">outfile_path</span><span class="p">,</span> <span class="n">max_clusters</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        data:np.ndarray,shape=(n_sample,featuresures),</span>
+<span class="sd">            A feature matrix of any kind, hopefully one provided from the rest of the pipeline but in theory, this is </span>
+<span class="sd">            just a scikit learn wrapper so you can plug anything you want really</span>
+<span class="sd">        </span>
+<span class="sd">        outfile_path:str,default=os.getcwd()</span>
+<span class="sd">        </span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        ----------</span>
+<span class="sd">        </span>
+<span class="sd">        Notes</span>
+<span class="sd">        ----------</span>
+<span class="sd">        </span>
+<span class="sd">        Examples</span>
+<span class="sd">        ----------</span>
+<span class="sd">        </span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">data</span> <span class="k">if</span> <span class="n">data</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">feature_matrix</span>
+        <span class="n">outfile_path</span> <span class="o">=</span> <span class="n">outfile_path</span> <span class="k">if</span> <span class="n">outfile_path</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">()</span>
+        <span class="n">max_clusters</span> <span class="o">=</span> <span class="n">max_clusters</span> <span class="k">if</span> <span class="n">max_clusters</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="mi">10</span>
+        
+        
+        <span class="c1">#keeping track of our scores </span>
+        <span class="n">inertia_scores</span><span class="p">,</span><span class="n">silhouette_scores</span><span class="p">,</span><span class="n">all_labels</span><span class="p">,</span><span class="n">centers</span> <span class="o">=</span> <span class="p">[],[],[],[]</span>
+        <span class="n">cluster_range</span> <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="n">max_clusters</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
+
+
+        <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">cluster_range</span><span class="p">:</span>
+            <span class="n">kmeans</span> <span class="o">=</span> <span class="n">KMeans</span><span class="p">(</span><span class="n">n_clusters</span><span class="o">=</span><span class="n">k</span><span class="p">,</span> <span class="n">init</span><span class="o">=</span><span class="s1">&#39;random&#39;</span><span class="p">,</span> <span class="n">n_init</span><span class="o">=</span><span class="n">k</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> <span class="c1">#we set</span>
+            <span class="n">kmeans</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="c1">#fit data and now we have everything transformed</span>
+            <span class="n">cluster_centers</span><span class="p">,</span> <span class="n">inertia</span><span class="p">,</span> <span class="n">cluster_labels</span> <span class="o">=</span> <span class="n">kmeans</span><span class="o">.</span><span class="n">cluster_centers_</span><span class="p">,</span><span class="n">kmeans</span><span class="o">.</span><span class="n">inertia_</span><span class="p">,</span><span class="n">kmeans</span><span class="o">.</span><span class="n">labels_</span>
+            <span class="n">sil_score</span> <span class="o">=</span> <span class="n">silhouette_score</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">cluster_labels</span><span class="p">)</span>
+            
+            <span class="n">centers</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cluster_centers</span><span class="p">)</span>
+            <span class="n">inertia_scores</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">inertia</span><span class="p">)</span>
+            <span class="n">silhouette_scores</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">sil_score</span><span class="p">)</span>
+            <span class="n">all_labels</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cluster_labels</span><span class="p">)</span>
+
+
+            <span class="n">np</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">outfile_path</span><span class="si">}</span><span class="s2">kluster_labels_</span><span class="si">{</span><span class="n">k</span><span class="si">}</span><span class="s2">clust&quot;</span><span class="p">,</span><span class="n">cluster_labels</span><span class="p">)</span>
+
+        
+        <span class="c1">#so we save unless your calling this specific optimization</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">mdsa_tools.Viz</span><span class="w"> </span><span class="kn">import</span> <span class="n">plot_elbow_scores</span><span class="p">,</span><span class="n">plot_sillohette_scores</span>
+
+        
+        <span class="n">optimal_sillohuette</span><span class="o">=</span><span class="n">plot_sillohette_scores</span><span class="p">(</span><span class="n">cluster_range</span><span class="p">,</span><span class="n">silhouette_scores</span><span class="p">,</span><span class="n">outfile_path</span><span class="p">)</span>
+        <span class="n">optimal_elbow</span><span class="o">=</span><span class="n">plot_elbow_scores</span><span class="p">(</span><span class="n">cluster_range</span><span class="p">,</span><span class="n">inertia_scores</span><span class="p">,</span><span class="n">outfile_path</span><span class="p">)</span>
+
+        <span class="c1">#print(f&quot;\nsize of labels:{len(all_labels)} ,optimal_elbow: {optimal_elbow}:optimal_sillohuette {optimal_sillohuette}&quot;)</span>
+
+        <span class="c1"># Now you can return optimal k values</span>
+        
+        <span class="n">optimal_k_silhouette_labels</span> <span class="o">=</span> <span class="n">all_labels</span><span class="p">[</span><span class="n">optimal_sillohuette</span><span class="o">-</span><span class="mi">2</span><span class="p">]</span> 
+        <span class="n">optimal_k_elbow_labels</span> <span class="o">=</span> <span class="n">all_labels</span><span class="p">[</span><span class="n">optimal_elbow</span><span class="o">-</span><span class="mi">2</span><span class="p">]</span>
+        <span class="n">centers_sillohuette</span> <span class="o">=</span> <span class="n">centers</span><span class="p">[</span><span class="n">optimal_sillohuette</span><span class="o">-</span><span class="mi">2</span><span class="p">]</span> 
+        <span class="n">centers_elbow</span> <span class="o">=</span> <span class="n">centers</span><span class="p">[</span><span class="n">optimal_elbow</span><span class="o">-</span><span class="mi">2</span><span class="p">]</span> 
+
+        
+        <span class="k">return</span> <span class="n">optimal_k_silhouette_labels</span><span class="p">,</span><span class="n">optimal_k_elbow_labels</span><span class="p">,</span><span class="n">centers_sillohuette</span><span class="p">,</span><span class="n">centers_elbow</span></div>
+
+    
+<div class="viewcode-block" id="systems_analysis.run_PCA">
+<a class="viewcode-back" href="../../_autosummary/mdsa_tools.Analysis.html#mdsa_tools.Analysis.systems_analysis.run_PCA">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">run_PCA</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">feature_matrix</span><span class="p">,</span><span class="n">n</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&#39;&#39;&#39;small function for running principal components analysis</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+
+<span class="sd">        feature_matrix:np.ndarray,shape=(sum(n_frames),n_residues*n_residues) where the sum of n_frames refers to the total number of frames.</span>
+<span class="sd">            Each row of the new matrix represents a flattened adjacency matrix for each frame, and the frames are stacked</span>
+<span class="sd">            in such a way that each of the original arrays follow each other sequentially.</span>
+<span class="sd">        </span>
+<span class="sd">        n:int,default=2</span>
+<span class="sd">            The number of principal components you would like to reduce your dataset down to</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+
+
+
+
+<span class="sd">        Notes</span>
+<span class="sd">        -----</span>
+
+
+
+
+<span class="sd">        Examples</span>
+<span class="sd">        --------</span>
+
+
+
+<span class="sd">        &#39;&#39;&#39;</span>
+
+        <span class="n">pca</span><span class="o">=</span><span class="n">PCA</span><span class="p">(</span><span class="n">n_components</span><span class="o">=</span><span class="n">n</span><span class="p">)</span>
+        <span class="n">pca</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">feature_matrix</span><span class="p">)</span>
+        <span class="n">new_values</span><span class="o">=</span><span class="n">pca</span><span class="o">.</span><span class="n">components_</span> 
+        <span class="n">X_pca</span> <span class="o">=</span> <span class="n">pca</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">feature_matrix</span><span class="p">)</span>
+        <span class="n">weights</span> <span class="o">=</span> <span class="n">pca</span><span class="o">.</span><span class="n">components_</span>
+        <span class="n">explained_variances</span> <span class="o">=</span> <span class="n">pca</span><span class="o">.</span><span class="n">explained_variance_ratio_</span>
+
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;X_pca shape (new data):&quot;</span><span class="p">,</span><span class="n">X_pca</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;the total explained variance</span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">explained_variances</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;the total explained variance of PC&#39;s is </span><span class="si">{</span><span class="n">explained_variances</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;weights shape:&quot;</span><span class="p">,</span> <span class="n">weights</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> 
+        
+        <span class="k">return</span> <span class="n">X_pca</span><span class="p">,</span><span class="n">weights</span><span class="p">,</span><span class="n">explained_variances</span></div>
+</div>
+
+
+<div class="viewcode-block" id="MSM_Modeller">
+<a class="viewcode-back" href="../../_autosummary/mdsa_tools.Analysis.html#mdsa_tools.Analysis.MSM_Modeller">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">MSM_Modeller</span><span class="p">():</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">labels</span><span class="p">,</span><span class="n">frame_list</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">labels</span><span class="o">=</span><span class="n">labels</span> <span class="k">if</span> <span class="n">labels</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">frame_list</span><span class="o">=</span><span class="n">frame_list</span> <span class="k">if</span> <span class="n">frame_list</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">frame_list</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">transition_probability_matrix</span><span class="o">=</span><span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">lag</span><span class="o">=</span><span class="kc">None</span>
+
+<div class="viewcode-block" id="MSM_Modeller.create_transition_probability_matrix">
+<a class="viewcode-back" href="../../_autosummary/mdsa_tools.Analysis.html#mdsa_tools.Analysis.MSM_Modeller.create_transition_probability_matrix">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">create_transition_probability_matrix</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">labels</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">frame_list</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">lag</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&#39;&#39;&#39;Create probability matrix from input data (returns, and updates class attribute)</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        labels:arraylike,shape=(n_labels,)</span>
+<span class="sd">            A list of labels pertaining to frames of molecular dynamics trajectories assigned particular substates</span>
+
+<span class="sd">        frame_list: listlike,shape=(data,)</span>
+<span class="sd">            A list of integers representing the number of frames present in each replicate. This should be in the order</span>
+<span class="sd">            of which the various versions of the system, and replicates where concatenated. </span>
+
+<span class="sd">        </span>
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        transition_probability_matrix:arraylike;shape=(n_states+1,n_states+1)</span>
+<span class="sd">            A transition probability matrix created from the list of labels. Diagonals indicate</span>
+<span class="sd">            if it is likely to stay in the same state and off diagonals mark probabilities of transitions</span>
+
+
+
+<span class="sd">        </span>
+<span class="sd">        Notes</span>
+<span class="sd">        -----</span>
+<span class="sd">        Much in the spirit of our original matrices the first row and column of theese matrices contain</span>
+<span class="sd">        indexes mainly for ease of use and manipulation. Yes, in theory pandas dataframes could streamline this process</span>
+<span class="sd">        but, numpy arrays are just that much more efficient in most use cases,</span>
+
+
+
+<span class="sd">        Examples</span>
+<span class="sd">        --------</span>
+
+<span class="sd">        </span>
+
+<span class="sd">        &#39;&#39;&#39;</span>
+
+
+        <span class="n">labels</span><span class="o">=</span><span class="n">labels</span> <span class="k">if</span> <span class="n">labels</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">labels</span>
+        <span class="n">frame_list</span><span class="o">=</span><span class="n">frame_list</span> <span class="k">if</span> <span class="n">frame_list</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">frame_list</span>
+        <span class="n">lag</span><span class="o">=</span><span class="n">lag</span> <span class="k">if</span> <span class="n">lag</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="mi">1</span>
+
+        <span class="c1">#extract unique states and initiate transiiton probability matrix</span>
+        <span class="n">unique_states</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">labels</span><span class="p">)</span>
+        <span class="n">number_of_states</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">unique_states</span><span class="p">)</span>
+        <span class="n">transtion_prob_matrix</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="n">number_of_states</span><span class="p">,</span><span class="n">number_of_states</span><span class="p">))</span>
+        
+        <span class="n">iterator</span><span class="o">=</span><span class="mi">0</span>
+        <span class="k">for</span> <span class="n">trajectory_length</span> <span class="ow">in</span> <span class="n">frame_list</span><span class="p">:</span> <span class="c1"># iterate through </span>
+            <span class="n">current_trajectory</span><span class="o">=</span><span class="n">labels</span><span class="p">[</span><span class="n">iterator</span><span class="p">:</span><span class="n">iterator</span><span class="o">+</span><span class="n">trajectory_length</span><span class="p">]</span>
+            <span class="n">iterator</span><span class="o">=</span><span class="n">iterator</span><span class="o">+</span><span class="n">trajectory_length</span> <span class="c1">#update this </span>
+
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">current_trajectory</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">-</span><span class="n">lag</span><span class="p">):</span>
+                <span class="n">current_state</span><span class="o">=</span><span class="n">current_trajectory</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+                <span class="n">next_state</span> <span class="o">=</span> <span class="n">current_trajectory</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="n">lag</span><span class="p">]</span>
+                <span class="n">transtion_prob_matrix</span><span class="p">[</span><span class="n">current_state</span><span class="p">,</span> <span class="n">next_state</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+
+        <span class="n">row_sums</span> <span class="o">=</span> <span class="n">transtion_prob_matrix</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">keepdims</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">transition_probs</span> <span class="o">=</span> <span class="n">transtion_prob_matrix</span> <span class="o">/</span> <span class="n">row_sums</span>
+
+        <span class="n">final_transition_prob_matrix</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="n">number_of_states</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span><span class="n">number_of_states</span><span class="o">+</span><span class="mi">1</span><span class="p">))</span>
+        <span class="n">final_transition_prob_matrix</span><span class="p">[</span><span class="mi">1</span><span class="p">:,</span><span class="mi">1</span><span class="p">:]</span><span class="o">=</span><span class="n">transition_probs</span>
+        <span class="n">final_transition_prob_matrix</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">:],</span><span class="n">final_transition_prob_matrix</span><span class="p">[</span><span class="mi">1</span><span class="p">:,</span><span class="mi">0</span><span class="p">]</span><span class="o">=</span><span class="n">unique_states</span><span class="p">,</span><span class="n">unique_states</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">transition_probability_matrix</span><span class="o">=</span><span class="n">final_transition_prob_matrix</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">final_transition_prob_matrix</span><span class="p">)</span>
+
+
+        <span class="k">return</span> <span class="n">final_transition_prob_matrix</span></div>
+
+    
+
+<div class="viewcode-block" id="MSM_Modeller.evaluate_Chapman_Kolmogorov">
+<a class="viewcode-back" href="../../_autosummary/mdsa_tools.Analysis.html#mdsa_tools.Analysis.MSM_Modeller.evaluate_Chapman_Kolmogorov">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">evaluate_Chapman_Kolmogorov</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">transition_probability_matrix</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">n</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">labels</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">original_lag</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&#39;&#39;&#39;evaluate if the chapman kolmogorov test evaluates to true</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        n:int,default=4</span>
+<span class="sd">            The original number of lags we used to compute the transition probability matrix</span>
+<span class="sd">        </span>
+<span class="sd">        transition_proability_matrix:arraylike,shape=(n_states+1,n_states+1),</span>
+
+<span class="sd">        n:int,default=4</span>
+<span class="sd">            The time lag we are using to compute our labels</span>
+
+<span class="sd">        labels:arraylike,default=self.labels</span>
+<span class="sd">            The list of labels we are using for the labeling of data from trajectories. </span>
+<span class="sd">        </span>
+<span class="sd">        original_lag:int:default=1</span>
+
+
+<span class="sd">        Notes</span>
+<span class="sd">        -----</span>
+
+<span class="sd">        </span>
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+
+
+
+<span class="sd">        Examples</span>
+<span class="sd">        --------</span>
+<span class="sd">        </span>
+<span class="sd">        </span>
+<span class="sd">        &#39;&#39;&#39;</span>
+
+        <span class="n">transition_probability_matrix</span><span class="o">=</span><span class="n">transition_probability_matrix</span> <span class="k">if</span> <span class="n">transition_probability_matrix</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">create_transition_probability_matrix</span><span class="p">()</span>
+        <span class="n">original_lag</span><span class="o">=</span><span class="n">original_lag</span> <span class="k">if</span> <span class="n">original_lag</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="mi">1</span>
+        <span class="n">n</span> <span class="o">=</span> <span class="n">n</span> <span class="k">if</span> <span class="n">n</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="mi">4</span>
+        <span class="n">labels</span><span class="o">=</span><span class="n">labels</span> <span class="k">if</span> <span class="n">labels</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">labels</span>
+
+        <span class="n">transition_prob_data</span><span class="o">=</span><span class="n">transition_probability_matrix</span><span class="p">[</span><span class="mi">1</span><span class="p">:,</span><span class="mi">1</span><span class="p">:]</span>
+        <span class="n">post_timestep_data</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">matrix_power</span><span class="p">(</span><span class="n">transition_prob_data</span><span class="p">,</span><span class="n">n</span><span class="p">)</span>
+        <span class="n">transition_probability_matrix</span><span class="p">[</span><span class="mi">1</span><span class="p">:,</span><span class="mi">1</span><span class="p">:]</span><span class="o">=</span><span class="n">post_timestep_data</span>
+
+        <span class="n">total_lag</span><span class="o">=</span><span class="n">original_lag</span><span class="o">+</span><span class="n">n</span>
+        <span class="n">matrix_from_total_lag</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">create_transition_probability_matrix</span><span class="p">(</span><span class="n">lag</span><span class="o">=</span><span class="n">total_lag</span><span class="p">)</span>
+        <span class="n">diff</span><span class="o">=</span><span class="n">matrix_from_total_lag</span><span class="p">[</span><span class="mi">1</span><span class="p">:,</span><span class="mi">1</span><span class="p">:]</span><span class="o">-</span><span class="n">transition_probability_matrix</span><span class="p">[</span><span class="mi">1</span><span class="p">:,</span><span class="mi">1</span><span class="p">:]</span>
+        <span class="n">frob</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">diff</span><span class="p">,</span> <span class="nb">ord</span><span class="o">=</span><span class="s1">&#39;fro&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">frob</span></div>
+</div>
+
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;testing testing 1 2 3&#39;</span><span class="p">)</span>
+
+
+
+</pre></div>
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../index.html">Project name not set</a></h1>
+
+
+
+
+
+
+
+
+
+<search id="searchbox" style="display: none" role="search">
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="Search"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script><h3>Navigation</h3>
+<p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../_api/modules.html">mdsa_tools</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../index.html">Documentation overview</a><ul>
+  <li><a href="../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &#169;.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 8.2.3</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 1.0.0</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>
