@@ -30,8 +30,8 @@ np.set_printoptions(threshold=np.inf, linewidth=200)
 #long only##############
 ########################
 
-start_mask = ((b >= 1600) & (((b - 1600) % 160) < 10))
-end_mask = ((b >= 1600) & (((b - 1600) % 160) >= 150))
+start_mask = ((b >= 1600) & (((b - 1600) % 160) < 20))
+end_mask = ((b >= 1600) & (((b - 1600) % 160) >= 140))
 
 visualize_reduction(X_pca[0:3200,:],color_mappings=start_mask,title='long only GCU first20ns of every trajectory',savepath='./windows/long_only_GCUfirst20ns_10frame')
 visualize_reduction(X_pca[3200:,:],color_mappings=start_mask,title='long only CGU first 20ns of every trajectory',savepath='./windows/long_only_CGUfirst20ns_10frame')

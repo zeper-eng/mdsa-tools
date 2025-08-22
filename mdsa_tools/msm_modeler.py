@@ -24,6 +24,7 @@ class MSM_Modeller():
         --------
 
         '''
+        
         self.labels=labels if labels is not None else None 
         self.centers=centers if centers is not None else None 
         self.frame_scale=frame_scale if frame_scale is not None else None 

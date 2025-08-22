@@ -12,7 +12,8 @@ all_systems=[redone_CCU_GCU_fulltraj,redone_CCU_CGU_fulltraj]
 
 #For the paper we move forward with systems representations
 Systems_Analyzer = systems_analysis(all_systems)
-UMAP_coordinates=Systems_Analyzer.reduce_systems_representations(method='UMAP',n_components=2,n_neighbors=15,min_dist=.5) #PCA
+Systems_Analyzer.replicates_to_featurematrix()
+UMAP_coordinates=Systems_Analyzer.reduce_systems_representations(method='UMAP',n_components=2,n_neighbors=15,min_dist=.3) #PCA
 
 
 ################
@@ -24,8 +25,8 @@ system_labels=(([1]*3200)+[2]*3200)
 colormappings=[np.arange(0,np.max(i),1) for i in frame_list]
 colormappings=np.concatenate(colormappings)
 
-visualize_reduction(UMAP_coordinates,color_mappings=system_labels,cmap=cm.magma_r,savepath='/Users/luis/Desktop/workspacetwo/manuscript_explorations/crawlspace/15n_point5mindist',title='UMAP Dimensional Reduction with per-replicate frame highlighting',cbar_label='System')#each system
-visualize_reduction(UMAP_coordinates,color_mappings=colormappings,cmap=cm.magma_r,savepath='/Users/luis/Desktop/workspacetwo/manuscript_explorations/crawlspace/15n_point5mindist_crawlspace',title='UMAP Dimensional Reduction with per-replicate frame highlighting',cbar_label='Frame Number')#all reps
+visualize_reduction(UMAP_coordinates,color_mappings=system_labels,cmap=cm.magma_r,savepath='/Users/luis/Desktop/workspacetwo/manuscript_explorations/crawlspace/15n_point3mindist',title='UMAP Dimensional Reduction with per-replicate frame highlighting',cbar_label='System')#each system
+visualize_reduction(UMAP_coordinates,color_mappings=colormappings,cmap=cm.magma_r,savepath='/Users/luis/Desktop/workspacetwo/manuscript_explorations/crawlspace/15n_point3mindist_crawlspace',title='UMAP Dimensional Reduction with per-replicate frame highlighting',cbar_label='Frame Number')#all reps
 
 os._exit(0)
 
