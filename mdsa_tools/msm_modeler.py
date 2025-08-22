@@ -4,7 +4,7 @@ import pandas as pd
 
 class MSM_Modeller():
 
-    def __init__(self,candidate_states,reduced_coordinates,frame_scale):
+    def __init__(self,labels,centers,reduced_coordinates,frame_scale):
         '''A module for evaluating and modelling the candidate states and subsequent MSM of an emebddingspace.
 
         
@@ -24,9 +24,10 @@ class MSM_Modeller():
         --------
 
         '''
-        self.candidate_states=candidate_states if candidate_states is not None else None 
-        self.reduced_coordinates=reduced_coordinates if reduced_coordinates is not None else None 
+        self.labels=labels if labels is not None else None 
+        self.centers=centers if centers is not None else None 
         self.frame_scale=frame_scale if frame_scale is not None else None 
+        self.reduced_coordinates=reduced_coordinates if reduced_coordinates is not None else None
 
     def rmsd_from_centers(self, X, labels, centers):
         results = []
@@ -38,7 +39,7 @@ class MSM_Modeller():
         results=np.array(results)
         return results
 
-    def evaluate_cohesion_slidingwindow(self,candidate_states=None,reduced_coordinates=None,frame_scale=None,window_size=None):
+    def evaluate_cohesion_slidingwindow(self,labels=None,centers=None,reduced_coordinates=None,frame_scale=None,step_size=None):
         '''evaluate whether trajectories are temporally settling into the candidate states
         
         Paramters
@@ -75,131 +76,104 @@ class MSM_Modeller():
 
         
         '''
-        candidate_states=candidate_states if candidate_states is not None else self.candidate_states
         reduced_coordinates=reduced_coordinates if reduced_coordinates is not None else self.reduced_coordinates
         frame_scale=frame_scale if frame_scale is not None else self.frame_scale
-        window_size = window_size if window_size is not None else 10
-
-        cords_per_sys=np.array_split(reduced_coordinates,len(candidate_states))
-
-
-        rmsd_df_per_system=[]
+        step_size = step_size if step_size is not None else 10
+        labels = labels if labels is not None else self.labels        
+        centers = centers if centers is not None else self.centers
 
 
-        for i in range(len(candidate_states)):#iterate through system
-            labels,centers = candidate_states[i][0],candidate_states[i][1] #grab labels and center of current system
-            current_coordinates=cords_per_sys[i]
+        slidingwindow=0
+        window_df_all=[]
+        for j in range(1,(np.max(frame_scale)//step_size)+1):
+            print(f"shrink: {j}")
 
-            rmsd_window_all=[]            
-            
-            window_iterator=0
-            num_windows=np.max(frame_scale)//window_size
-            print(f'\nwindow_iterator {window_iterator}, num_windows {num_windows}')
-            
-            start=0
-            for j in range(num_windows):
-                start+=window_size*j
-                window_df_all=[]
+            mask=[]
 
-                for k in range(len(frame_scale)):
-                    
-                    current_replicate_length=frame_scale[k]
-                    if j * window_size >= current_replicate_length:
-                        # keep 'start' aligned for the next replicate
-                        start += current_replicate_length
-                        # print(f"SKIP rep={k}, win={j} (rep_len={current_replicate_length})")
-                        continue
-                    end=start+window_size
-                    rmsd_results = self.rmsd_from_centers(
-                    current_coordinates[start:end,:],
-                    labels[start:end],
-                    centers
-                    )
-                    print(f"current_window:{j}, current replicate:{k}")
-                    print(f"current_start:{start}, current end:{end}")
-                    windowdf=pd.DataFrame(rmsd_results,columns=('cluster','rmsd'))
-                    windowdf['window'] = j
-                    windowdf["system"] = i
-                    windowdf["length"] = current_replicate_length
-                    window_df_all.append(windowdf)
-                    start+=current_replicate_length#move forward in replicate 
-
-                start=0
-
-                rmsd_concat = pd.concat(window_df_all, ignore_index=True)
-                avg_equal_by_window = (rmsd_concat
-                .groupby(['length','system','window','cluster'])['rmsd'].mean())     # mean within cluster
-                rmsd_window_all.append(avg_equal_by_window)
+            #iterate through reps and make mask
+            for rep_length in frame_scale:
                 
-            
-            rmsd_window_all=pd.concat(rmsd_window_all)
-            rmsd_df_per_system.append(rmsd_window_all)
-            
-        rmsd_df_per_system=pd.concat(rmsd_df_per_system)     
-        print(rmsd_df_per_system) 
-        return rmsd_df_per_system
+                if slidingwindow>rep_length:
+                    replicate_bools = np.full(rep_length,False)
+                    mask.append(replicate_bools)
+                    continue
 
-    def evaluate_cohesion_shrinkingwindow(self,candidate_states=None,reduced_coordinates=None,frame_scale=None,step_size=None):
+                replicate_bools = np.full(rep_length,False)
+                replicate_bools[slidingwindow:slidingwindow+step_size]=True
+                mask.append(replicate_bools)
+            
+
+            slidingwindow+=step_size#increase creep
+
+            #apply mask save current window as a pd 
+            window_mask=np.concatenate(mask)
+            window_labels=labels[window_mask]
+            window_coordinates=reduced_coordinates[window_mask,:]
+
+            rmsd_results = self.rmsd_from_centers(window_coordinates,window_labels,centers)
+            windowdf=pd.DataFrame(rmsd_results,columns=('cluster','rmsd'))
+            windowdf['window'] = j
+            
+            window_df_all.append(windowdf)
+
+                
+        #concatenate pd and return
+        window_df_all=pd.concat(window_df_all)
+        
+
+        
+        return window_df_all
+
+    def evaluate_cohesion_shrinkingwindow(self,labels=None,centers=None,reduced_coordinates=None,frame_scale=None,step_size=None):
         '''shrinking window version of slidingwindow
         '''
-        candidate_states=candidate_states if candidate_states is not None else self.candidate_states
         reduced_coordinates=reduced_coordinates if reduced_coordinates is not None else self.reduced_coordinates
         frame_scale=frame_scale if frame_scale is not None else self.frame_scale
         step_size = step_size if step_size is not None else 10
 
-        cords_per_sys=np.array_split(reduced_coordinates,len(candidate_states))
-        
-        for i in range(len(candidate_states)):#iterate through system
-            labels,centers = candidate_states[i][0],candidate_states[i][1] #grab labels and center of current system
-            current_coordinates=cords_per_sys[i]
+        labels = labels if labels is not None else self.labels        
+        centers = centers if centers is not None else self.centers
 
-            creepingstart=0
-            window_df_all=[]
-            for j in range(1,(np.max(frame_scale)//step_size)+1):
-                print(f"shrink: {j}")
+        creepingstart=0
+        window_df_all=[]
+        for j in range(1,(np.max(frame_scale)//step_size)+1):
+            print(f"shrink: {j}")
 
-                mask=[]
-                #iterate through reps
-                for rep_length in frame_scale:
-                    if creepingstart>rep_length:
-                        replicate_bools = np.full(rep_length,False)
-                        mask.append(replicate_bools)
-                        continue
+            mask=[]
 
-                    replicate_bools = np.full(rep_length,True)
-                    replicate_bools[0:creepingstart]=False
+            #iterate through reps and make mask
+            for rep_length in frame_scale:
+                if creepingstart>rep_length:
+                    replicate_bools = np.full(rep_length,False)
                     mask.append(replicate_bools)
+                    continue
                 
-                creepingstart+=step_size#oincrease creep
+                replicate_bools = np.full(rep_length,True)
+                replicate_bools[0:creepingstart]=False
+                mask.append(replicate_bools)
 
-                #create mask and apply to data
-                window_mask=np.concatenate(mask)
-                window_labels=labels[window_mask]
-                window_coordinates=current_coordinates[window_mask,:]
-                
-                #calculate rmsd 
-                rmsd_results = self.rmsd_from_centers(window_coordinates,window_labels,centers)
 
-                #append data before next window
-                windowdf=pd.DataFrame(rmsd_results,columns=('cluster','rmsd'))
-                windowdf['window'] = j
-                windowdf["system"] = i
-                window_df_all.append(windowdf)
-                print(windowdf)
+            #apply mask save currenti window as a pd 
+            window_mask=np.concatenate(mask)
 
-                
+            window_labels=labels[window_mask]
+            window_coordinates=reduced_coordinates[window_mask,:]
 
+            rmsd_results = self.rmsd_from_centers(window_coordinates,window_labels,centers)
+            windowdf=pd.DataFrame(rmsd_results,columns=('cluster','rmsd'))
+            windowdf['window'] = j
+            
+            creepingstart+=step_size#oincrease creep
+
+            window_df_all.append(windowdf)
 
             
+        #concatenate pd and return
+        window_df_all=pd.concat(window_df_all)
+        print(window_df_all)
+   
+        return window_df_all
 
-
-
-            
-
-
-
-
-        return
 
 
     def create_transition_probability_matrix(self,labels=None,frame_list=None,lag=None):

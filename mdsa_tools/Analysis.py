@@ -266,11 +266,7 @@ class systems_analysis:
             print('No valid method supplied for dimensional reduction ')
         
     def cluster_embeddingspace(self, reduced_coordinates=None,outfile_path=None,num_systems=None,val_metric=None):
-        '''
-        This has been depreciated for now
-        
-        '''
-        
+
         
         '''A function for looking at conformational states in embedding space
 
@@ -323,9 +319,9 @@ class systems_analysis:
         for i in individual_systems:
             optimal_k_silhouette_labels,optimal_k_elbow_labels,centers_sillohuette,centers_elbow=self.preform_clust_opt(outfile_path,data=i)
             if val_metric=='sillohuette':
-                candidate_states_per_system.append([optimal_k_silhouette_labels,centers_sillohuette])
+                candidate_states_per_system.append((optimal_k_silhouette_labels,centers_sillohuette))
             if val_metric=='elbow':
-                candidate_states_per_system.append([optimal_k_elbow_labels,centers_elbow])
+                candidate_states_per_system.append((optimal_k_elbow_labels,centers_elbow))
 
 
         return candidate_states_per_system
