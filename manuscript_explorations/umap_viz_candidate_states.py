@@ -37,10 +37,21 @@ full_labels_CGU = np.concatenate([
      candidate_states_per_system[1][0]
 ])
 
+
+#UMAP 200 neighbors .3 distance
 umap_embedding=Systems_Analyzer.reduce_systems_representations(method='UMAP',n_neighbors=200,min_dist=.3)
 
-visualize_reduction(umap_embedding,full_labels_GCU,'embeddingspace clusters GCU',cmap=cm.magma_r,savepath='./embeddingspace_visualizations/point3mindist_200_embeddingspace_clusters_GCU')
-visualize_reduction(umap_embedding,full_labels_CGU,'embeddingspace clusters CGU',cmap=cm.magma_r,savepath='./embeddingspace_visualizations/point3mindist_200_embeddingspace_clusters_CGU')
+visualize_reduction(umap_embedding,full_labels_GCU,'embeddingspace clusters GCU 200 neighbors .3 min dist',cmap=cm.magma_r,savepath='./embeddingspace_visualizations/point3mindist_200_embeddingspace_clusters_GCU')
+visualize_reduction(umap_embedding,full_labels_CGU,'embeddingspace clusters CGU 200 neighbors .3 min dist',cmap=cm.magma_r,savepath='./embeddingspace_visualizations/point3mindist_200_embeddingspace_clusters_CGU')
+
+
+#UMAP 100 neighbors .3 distance
+umap_embedding=Systems_Analyzer.reduce_systems_representations(method='UMAP',n_neighbors=100,min_dist=.3)
+
+visualize_reduction(umap_embedding,full_labels_GCU,'embeddingspace clusters GCU 100 neighbors .3 min dist',cmap=cm.magma_r,savepath='./embeddingspace_visualizations/point3mindist_100_embeddingspace_clusters_GCU')
+visualize_reduction(umap_embedding,full_labels_CGU,'embeddingspace clusters CGU 100 neighbors .3 min dist',cmap=cm.magma_r,savepath='./embeddingspace_visualizations/point3mindist_100_embeddingspace_clusters_CGU')
+
+
 
 from mdsa_tools.Viz import highlight_reps_in_embeddingspace,highlight_crawl_directions,visualize_reduction
 frame_list=((([80] * 20) + ([160] * 10))*2)

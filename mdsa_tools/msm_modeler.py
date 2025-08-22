@@ -24,12 +24,13 @@ class MSM_Modeller():
         --------
 
         '''
-        
+
         self.labels=labels if labels is not None else None 
         self.centers=centers if centers is not None else None 
         self.frame_scale=frame_scale if frame_scale is not None else None 
         self.reduced_coordinates=reduced_coordinates if reduced_coordinates is not None else None
 
+    #Candidate State Evaluation
     def rmsd_from_centers(self, X, labels, centers):
         results = []
         for k in np.unique(labels):
@@ -175,8 +176,7 @@ class MSM_Modeller():
    
         return window_df_all
 
-
-
+    #Creation of Transition Probability Matrix
     def create_transition_probability_matrix(self,labels=None,frame_list=None,lag=None):
         '''Create probability matrix from input data (returns, and updates class attribute)
 
@@ -216,7 +216,7 @@ class MSM_Modeller():
 
 
         labels=labels if labels is not None else self.labels
-        frame_list=frame_list if frame_list is not None else self.frame_list
+        frame_list=frame_list if frame_list is not None else self.frame_scale
         lag=lag if lag is not None else 1
 
         #extract unique states and initiate transiiton probability matrix

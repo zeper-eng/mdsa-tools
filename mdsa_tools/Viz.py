@@ -7,7 +7,33 @@ import matplotlib.cm as cm
 import pycircos.pycircos as py 
 import seaborn as sns
 
+#Miscellaneous tools
+def add_custom_colorbar(scatter, labels, cbar_label=None, ax=None):
+    """
+    Add a colorbar to a scatter plot with ticks based on unique values.
 
+    Parameters
+    ----------
+    scatter : matplotlib.collections.PathCollection
+        The scatter plot returned by plt.scatter or ax.scatter.
+    final_coordinates : np.ndarray
+        Array where the 3rd column ([:, 2]) holds the values used for coloring.
+    cbar_label : str, optional
+        Label for the colorbar. Defaults to 'Value'.
+    ax : matplotlib.axes.Axes, optional
+        Axis to attach the colorbar to. Defaults to current axis.
+    """
+    if ax is None:
+        ax = plt.gca()
+
+    cbar = plt.colorbar(scatter, ax=ax, shrink=0.8, pad=0.02)
+    cbar.set_label(cbar_label if cbar_label is not None else 'Value', fontsize=10)
+
+    unique_vals = np.unique(labels)
+    cbar.set_ticks(unique_vals)
+    cbar.set_ticklabels([str(int(u)) for u in unique_vals])
+
+    return cbar
 
 #Replicate maps
 def replicatemap_from_labels(labels,frame_list,savepath=None,title=None,
@@ -63,18 +89,26 @@ def replicatemap_from_labels(labels,frame_list,savepath=None,title=None,
     iterator=0
     final_coordinates=[]
 
+
+
     for i in range(len(frame_list)):
-        current_replicate_coordinates=np.full(shape=(frame_list[i],),fill_value=i) #make list of 11111 then 22222 for each rep
-        frame_positions=np.arange(1,frame_list[i])
-        frame_values=labels[iterator:iterator+frame_list[i]]
+        current_frame_length=frame_list[i]
+
+        current_replicate_coordinates=np.full(shape=(current_frame_length,),fill_value=i) #make list of 11111 then 22222 for each rep
+        print(current_replicate_coordinates.shape)
+        frame_positions=np.arange(current_frame_length)
+        print(frame_positions.shape)
+        frame_values=labels[iterator:iterator+current_frame_length]
+        (frame_values.shape)
         replicate_block = np.stack([current_replicate_coordinates, frame_positions, frame_values], axis=1)
         final_coordinates.append(replicate_block)
-        iterator+=frame_list[i]
+        iterator+=current_frame_length
     
     final_coordinates = np.vstack(final_coordinates)
-
+    print(final_coordinates.shape)
     y_spacing_factor = 1
     x_spacing_factor = 1
+    print(final_coordinates[:,0])
 
     scatter=plt.scatter(
                 x=final_coordinates[:,1] * x_spacing_factor,
@@ -82,14 +116,11 @@ def replicatemap_from_labels(labels,frame_list,savepath=None,title=None,
                 c=final_coordinates[:,2],
                 s=1,
                 marker='s',
-                cmap=cmap)
+                cmap=cmap,
+                alpha=1)
     
     #cbar and cbar ticks
-    cbar = plt.colorbar(scatter, ax=plt.gca(), shrink=0.8, pad=0.02)
-    cbar.set_label(cbar_label if cbar_label is not None else 'Value', fontsize=10)
-    unique_vals = np.unique(final_coordinates[:, 2])
-    cbar.set_ticks(unique_vals)
-    cbar.set_ticklabels([str(int(u)) for u in unique_vals])
+    add_custom_colorbar(scatter,final_coordinates[:,2],cbar_label,plt.gca())
 
     #personal preferences
     plt.grid(visible=False)
@@ -102,19 +133,7 @@ def replicatemap_from_labels(labels,frame_list,savepath=None,title=None,
     ax.set_title('Clusters per frame', fontsize=20, weight='bold', family='monospace', style='italic')
     n_reps = int(final_coordinates[:, 0].max())
     n_frames = int(final_coordinates[:, 1].max())
-
-    #Setting Ticks
-    x_ticks_labels = np.arange(0, n_frames,10) 
-    x_ticks_locations = x_ticks_labels * x_spacing_factor
-    ax.set_xticks(x_ticks_locations)
-    ax.set_xticklabels([str(i) for i in x_ticks_labels],fontsize=8)
-
-
-    y_ticks_labels = np.arange(0,final_coordinates.shape[0],final_coordinates.shape[0]/10) if final_coordinates.shape[0] else np.arange(0, 2, 1)
-    y_ticks_locations = y_ticks_labels * y_spacing_factor
-    ax.set_yticks(y_ticks_locations)
-    ax.set_yticklabels([str(i) for i in y_ticks_labels], fontsize=8)
-
+    
     if title:
         plt.title(title)
     if xlabel:
@@ -515,7 +534,6 @@ def create_2d_color_mappings(labels=([80]*20)+([160]*10),
         return sample_color_mappings
 
 def visualize_reduction(embedding_coordinates, color_mappings=None, 
-                  custom=False, 
                   savepath=os.getcwd(), 
                   title=None, 
                   colors_list=['purple', 'orange', 'green', 'yellow', 'blue', 'red', 'pink', 'cyan', 'grey','brown'],
@@ -546,37 +564,16 @@ def visualize_reduction(embedding_coordinates, color_mappings=None,
         custom = False
         legend_labels = None
         print("No color_mappings provided — defaulting to sample index gradient.")
-    
-    unique_vals = np.unique(color_mappings)
-    
-    if custom:
-        # Discrete category color mapping
-        scatter = ax.scatter(embedding_coordinates[:, 0], embedding_coordinates[:, 1], c=color_mappings, 
-                             cmap=ListedColormap(colors_list[:len(unique_vals)]), alpha=0.6)
-        
-        if legend_labels is not None:
-            legend_handles = [plt.Line2D([0], [0], marker='o', color='w', markersize=10, 
-                                         markerfacecolor=color, label=label) 
-                              for label, color in legend_labels.items()]
-            ax.legend(handles=legend_handles, title="System Types", loc="upper right", prop={'size': 20, 'weight': 'bold'})
 
-    else:
-        # Use provided colormap, fallback to red
-        norm = Normalize(vmin=np.min(color_mappings), vmax=np.max(color_mappings))
-        cmap = cmap if cmap is not None else cm.magma_r
+   
+    # Use provided colormap, fallback to red
+    norm = Normalize(vmin=np.min(color_mappings), vmax=np.max(color_mappings))
+    cmap = cmap if cmap is not None else cm.magma_r
 
-        ax.scatter(embedding_coordinates[:, 0], embedding_coordinates[:, 1],
-                             c=color_mappings, cmap=cmap, norm=norm, alpha=0.6)
+    scatter=ax.scatter(embedding_coordinates[:, 0], embedding_coordinates[:, 1],
+                            c=color_mappings, cmap=cmap, norm=norm, alpha=0.6)
 
-        cbar_ticks = np.linspace(np.min(color_mappings), np.max(color_mappings), 10, dtype=int)
-        
-        cbar = plt.colorbar(cm.ScalarMappable(norm=norm, cmap=cmap), ax=ax,
-                            ticks=cbar_ticks, shrink=0.8, aspect=30, pad=0.02)
-        
-        cbar.set_label(cbar_label, fontdict=labels_font_dict,
-                       rotation=270, labelpad=25)
-        
-        cbar.ax.set_yticklabels([str(t) for t in cbar_ticks])
+    add_custom_colorbar(scatter,color_mappings,cbar_label,plt.gca()) #using our colorbar function
 
     # Final touches
     for spine in ax.spines.values():
