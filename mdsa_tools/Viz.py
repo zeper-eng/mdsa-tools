@@ -81,6 +81,7 @@ def replicatemap_from_labels(labels,frame_list,savepath=None,title=None,
     
 
     '''
+
     cmap=cmap if cmap is not None else cm.magma_r
 
     savepath=savepath if savepath is not None else os.getcwd()
@@ -92,12 +93,11 @@ def replicatemap_from_labels(labels,frame_list,savepath=None,title=None,
 
 
     for i in range(len(frame_list)):
+
         current_frame_length=frame_list[i]
 
         current_replicate_coordinates=np.full(shape=(current_frame_length,),fill_value=i) #make list of 11111 then 22222 for each rep
-        print(current_replicate_coordinates.shape)
         frame_positions=np.arange(current_frame_length)
-        print(frame_positions.shape)
         frame_values=labels[iterator:iterator+current_frame_length]
         (frame_values.shape)
         replicate_block = np.stack([current_replicate_coordinates, frame_positions, frame_values], axis=1)
@@ -105,10 +105,10 @@ def replicatemap_from_labels(labels,frame_list,savepath=None,title=None,
         iterator+=current_frame_length
     
     final_coordinates = np.vstack(final_coordinates)
-    print(final_coordinates.shape)
+    
     y_spacing_factor = 1
     x_spacing_factor = 1
-    print(final_coordinates[:,0])
+    
 
     scatter=plt.scatter(
                 x=final_coordinates[:,1] * x_spacing_factor,

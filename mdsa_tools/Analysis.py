@@ -124,6 +124,57 @@ class systems_analysis:
 
         return final_frames
 
+    def extract_hbond_values(self,systems_array,residues,mode="sum"):
+        ''' returns a 1dimensional array of "average" values per entry in the array
+        
+        Parameters
+        ----------
+        systems_array:np.ndarray,shape(n_frames,n_residues,n_residues)
+            An averaged array (or individual frame of a trajectory) that is to be visualized.
+            Since a typical adjacency matrix is NxN observations we will not focus on the multiple
+            frames of the trajectory and will assume an averaged matrix has been provided. Alternatively
+            this function can take a single frame from anywhere in the trajectory if you wish to analyze it
+
+        residues:list,shape=(res_indexes,)
+            A list denoting all of the residue indexes that you would like to analyze pairwise interactions for.
+            This can be two residues meaning you just want to see the pairwise interactions between them or
+            more residues and then you would get *all possible pairwise combinations of theese residues interactions*
+        
+        mode:string,default="sum",
+            A string argument that decides the aggregation metric by which you would like to aggregate every frame. Mean of
+            the residues of the CAR interaction surface for example, would give you the average hydrogen bonding found between all
+            the residues of the car interaction surface and the +1 codon, sum would give you the total net hydrogen bond counts.
+            
+        Returns
+        ----------
+        avg_ta_labels:array,shape=(n_frames,):
+            An array of the same size as the frames of interest except it just contains an average
+            of all the possible pairwise hydrogen bonding interactions of the residues of interest for
+            each frame
+        
+        Notes
+        ----------
+        This is actually a more powerful function than it may appear at first because if you only,
+        say your pca found a few pairwise comparisons be incredibly important, well now we can isolate
+        for just thoose frames and see which is best.
+
+        '''
+
+        # we always assume it comes with indixes but filter res accounts for this
+        # this note in relation to the lines after filter res in the clauses
+
+        if mode == "average":
+            systems_array,residues
+            filtered_t_a_array=filtered_t_a_array[:,1:,1:]        
+            ta_labels = np.mean(np.triu(filtered_t_a_array, k=1), axis=(1, 2)) #accounting for symmetry
+        
+        if mode == "sum":      
+            systems_array,residues
+            filtered_t_a_array=filtered_t_a_array[:,1:,1:]
+            ta_labels = np.sum(np.triu(filtered_t_a_array, k=1), axis=(1, 2)) #accounting for symmetry
+        
+        return ta_labels
+
     #Analyses
     def cluster_system_level(self,outfile_path=None, max_clusters=None,data=None,k=None):
         '''
@@ -174,9 +225,13 @@ class systems_analysis:
 
         if k is None:
             optimal_k_silhouette_labels,optimal_k_elbow_labels,centers_sillohuette,centers_elbow=self.preform_clust_opt(outfile_path=outfile_path,data=data,max_clusters=max_clusters)
+        
         if k is not None:
-            labels,centers=self.preform_clust_opt(outfile_path=outfile_path,data=data,max_clusters=max_clusters,k=k)
-            return labels,centers
+            kmeans = KMeans(n_clusters=k, init='random', n_init=k, random_state=0)
+            kmeans.fit(data)
+            cluster_centers, inertia, cluster_labels = kmeans.cluster_centers_,kmeans.inertia_,kmeans.labels_
+            return cluster_labels,cluster_centers
+            
 
         return optimal_k_silhouette_labels,optimal_k_elbow_labels,centers_sillohuette,centers_elbow
     

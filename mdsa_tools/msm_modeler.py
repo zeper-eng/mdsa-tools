@@ -176,6 +176,73 @@ class MSM_Modeller():
    
         return window_df_all
 
+    def compute_implied_timescales(self, lags, labels=None, frame_list=None, n_timescales=10):
+        """
+        Compute implied timescales as a function of lag time.
+        
+        Parameters
+        ----------
+        lags : list of int
+            Lag times to evaluate.
+        labels : array-like
+            State labels.
+        frame_list : list-like
+            Frame counts per trajectory.
+        n_timescales : int
+            Number of slowest timescales to return.
+
+        Returns
+        -------
+        dict of lag -> timescales
+        """
+
+        results = {}
+
+        for lag in lags:
+            T = self.create_transition_probability_matrix(
+                labels=labels, frame_list=frame_list, lag=lag
+            )[1:,1:]  # strip index row/col
+
+            eigvals, _ = np.linalg.eig(T.T) #transpose bc row normalized
+            eigvals = np.real(eigvals)
+
+            # sort by magnitude, ignore the trivial 1
+            eigvals = np.sort(np.abs(eigvals))[::-1][1:n_timescales+1]
+
+            timescales = -lag / np.log(eigvals)
+            results[lag] = timescales
+
+        return results
+
+    def chapman_kolmogorov_test(self, labels=None, frame_list=None, lag=None, steps=4):
+        """
+        Compare predicted vs. direct transition matrices at multiples of lag.
+        
+        Parameters
+        ----------
+        lag : int
+            Base lag time.
+        steps : int
+            How many multiples of lag to test (e.g. 2τ, 3τ, 4τ).
+        """
+        labels=labels if labels is not None else self.labels
+        lag=lag if lag is not None else 30
+        frame_list=frame_list if frame_list is not None else self.frame_scale
+        # Transition matrix at lag τ
+        T_tau = self.create_transition_probability_matrix(labels, frame_list, lag=lag)[1:,1:]
+
+        results = {}
+        for k in range(1, steps+1):
+            # Predicted transition matrix
+            T_pred = np.linalg.matrix_power(T_tau, k)
+
+            # Directly estimated from data
+            T_direct = self.create_transition_probability_matrix(labels, frame_list, lag=lag*k)[1:,1:]
+
+            results[k] = (T_pred, T_direct)
+
+        return results
+
     #Creation of Transition Probability Matrix
     def create_transition_probability_matrix(self,labels=None,frame_list=None,lag=None):
         '''Create probability matrix from input data (returns, and updates class attribute)
@@ -226,8 +293,12 @@ class MSM_Modeller():
         
         iterator=0
         for trajectory_length in frame_list: # iterate through 
+
             current_trajectory=labels[iterator:iterator+trajectory_length]
             iterator=iterator+trajectory_length #update this 
+
+            if lag>=trajectory_length:#so we only use the long data
+                continue
 
             for i in range(current_trajectory.shape[0]-lag):
                 current_state=current_trajectory[i]
@@ -235,6 +306,8 @@ class MSM_Modeller():
                 transtion_prob_matrix[current_state, next_state] += 1
 
         row_sums = transtion_prob_matrix.sum(axis=1, keepdims=True)
+
+        print(f"matrix counts before rownorm:\n{transtion_prob_matrix}")
 
         transition_probs = np.divide(
                     transtion_prob_matrix, row_sums,
@@ -250,6 +323,37 @@ class MSM_Modeller():
 
         return final_transition_prob_matrix
     
+    def extract_stationary_states(self,final_transition_prob_matrix=None):
+        '''grab eigenvalues and eigenvectors of the transition matrix
+        
+        '''
+
+        if final_transition_prob_matrix is None:
+            final_transition_prob_matrix=self.create_transition_probability_matrix()
+
+        # Get the "core" transition matrix without labels
+        T = final_transition_prob_matrix[1:, 1:]
+
+        # Compute eigenvalues and eigenvectors of the transpose
+        eigvals, eigvecs = np.linalg.eig(T.T)
+
+        print(f"eigenvals:{eigvals},eigvecs:{eigvecs}")
+
+        # Find the eigenvector for eigenvalue closest to 1
+        idx = np.argmin(np.abs(eigvals - 1))
+        stationary = np.real(eigvecs[:, idx])
+        print(f"idx:{idx},stationary:{stationary}")
+
+        # Normalize to sum to 1
+        stationary = stationary / stationary.sum()
+        print(f"stationary:{stationary}")
+
+        print("Eigenvalues:", eigvals)
+        print("Stationary distribution:", stationary)
+
+
+        return stationary
+   
     def evaluate_Chapman_Kolmogorov(self,transition_probability_matrix=None,n=None,labels=None,original_lag=None):
         '''evaluate if the chapman kolmogorov test evaluates to true
 
@@ -299,3 +403,48 @@ class MSM_Modeller():
         frob = np.linalg.norm(diff, ord='fro')
 
         return frob
+    
+
+    if __name__=="__main__":
+    
+        from mdsa_tools.Analysis import systems_analysis
+        import numpy as np
+        import matplotlib.cm as cm
+        import os
+        import pandas as pd
+        from mdsa_tools.msm_modeler import MSM_Modeller as msm
+
+        #Pipeline setup assumed as in: Data Generation
+        redone_CCU_GCU_fulltraj=np.load('/Users/luis/Downloads/redone_unrestrained_CCU_GCU_Trajectory_array.npy',allow_pickle=True)
+        redone_CCU_CGU_fulltraj=np.load('/Users/luis/Downloads/redone_unrestrained_CCU_CGU_Trajectory_array.npy',allow_pickle=True)
+
+        from mdsa_tools.Viz import visualize_reduction
+        persys_frame_list=((([80] * 20) + ([160] * 10)))
+        persys_frame_short=([80] * 20) 
+        persys_frame_long= ([160] * 10)
+
+        #Just out of curiosity try just gcu
+        all_systems=[redone_CCU_GCU_fulltraj]
+        Systems_Analyzer = systems_analysis(systems_representations=all_systems,replicate_distribution=persys_frame_list)
+        Systems_Analyzer.replicates_to_featurematrix()
+        X_pca,_ ,_=Systems_Analyzer.reduce_systems_representations()
+        cluster_labels,cluster_centers=Systems_Analyzer.cluster_system_level(data=X_pca,k=6,outfile_path='../manuscript_explorations/GCU_solo/GCU_pcaspace_clustersolo')#because we define k so no sets
+
+        visualize_reduction(X_pca,color_mappings=cluster_labels,savepath='../manuscript_explorations/GCU_solo/GCU_pcaspace_clustersolo',cmap=cm.inferno_r)
+
+
+        #################################################
+        #building replicate maps to visualize transition#
+        #################################################
+        from mdsa_tools.Viz import replicatemap_from_labels
+    
+        GCU_with_filler=np.concatenate((cluster_labels,np.full(shape=(3200,),fill_value=np.max(cluster_labels)+1)))
+        replicatemap_from_labels(GCU_with_filler,persys_frame_list*2,savepath='../manuscript_explorations/replicate_maps/6klust_replicate_map',title='6klust_replicate_map')
+        fourk_modeller=msm(cluster_labels,cluster_centers,X_pca,frame_scale=persys_frame_list)
+        GCU_transition_prob_matrix = fourk_modeller.create_transition_probability_matrix()
+        stationarystates = fourk_modeller.extract_stationary_states()
+
+        np.savetxt('../manuscript_explorations/GCU_solo/GCUsolo_transition_prob_matrix.csv',GCU_transition_prob_matrix,delimiter=',')
+        os._exit(0)
+
+        coordinates=[X_pca[0:3200,:],X_pca[3200:,:]]
