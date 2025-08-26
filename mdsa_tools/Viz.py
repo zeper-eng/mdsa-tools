@@ -6,33 +6,35 @@ from matplotlib.colors import Normalize
 import matplotlib.cm as cm
 import pycircos.pycircos as py 
 import seaborn as sns
+from matplotlib.colors import BoundaryNorm
 
 #Miscellaneous tools
-def add_custom_colorbar(scatter, labels, cbar_label=None, ax=None):
+def add_custom_colorbar(scatter, labels, cbar_label=None, ax=None, cmap_name='inferno'):
     """
-    Add a colorbar to a scatter plot with ticks based on unique values.
-
-    Parameters
-    ----------
-    scatter : matplotlib.collections.PathCollection
-        The scatter plot returned by plt.scatter or ax.scatter.
-    final_coordinates : np.ndarray
-        Array where the 3rd column ([:, 2]) holds the values used for coloring.
-    cbar_label : str, optional
-        Label for the colorbar. Defaults to 'Value'.
-    ax : matplotlib.axes.Axes, optional
-        Axis to attach the colorbar to. Defaults to current axis.
+    Make the scatter + colorbar use discrete colors for the given labels.
+    Works with string labels or non-contiguous ints.
     """
     if ax is None:
         ax = plt.gca()
 
-    cbar = plt.colorbar(scatter, ax=ax, shrink=0.8, pad=0.02)
-    cbar.set_label(cbar_label if cbar_label is not None else 'Value', fontsize=10)
+    labels = np.asarray(labels)
+    uniques, label_ids = np.unique(labels, return_inverse=True)
+    N = len(uniques)
 
-    unique_vals = np.unique(labels)
-    cbar.set_ticks(unique_vals)
-    cbar.set_ticklabels([str(int(u)) for u in unique_vals])
+    # N distinct colors, with hard boundaries between classes
+    cmap = plt.get_cmap(cmap_name, N)
+    bounds = np.arange(-0.5, N + 0.5, 1)
+    norm = BoundaryNorm(bounds, N)
 
+    # Ensure the scatter uses the discrete mapping
+    scatter.set_cmap(cmap)
+    scatter.set_norm(norm)
+    scatter.set_array(label_ids)  # in case scatter wasn't created with these ints
+
+    # Discrete (stepped) colorbar
+    cbar = plt.colorbar(scatter, ax=ax, boundaries=bounds, ticks=np.arange(N), pad=0.02, shrink=0.8)
+    cbar.set_label(cbar_label or 'Value', fontsize=10)
+    cbar.set_ticklabels([str(u) for u in uniques])
     return cbar
 
 #Replicate maps
@@ -536,9 +538,7 @@ def create_2d_color_mappings(labels=([80]*20)+([160]*10),
 def visualize_reduction(embedding_coordinates, color_mappings=None, 
                   savepath=os.getcwd(), 
                   title=None, 
-                  colors_list=['purple', 'orange', 'green', 'yellow', 'blue', 'red', 'pink', 'cyan', 'grey','brown'],
                   cmap=None,
-                  legend_labels=None,
                   axis_one_label=None,
                   axis_two_label=None,
                   cbar_label=None):

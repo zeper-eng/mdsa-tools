@@ -566,23 +566,68 @@ class systems_analysis:
         '''
         Parameters
         ----------
-        data:np.ndarray,shape=(n_sample,featuresures),
-            A feature matrix of any kind, hopefully one provided from the rest of the pipeline but in theory, this is 
-            just a scikit learn wrapper so you can plug anything you want really
+        data : np.ndarray, shape = (n_samples, featuresures)
+            A feature matrix of any kind (ideally produced earlier in this pipeline).
+            This is just a scikit-learn wrapper, so you can plug anything you want really.
+            If None, defaults to `self.feature_matrix`.
         
-        outfile_path:str,default=os.getcwd()
-        
+        outfile_path : str, default = os.getcwd()
+            Path prefix where per-K label arrays will be saved via `np.save`.
+            A file is written for each tested K as
+            "<outfile_path>kluster_labels_{K}clust.npy".
+            (If you don’t pass a trailing separator, this will be concatenated verbatim.)
+
+        max_clusters : int, default = 10
+            When `k is None`, we grid-search KMeans for K in [2, ..., max_clusters]
+            to compute inertia (elbow) and sillohuette scores.
+
+        k : int or None, default = None
+            If provided, we skip optimization and run a single KMeans with exactly `k`
+            clusters (useful when you already know the K you want to keep).
 
         Returns
         ----------
-        
+        If `k is not None`:
+            (cluster_labels, cluster_centers) : tuple
+                cluster_labels : np.ndarray, shape = (n_samples,)
+                    The assignment of each sample to its cluster.
+                cluster_centers : np.ndarray, shape = (k, featuresures)
+                    The KMeans centroids for the requested K.
+
+        If `k is None` (optimization path):
+            (optimal_k_silhouette_labels, optimal_k_elbow_labels, centers_sillohuette, centers_elbow) : tuple
+                optimal_k_silhouette_labels : np.ndarray, shape = (n_samples,)
+                    Labels for the K that maximizes sillohuette score over the tested range.
+                optimal_k_elbow_labels : np.ndarray, shape = (n_samples,)
+                    Labels for the K chosen by the elbow (inertia) heuristic.
+                centers_sillohuette : np.ndarray, shape = (K_sillohuette, featuresures)
+                    Centroids corresponding to the sillohuette-optimal labels.
+                centers_elbow : np.ndarray, shape = (K_elbow, featuresures)
+                    Centroids corresponding to the elbow-optimal labels.
+
         Notes
         ----------
-        
+        - KMeans config here is `init='random'`, `n_init=k` (or `n_init=K` inside the loop),
+        and `random_state=0` for reproducibility—kept consistent with the rest of this code.
+        - Validation metrics:
+            * **Sillohuette** (via `sklearn.metrics.silhouette_score`) favors compact, well-separated clusters.
+            * **Elbow** uses raw inertia (within-cluster SSE) to pick a knee in the curve.
+        The helper functions `plot_sillohette_scores` and `plot_elbow_scores` (from `mdsa_tools.Viz`)
+        are called to optionally save plots and to return the selected K values.
+        - Side effects: for each tested K in `[2, max_clusters]`, this writes labels to disk using
+        `np.save(f"{outfile_path}kluster_labels_{K}clust", labels)`. Numpy will append the `.npy`
+        extension if not present.
+
         Examples
         ----------
-        
+        >>> # 1) Let the function pick K by sillohuette and elbow
+        >>> opt_sil_labels, opt_elb_labels, sil_centers, elb_centers = \
+        ...     sa.preform_clust_opt(outfile_path='/results/', max_clusters=12, data=sa.feature_matrix)
+        >>>
+        >>> # 2) Run a fixed-K clustering (no optimization)
+        >>> labels_k5, centers_k5 = sa.preform_clust_opt(outfile_path='/results/', data=sa.feature_matrix, k=5)
         '''
+        
         data = data if data is not None else self.feature_matrix
         outfile_path = outfile_path if outfile_path is not None else os.getcwd()
         max_clusters = max_clusters if max_clusters is not None else 10
