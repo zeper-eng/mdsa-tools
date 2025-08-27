@@ -9,11 +9,7 @@ import seaborn as sns
 from matplotlib.colors import BoundaryNorm
 
 #Miscellaneous tools
-def add_custom_colorbar(scatter, labels, cbar_label=None, ax=None, cmap_name='inferno'):
-    """
-    Make the scatter + colorbar use discrete colors for the given labels.
-    Works with string labels or non-contiguous ints.
-    """
+def add_custom_colorbar(scatter, labels, cbar_label=None, ax=None, cmap=None):
     if ax is None:
         ax = plt.gca()
 
@@ -21,18 +17,17 @@ def add_custom_colorbar(scatter, labels, cbar_label=None, ax=None, cmap_name='in
     uniques, label_ids = np.unique(labels, return_inverse=True)
     N = len(uniques)
 
-    # N distinct colors, with hard boundaries between classes
-    cmap = plt.get_cmap(cmap_name, N)
+    # use passed cmap, fallback to inferno
+    cmap = cmap if cmap is not None else plt.get_cmap("inferno", N)
     bounds = np.arange(-0.5, N + 0.5, 1)
     norm = BoundaryNorm(bounds, N)
 
-    # Ensure the scatter uses the discrete mapping
     scatter.set_cmap(cmap)
     scatter.set_norm(norm)
-    scatter.set_array(label_ids)  # in case scatter wasn't created with these ints
+    scatter.set_array(label_ids)
 
-    # Discrete (stepped) colorbar
-    cbar = plt.colorbar(scatter, ax=ax, boundaries=bounds, ticks=np.arange(N), pad=0.02, shrink=0.8)
+    cbar = plt.colorbar(scatter, ax=ax, boundaries=bounds,
+                        ticks=np.arange(N), pad=0.02, shrink=0.8)
     cbar.set_label(cbar_label or 'Value', fontsize=10)
     cbar.set_ticklabels([str(u) for u in uniques])
     return cbar
@@ -41,7 +36,8 @@ def add_custom_colorbar(scatter, labels, cbar_label=None, ax=None, cmap_name='in
 def replicatemap_from_labels(labels,frame_list,savepath=None,title=None,
                               xlabel=None, ylabel=None,
                              cbar_label=None,
-                             cmap=None) -> np.ndarray:
+                             cmap=None,
+                             ) -> np.ndarray:
     '''returns an array consisting of a re-formatted list of labels through which to view a set.
 
     Parameters
@@ -541,12 +537,14 @@ def visualize_reduction(embedding_coordinates, color_mappings=None,
                   cmap=None,
                   axis_one_label=None,
                   axis_two_label=None,
-                  cbar_label=None):
+                  cbar_label=None,
+                  gridvisible=False):
 
     axis_one_label=None if axis_one_label is not None else 'Embedding Space Axis 1'
     axis_two_label=None if axis_two_label is not None else 'Embedding Space Axis 2'
-    title=title if title is not None else "Dimensional Reduction of (PCA) of GCU and CGU Systems"
+    title=title if title is not None else "Dimensional Reduction of Systems"
     cbar_label=cbar_label if cbar_label is not None else "Value"
+    cmap = cmap if cmap is not None else cm.magma_r
 
     labels_font_dict = {
         'family': 'monospace',
@@ -561,24 +559,22 @@ def visualize_reduction(embedding_coordinates, color_mappings=None,
 
     if color_mappings is None or len(color_mappings) == 0:
         color_mappings = np.arange(embedding_coordinates.shape[0])
-        custom = False
-        legend_labels = None
         print("No color_mappings provided — defaulting to sample index gradient.")
 
    
-    # Use provided colormap, fallback to red
+    # Use provided colormap, fallback to magma
     norm = Normalize(vmin=np.min(color_mappings), vmax=np.max(color_mappings))
-    cmap = cmap if cmap is not None else cm.magma_r
 
     scatter=ax.scatter(embedding_coordinates[:, 0], embedding_coordinates[:, 1],
                             c=color_mappings, cmap=cmap, norm=norm, alpha=0.6)
 
-    add_custom_colorbar(scatter,color_mappings,cbar_label,plt.gca()) #using our colorbar function
-
+    add_custom_colorbar(scatter, color_mappings, cbar_label, plt.gca(), cmap=cmap)
+    
     # Final touches
     for spine in ax.spines.values():
         spine.set_visible(False)
 
+    ax.grid(visible=gridvisible)
     ax.set_title(title, fontdict=labels_font_dict)
     ax.set_xlabel(axis_one_label, fontdict=labels_font_dict)
     ax.set_ylabel(axis_two_label, fontdict=labels_font_dict)
@@ -590,127 +586,12 @@ def visualize_reduction(embedding_coordinates, color_mappings=None,
     plt.close()
     return
 
-def visualize_candidate_states(candidate_states,reduced_coordinates,savepath=None,cmap=None):
-    '''visualize the candidate states discovered by clustering embedding space
-
-    Parameters
-    ----------
-    candidatestates=arraylike,default=mdsa_tools.Analysis.cluster_embeddingspace(),shape=(number_of_systems_)
-        A list of arrays holding, each array in every system contains the cluster assignments and labels returned
-        from the system analysis module's preform_clust_opt() operation.
-    
-    Reduced_cooridinates:
-
-    cmap:
-        cmap
-    
-    '''
-    savepath=savepath if savepath is not None else os.getcwd()
-    frames_per_sys=np.array_split(reduced_coordinates,len(candidate_states))
-
-    
-    for i in range(len(candidate_states)):
-        labels,_ = candidate_states[i][0],candidate_states[i][1]
-        from mdsa_tools.Viz import visualize_reduction
-        visualize_reduction(frames_per_sys[i],cmap=cmap,color_mappings=labels,savepath=f'{savepath}/system_{i}')
 
 
-    return
-    
-def highlight_reps_in_embeddingspace(reduced_coordinates,
-                    frame_list=((([80] * 20) + ([160] * 10)) * 2),
-                    outfilepath='/zfshomes/lperez/thesis_figures/PCA/test_one_rep',
-                    cmap=cm.magma_r):
-    '''Visualizes and saves a replicates inside of embedding space
-
-    Parameters
-    ----------
-    X_pca : np.ndarray, shape=(n_samples, n_components)
-        The results of fitting a PCA analysis and using the .transform() method.
-
-    frame_list : list of int, optional
-        A list holding integer counts of the number of frames in each replicate. 
-        Default is (([80] * 20) + ([160] * 10)) * 2.
-    
-    cmap:matplotlib.cm.cmap:,default=magma_r
-        colormap of choice for highlighting replicates in embeddingspace
-
-    Returns
-    -------
-    None
-
-    Notes
-    -----
-    Each replicate is plotted in its own subplot. A new row of plots begins every 30 replicates.
-    '''
-
-    rep_iterator = 0
-    
-    for entry in range(len(frame_list)):
-        
-        colors = np.full(shape=reduced_coordinates.shape[0],fill_value=0)
-        colors[rep_iterator:rep_iterator+frame_list[entry]] = np.arange(1,frame_list[entry]+1,1) 
-
-        # ticks for scaling
-        x_min, x_max = reduced_coordinates[:, 0].min(), reduced_coordinates[:, 0].max()
-        y_min, y_max = reduced_coordinates[:, 1].min(), reduced_coordinates[:, 1].max()
-        plt.xticks(np.arange(np.floor(x_min), np.ceil(x_max) + 1, 1))
-        plt.yticks(np.arange(np.floor(y_min), np.ceil(y_max) + 1, 1))
-
-        plt.scatter(reduced_coordinates[:,0],reduced_coordinates[:,1],c=colors,s=5,cmap=cmap)
-        plt.grid(visible=False)
-        plt.savefig(f"{outfilepath}_rep{entry}.png")
-        plt.close()
-        
-        rep_iterator+=frame_list[entry]
-    
-    return
-
-def highlight_crawl_directions(reduced_coordinates,
-                    frame_list=((([80] * 20) + ([160] * 10)) * 2),
-                    outfilepath='/zfshomes/lperez/thesis_figures/PCA/test_one_rep',
-                    cmap=cm.magma_r):
-    '''Visualizes and saves a replicates inside of embedding space
-
-    Parameters
-    ----------
-    X_pca : np.ndarray, shape=(n_samples, n_components)
-        The results of fitting a PCA analysis and using the .transform() method.
-
-    frame_list : list of int, optional
-        A list holding integer counts of the number of frames in each replicate. 
-        Default is (([80] * 20) + ([160] * 10)) * 2.
-    
-    cmap:matplotlib.cm.cmap:,default=magma_r
-        colormap of choice for highlighting replicates in embeddingspace
-
-    Returns
-    -------
-    None
-
-    Notes
-    -----
-    Each replicate is plotted in its own subplot. A new row of plots begins every 30 replicates.
-    '''
-
-    colormappings=[np.arange(0,np.max(i),1) for i in frame_list]
-    colormappings=np.concatenate(colormappings)
-    print(colormappings.shape)
-
-    plt.scatter(reduced_coordinates[:,0],reduced_coordinates[:,1],c=colormappings,s=5,cmap=cmap)
-    # ticks for scaling
-    x_min, x_max = reduced_coordinates[:, 0].min(), reduced_coordinates[:, 0].max()
-    y_min, y_max = reduced_coordinates[:, 1].min(), reduced_coordinates[:, 1].max()
-    plt.xticks(np.arange(np.floor(x_min), np.ceil(x_max) + 1, 1))
-    plt.yticks(np.arange(np.floor(y_min), np.ceil(y_max) + 1, 1))
-
-    plt.grid(visible=False)
-    plt.savefig(f"{outfilepath}_crawlhighlights.png")
-    plt.close()
 
 #Contour plots 
 def contour_embedding_space(outfile_path, embeddingspace_coordinates, levels=10, thresh=0, bw_adjust=.5,
-                             title=None, xlabel=None, ylabel=None):
+                             title=None, xlabel=None, ylabel=None,gridvisible=False):
     '''Plots a contour map of embedding space coordinates.
 
     Parameters
@@ -760,6 +641,7 @@ def contour_embedding_space(outfile_path, embeddingspace_coordinates, levels=10,
     '''
 
     outfile_path = outfile_path if outfile_path is not None else os.getcwd()
+    gridvisible = gridvisible if gridvisible is not None else False
 
     sns.kdeplot(
         x=embeddingspace_coordinates[:, 0],
@@ -773,6 +655,7 @@ def contour_embedding_space(outfile_path, embeddingspace_coordinates, levels=10,
     )
 
     ax = plt.gca()
+    
     for spine in ax.spines.values():
         spine.set_visible(False)
 
@@ -783,7 +666,7 @@ def contour_embedding_space(outfile_path, embeddingspace_coordinates, levels=10,
     if ylabel:
         plt.ylabel(ylabel)
 
-    plt.grid(visible=False)
+    plt.grid(visible=gridvisible)
     plt.savefig(outfile_path, dpi=800)
     plt.close()
 
