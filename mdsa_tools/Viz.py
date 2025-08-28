@@ -1,12 +1,11 @@
 import numpy as np
 import os
 import matplotlib.pyplot as plt
-from matplotlib.colors import ListedColormap
-from matplotlib.colors import Normalize
 import matplotlib.cm as cm
 import pycircos.pycircos as py 
 import seaborn as sns
 from matplotlib.colors import BoundaryNorm
+import pandas as pd
 
 #Miscellaneous tools
 def add_custom_colorbar(scatter, labels, cbar_label=None, ax=None, cmap=None):
@@ -17,20 +16,57 @@ def add_custom_colorbar(scatter, labels, cbar_label=None, ax=None, cmap=None):
     uniques, label_ids = np.unique(labels, return_inverse=True)
     N = len(uniques)
 
-    # use passed cmap, fallback to inferno
-    cmap = cmap if cmap is not None else plt.get_cmap("inferno", N)
-    bounds = np.arange(-0.5, N + 0.5, 1)
-    norm = BoundaryNorm(bounds, N)
+    cmap = cmap if cmap is not None else cm.inferno
+    bounds = np.arange(-0.5, N + 0.5, 1)  # [-0.5, 0.5], [0.5, 1.5]
+    norm = BoundaryNorm(bounds, cmap.N)
 
     scatter.set_cmap(cmap)
-    scatter.set_norm(norm)
     scatter.set_array(label_ids)
+    scatter.set_norm(norm)
 
     cbar = plt.colorbar(scatter, ax=ax, boundaries=bounds,
                         ticks=np.arange(N), pad=0.02, shrink=0.8)
     cbar.set_label(cbar_label or 'Value', fontsize=10)
+
+    if N>100:
+        tick_positions = np.arange(N)[::10]         # every 10th tick
+        tick_labels   = [str(u) for u in uniques][::10]
+        cbar.set_ticks(tick_positions)
+        cbar.set_ticklabels(tick_labels)
+        return cbar
+
     cbar.set_ticklabels([str(u) for u in uniques])
+
     return cbar
+
+def set_ticks(ax=None):
+    """
+    Set x and y ticks for an axis. If the axis range is greater than 100,
+    ticks are placed every 10 units. Otherwise, the default tick locator
+    from Matplotlib is preserved.
+
+    Parameters
+    ----------
+    ax : matplotlib.axes.Axes, default=None
+        Axis to apply tick settings. Defaults to current axis.
+
+    Returns
+    -------
+    None
+        Modifies the axis in place.
+    """
+    if ax is None:
+        ax = plt.gca()
+
+    xmin, xmax = ax.get_xlim()
+    if xmax - xmin > 100:
+        ax.set_xticks(np.arange(np.floor(xmin), np.ceil(xmax) + 1, 10))
+
+    ymin, ymax = ax.get_ylim()
+    if ymax - ymin > 100:
+        ax.set_yticks(np.arange(np.floor(ymin), np.ceil(ymax) + 1, 10))
+
+    return
 
 #Replicate maps
 def replicatemap_from_labels(labels,frame_list,savepath=None,title=None,
@@ -561,20 +597,18 @@ def visualize_reduction(embedding_coordinates, color_mappings=None,
         color_mappings = np.arange(embedding_coordinates.shape[0])
         print("No color_mappings provided — defaulting to sample index gradient.")
 
-   
-    # Use provided colormap, fallback to magma
-    norm = Normalize(vmin=np.min(color_mappings), vmax=np.max(color_mappings))
 
     scatter=ax.scatter(embedding_coordinates[:, 0], embedding_coordinates[:, 1],
-                            c=color_mappings, cmap=cmap, norm=norm, alpha=0.6)
+                            c=color_mappings, cmap=cmap, alpha=0.6)
 
     add_custom_colorbar(scatter, color_mappings, cbar_label, plt.gca(), cmap=cmap)
-    
+
     # Final touches
     for spine in ax.spines.values():
         spine.set_visible(False)
 
     ax.grid(visible=gridvisible)
+    set_ticks(ax=plt.gca())
     ax.set_title(title, fontdict=labels_font_dict)
     ax.set_xlabel(axis_one_label, fontdict=labels_font_dict)
     ax.set_ylabel(axis_two_label, fontdict=labels_font_dict)
@@ -584,9 +618,91 @@ def visualize_reduction(embedding_coordinates, color_mappings=None,
     plt.tight_layout()
     plt.savefig(savepath, dpi=500)
     plt.close()
+
     return
 
 
+#RMSD lineplots
+def rmsd_lineplots(pandasdf=None,title='RMSD plot',
+                xgroupvar='window',
+                ygroupvar='rmsd',
+                xlab="window",
+                ylab="rmsd",
+                groupingvar='cluster',
+                cmap=cm.inferno_r,
+                legendtitle='Cluster',
+                outfilepath=os.getcwd()):
+    '''
+    Creates a line plot of RMSD values across a specified grouping variable.
+
+    Parameters
+    ----------
+    pandasdf : pandas.DataFrame, default=None
+        A DataFrame containing the values to be plotted. It should contain at least 
+        the columns specified by `xgroupvar`, `ygroupvar`, and `groupingvar`.
+
+    title : str, default='RMSD plot'
+        Title for the plot.
+
+    xgroupvar : str, default='window'
+        Column name in `pandasdf` to be used as the x-axis variable.
+
+    ygroupvar : str, default='rmsd'
+        Column name in `pandasdf` to be used as the y-axis variable.
+
+    xlab : str, default='window'
+        Label for the x-axis.
+
+    ylab : str, default='rmsd'
+        Label for the y-axis.
+
+    groupingvar : str, default='cluster'
+        Column name in `pandasdf` used to group lines (e.g., clusters or categories) and
+        Column name used by seaborn to color lines by category.
+
+    palette : colormap or palette, default=cm.magma_r
+        Color mapping for different groups. Accepts matplotlib colormap or seaborn palette.
+
+    legendtitle : str, default='Cluster'
+        Title for the legend.
+
+    outfilepath : str, default=os.getcwd()
+        Path prefix where the figure will be saved. The function appends '_rmsdlineplot' to this path.
+
+    Returns
+    -------
+    None
+        Saves the line plot to disk and displays it.
+
+    Notes
+    -----
+    This function uses seaborn's lineplot for grouped visualization of RMSD trajectories 
+    or similar metrics. It assumes the input DataFrame has one row per observation.
+
+    Examples
+    --------
+    '''
+
+    plt.figure(figsize=(10, 8))
+    sns.lineplot(
+        data=pandasdf,
+        x=xgroupvar,
+        y=ygroupvar,
+        hue=groupingvar,   # automatically treats as categorical
+        palette=cmap  # choose color palette
+    )
+    ax=plt.gca()
+
+    for spine in ax.spines.values():
+        spine.set_visible(False)
+
+    plt.legend(title=legendtitle, bbox_to_anchor=(1.0, 1), loc="upper left")    
+    plt.xlabel(xlab)
+    plt.ylabel(ylab)
+    plt.savefig(outfilepath+'_rmsdlineplot',dpi=800)
+    
+    plt.close()
+    return
 
 
 #Contour plots 
