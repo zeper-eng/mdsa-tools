@@ -8,14 +8,35 @@ def test_feature_matrix_shape(analyzer):
 
 def test_proper_PCA_reduction_output(analyzer):
     X_pca, weights, var_ratio = analyzer.reduce_systems_representations(method="PCA")
-    assert X_pca.shape[0] == analyzer.feature_matrix.shape[0]
+    assert X_pca.shape[0] == analyzer.feature_matrix.shape[0], "rows of PCA output must equal number of samples"
     assert isinstance(var_ratio, np.ndarray) and var_ratio.shape[0] == 2
-    assert weights.shape[1] == analyzer.feature_matrix.shape[1]
+    assert weights.shape[1] == analyzer.feature_matrix.shape[1], "weights columns must match number of features"
+    # explained variance ratio should be non-increasing and sum to <= 1
+    assert var_ratio.ndim == 1 and var_ratio.shape[0] >= 2, "expected at least 2 components in PCA"
+    assert np.all(var_ratio[:-1] >= var_ratio[1:]), "explained variance ratios should be non-increasing"
+    assert np.sum(var_ratio) <= 1.0001, "explained variance ratio sum should not exceed 1"
 
 def test_proper_UMAP_reduction_output(analyzer):
     umap_coordinates = analyzer.reduce_systems_representations(method="UMAP",n_neighbors=5)
-    assert umap_coordinates.shape[0] == analyzer.feature_matrix.shape[0]
+    assert umap_coordinates.shape[0] == analyzer.feature_matrix.shape[0], "UMAP rows must equal number of samples"
     assert umap_coordinates.shape[1] == 2
+    assert np.issubdtype(np.asarray(umap_coordinates).dtype, np.floating), "UMAP embedding dtype should be float"
+    assert hasattr(umap_coordinates, "shape"), "UMAP embedding should be array-like"
+
+def test_ranked_weights_unique_and_complete(analyzer):
+    analyzer.reduce_systems_representations(method="PCA")  # ensure reduction path exercised
+    ranked = analyzer.create_PCA_ranked_weights()
+    # basic structure
+    required_cols = {"Comparisons","PC1_Weights","PC2_Weights","PC1_magnitude","PC2_magnitude"}
+    assert required_cols.issubset(set(ranked.columns)), "ranked weights missing required columns"
+    # number of rows should equal number of features (pairwise residue comparisons)
+    assert ranked.shape[0] == analyzer.feature_matrix.shape[1], "ranked rows != number of features"
+    # comparisons should be unique labels like 'i-j'
+    assert ranked["Comparisons"].is_unique, "comparison labels must be unique"
+    assert ranked["Comparisons"].str.contains(r"^\d+-\d+$").all(), "comparison labels must look like 'i-j'"
+    # magnitudes must be nonnegative
+    assert (ranked["PC1_magnitude"].values >= 0).all()
+    assert (ranked["PC2_magnitude"].values >= 0).all()
 
 def test_system_clustering(analyzer):
     optimal_k_silhouette_labels, optimal_k_elbow_labels, centers_silhouette, centers_elbow = analyzer.cluster_system_level(max_clusters=5)

@@ -207,15 +207,15 @@ class systems_analysis:
             ---As in the output from scikit learns module PCA() from the cluster.vq() module check in later for link---
 
             In theory it should be (n_sampels,2) since we are generally reducing to two principal components but, if you choose to 
-            use a different number of principal components this would be a different # thus, the signature is broad
+            use a different number of principal components this would be a different # thus, the signature is broad.
 
 
         weights:shape=(n_samples,n_components)
-            The loadings for each principal component. Theese can be thought of as eigenvector components and they are the raw values 
-            they have not been **2 for magnitude measurements yet. This is a seperate function in this module called create_PCA_ranked_weights.
+            The loadings for each principal component. These can be thought of as eigenvector components and they are the raw values. 
+            They have not been **2 for magnitude measurements yet. This is a seperate function in this module called create_PCA_ranked_weights.
 
         explained_variance_ratio_:int,
-            The explained variance ratio of the principal components. This is just a fraction since we are using two principal components
+            The explained variance ratio of the principal components. The explained variance ratio tells you what fraction of the total variance is captured by each principla component. This is just a fraction since we are using two principal components
             but, if you choose to use more it would be slightly different. 
             **Check back here**    
         
@@ -412,7 +412,7 @@ class systems_analysis:
         Parameters
         ----------
 
-        weights : np.ndarray, shape = (n_components, featuresures)
+        weights : np.ndarray, shape = (n_components, feature)
             PCA component loadings (rows = components, columns = features). If None, this function
             calls `reduce_systems_representations()` to compute PCA (default n=2) and uses the
             returned `weights`.

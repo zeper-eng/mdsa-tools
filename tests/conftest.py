@@ -4,6 +4,7 @@ from mdsa_tools.Data_gen_hbond import TrajectoryProcessor
 from mdsa_tools.Convenience import unrestrained_residues
 from mdsa_tools.Analysis import systems_analysis
 
+
 DATA = Path(__file__).parent / "data" / "trajectories"
 CASES = [
     (DATA / "CCU_GCU_10frames.mdcrd", DATA / "5JUP_N2_GCU_nowat.prmtop"),
