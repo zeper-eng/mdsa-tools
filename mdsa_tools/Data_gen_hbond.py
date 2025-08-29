@@ -74,12 +74,11 @@ class TrajectoryProcessor():
         if self.system_representation is not None:
             systems_representation=self.system_representation
         if self.system_representation is None:
-            self.create_system_representations()
-            systems_representation=self.system_representation
-
+            array,dictionary = self.create_attributes(self.trajectory)
+        
+        array,dictionary
+            
        
-       
-
         residues_to_keep = [0]+residues_to_keep 
         if len(systems_representation.shape)==2:
 
@@ -192,7 +191,7 @@ class TrajectoryProcessor():
 
         if granularity == 'residue':
             indexes=[residue.resSeq+1 for residue in trajectory.topology.residues]
-            empty_array = np.zeros(shape=(len(indexes)+1,len(indexes)+1)) 
+            empty_array = np.zeros(shape=(len(indexes)+1,len(indexes)+1),dtype=np.float16) 
 
             empty_array[0,1:]=indexes
             empty_array[1:,0]=indexes
@@ -204,7 +203,7 @@ class TrajectoryProcessor():
         
         elif granularity == 'atom':
             indexes=[atom.index+1 for atom in trajectory.topology.atoms]
-            empty_array = np.zeros(shape=(len(indexes)+1,len(indexes)+1)) 
+            empty_array = np.zeros(shape=(len(indexes)+1,len(indexes)+1),dtype=np.float16) 
 
             empty_array[0,1:]=indexes
             empty_array[1:,0]=indexes
@@ -440,10 +439,22 @@ class cpptraj_hbond_import():
 
 if __name__ == '__main__':
 
-    #load in and test trajectory
-    topology = '/Users/luis/Desktop/workspace/PDBs/5JUP_N2_GCU_nowat.prmtop'
-    traj = '/Users/luis/Desktop/workspace/PDBs/CCU_GCU_10frames.mdcrd' 
-    test_trajectory = trajectory(trajectory_path=traj,topology_path=topology)
+        
+    from mdsa_tools.Data_gen_hbond import TrajectoryProcessor as tp
+    import numpy as np
+    import os
+    from mdsa_tools.Convenience import unrestrained_residues
+
+    topology = '../PDBs/5JUP_N2_GCU_nowat.prmtop'
+    traj = '../PDBs/CCU_GCU_10frames.mdcrd' 
+
+    test_trajectory = tp(trajectory_path=traj,topology_path=topology)
+
+    
+    print("succesfully loaded current PDB from included file")
+
+    os._exit(0)
+
     test_atomic_system=test_trajectory.create_system_representations(test_trajectory.trajectory,granularity='atom')
     print(test_atomic_system.shape)
 
@@ -451,4 +462,48 @@ if __name__ == '__main__':
     print(test_atomic_system_no_indexes[test_atomic_system_no_indexes!=0])
 
     print('test running just the datagen file')
+
+
+    #########################################
+    #In house test with our own trajectories#
+    #########################################
+
+    #load in and test trajectory
+    system_one_topology = '../PDBs/5JUP_N2_CGU_nowat.prmtop'
+    system_one_trajectory = './CCUGCU_G34_full.mdcrd' 
+    system_two_topology = '../PDBs/5JUP_N2_GCU_nowat.prmtop'
+    system_two_trajectory = './CCUCGU_G34_full.mdcrd' 
+
+    print('run one')
+    test_trajectory_one = tp(trajectory_path=system_one_trajectory,topology_path=system_one_topology)
+    print("tp made")
+    test_system_one_ = test_trajectory_one.create_filtered_representations(residues_to_keep=unrestrained_residues)
+    print("systems made")
+    np.save('./full_sampling_GCU',test_system_one_)
+    print(" made")
+
+
+    del test_trajectory_one, test_system_one_ 
+
+    test_trajectory_two = tp(trajectory_path=system_two_trajectory,topology_path=system_two_topology)
+    print("tp made")
+    test_system_two_ = test_trajectory_two.create_filtered_representations(residues_to_keep=unrestrained_residues)
+    print("systems made")
+    np.save('./full_sampling_CGU',test_system_two_)
+    print(" made")
+
+
+    #now that its loaded in try to make object
+    print("intializing creation made")
+    print("finished creation")
+
+    del test_trajectory_two, test_system_two_ 
+
+
+
+
+
+
+
+
     
