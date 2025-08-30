@@ -3,6 +3,7 @@ import pytest
 from mdsa_tools.Data_gen_hbond import TrajectoryProcessor
 from mdsa_tools.Convenience import unrestrained_residues
 from mdsa_tools.Analysis import systems_analysis
+import numpy as np
 
 
 DATA = Path(__file__).parent / "data" / "trajectories"
@@ -46,3 +47,30 @@ def analyzer(analysis_systems):
     sa = systems_analysis(analysis_systems)  # give both at once
     sa.replicates_to_featurematrix()
     return sa
+# === Fixtures for visualization tests ===
+
+@pytest.fixture()
+def small_embedding():
+    # 4 points in 2D square
+    return np.array([[0.0, 0.0],
+                     [1.0, 0.0],
+                     [0.0, 1.0],
+                     [1.0, 1.0]], dtype=float)
+
+@pytest.fixture()
+def discrete_colors():
+    # Two categories: 0 and 1
+    return np.array([0, 0, 1, 1], dtype=int)
+
+@pytest.fixture()
+def legend_labels_map():
+    # Map discrete label -> color (as expected by visualize_reduction)
+    return {0: "#1f77b4", 1: "#ff7f0e"}  # blue / orange
+
+
+@pytest.fixture()
+def simple_labels_and_frames():
+    # labels length must equal sum(frame_list)
+    labels = np.array([0, 1, 0, 2, 2], dtype=int)  # 5 frames total
+    frame_list = [3, 2]  # replicate 0: 3 frames, replicate 1: 2 frames
+    return labels, frame_list
