@@ -47,7 +47,7 @@ def analyzer(analysis_systems):
     sa = systems_analysis(analysis_systems)  # give both at once
     sa.replicates_to_featurematrix()
     return sa
-# === Fixtures for visualization tests ===
+# Fixtures for visualization tests
 
 @pytest.fixture()
 def small_embedding():
