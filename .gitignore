@@ -3,3 +3,7 @@ __pycache__/
 *.pyc
 .pytest_cache/
 *.png
+
+# Temporary outputs
+*.npy
+data_gen_output/
