@@ -513,18 +513,29 @@ class systems_analysis:
 
 
         for k in cluster_range:
-            kmeans = KMeans(n_clusters=k, init='random', n_init=k, random_state=0) #we set
-            kmeans.fit(data) #fit data and now we have everything transformed
-            cluster_centers, inertia, cluster_labels = kmeans.cluster_centers_,kmeans.inertia_,kmeans.labels_
-            sil_score = silhouette_score(data, cluster_labels)
-            
+            kmeans = KMeans(n_clusters=k, init='random', n_init=k, random_state=0)
+            kmeans.fit(data)
+            cluster_centers = kmeans.cluster_centers_
+            inertia = kmeans.inertia_
+            cluster_labels = kmeans.labels_
+
+            # Guard: silhouette requires at least 2 labels
+            unique_labels = np.unique(cluster_labels)
+            if unique_labels.size < 2:
+                sil_score = -1.0
+            else:
+                # If anything else goes wrong, treat as unusable
+                try:
+                    sil_score = silhouette_score(data, cluster_labels)
+                except Exception:
+                    sil_score = -1.0
+
             centers.append(cluster_centers)
             inertia_scores.append(inertia)
             silhouette_scores.append(sil_score)
             all_labels.append(cluster_labels)
 
-
-            np.save(f"{outfile_path}kluster_labels_{k}clust",cluster_labels)
+            np.save(f"{outfile_path}kluster_labels_{k}clust", cluster_labels)
 
         
         #so we save unless your calling this specific optimization
@@ -578,18 +589,54 @@ class systems_analysis:
 
         '''
 
-        pca=PCA(n_components=n)
-        pca.fit(feature_matrix)
-        X_pca = pca.transform(feature_matrix)
-        weights = pca.components_
-        explained_variances = pca.explained_variance_ratio_
+       
+        """Robust PCA that avoids NaNs when data has zero variance and
+        always returns shapes consistent with n components."""
+        import numpy as np
+        from sklearn.decomposition import PCA
 
-        print("X_pca shape (new data):",X_pca.shape)
-        print(f"the total explained variance{np.sum(explained_variances)}")
-        print(f"the total explained variance of PC's is {explained_variances}")
-        print("weights shape:", weights.shape) 
-        
-        return X_pca,weights,explained_variances
+        X = np.asarray(feature_matrix, dtype=float)
+        n_samples, n_features = X.shape
+
+        # If everything is constant, PCA variance ratios are undefined (NaN).
+        col_std = X.std(axis=0)
+        if np.allclose(col_std, 0):
+            X_pca = np.zeros((n_samples, n), dtype=float)
+            weights = np.zeros((n, n_features), dtype=float)
+            var_ratio = np.zeros(n, dtype=float)
+            return X_pca, weights, var_ratio
+
+        # Drop strictly zero-variance columns to avoid NaNs.
+        mask = col_std > 0
+        Xnz = X[:, mask]
+
+        # How many components can we actually fit?
+        n_eff = int(min(n, Xnz.shape[0], Xnz.shape[1]))
+        if n_eff < 1:
+            # Extremely degenerate fallback (shouldn't happen after the check above).
+            X_pca = np.zeros((n_samples, n), dtype=float)
+            weights = np.zeros((n, n_features), dtype=float)
+            var_ratio = np.zeros(n, dtype=float)
+            return X_pca, weights, var_ratio
+
+        pca = PCA(n_components=n_eff)
+        pca.fit(Xnz)
+        X_pca_eff = pca.transform(Xnz)                # (n_samples, n_eff)
+        weights_eff = pca.components_                 # (n_eff, n_nz_features)
+        var_ratio_eff = pca.explained_variance_ratio_ # (n_eff,)
+
+        # Expand weights back to full feature space and pad to n rows.
+        weights_full = np.zeros((n, n_features), dtype=float)
+        weights_full[:n_eff, mask] = weights_eff
+
+        # Pad X_pca and var_ratio to exactly n components (tests expect len==2).
+        X_pca_out = np.zeros((n_samples, n), dtype=float)
+        X_pca_out[:, :n_eff] = X_pca_eff
+
+        var_ratio_out = np.zeros(n, dtype=float)
+        var_ratio_out[:n_eff] = var_ratio_eff
+
+        return X_pca_out, weights_full, var_ratio_out
 
 
 

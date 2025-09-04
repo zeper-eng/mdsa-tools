@@ -46,77 +46,85 @@ class TrajectoryProcessor():
         self.feature_matrix=None
         self.topology = self.trajectory.topology
 
-    def create_filtered_representations(self,residues_to_keep,systems_representation=None):
-        '''Filters arrray representations to contain only residues of interest
+    def create_filtered_representations(self, residues_to_keep, systems_representation=None):
+        """
+        Filter array representations to contain only residues of interest.
 
         Parameters
         ----------
+        residues_to_keep : sequence[int]
+            Residue indices to keep (0-based).
+            We also include index 0 to keep the diagonal/header as prior logic assumed.
+        systems_representation : np.ndarray | None
+            Either (n_frames, n_res, n_res) or (n_res, n_res), or None.
 
-        systems_representation: np.ndarray, shape=(n_frames,n_residues,n_residues)
-            Array containing adjacency matrices for every frame. Shape is dependent on residues in trajectory and number of frames.
-        
-        res_of_interest: 
-            An array containing residues of interest 
+        Returns
+        -------
+        np.ndarray
+            Filtered system representation with shape (n_frames, n_keep, n_keep).
+        """
+        import numpy as np
 
+        # 1) Ensure we have a concrete, VALID systems_representation
+        if systems_representation is None:
+            cand = getattr(self, "system_representation", None)
+            if isinstance(cand, np.ndarray) and cand.ndim in (2, 3):
+                systems_representation = cand
+            else:
+                # Compute from trajectory and cache (order-agnostic unpack)
+                val1, val2 = self.create_attributes(self.trajectory)
+                if isinstance(val1, np.ndarray):
+                    array, dictionary = val1, val2
+                elif isinstance(val2, np.ndarray):
+                    array, dictionary = val2, val1
+                else:
+                    raise TypeError(
+                        "create_attributes(...) must return a NumPy array and a dictionary, "
+                        f"but got types ({type(val1)}, {type(val2)})"
+                    )
+                systems_representation = array
+                self.system_representation = array
+                self.dictionary = dictionary
 
-        Examples
-        --------
+        # 2) Normalize to ndarray + expected ndim
+        systems_representation = np.asarray(systems_representation)
+        if systems_representation.ndim == 2:
+            systems_representation = systems_representation[None, ...]
+        elif systems_representation.ndim != 3:
+            # Fallback: recompute once from source, with order-agnostic unpack
+            val1, val2 = self.create_attributes(self.trajectory)
+            if isinstance(val1, np.ndarray):
+                array, dictionary = val1, val2
+            elif isinstance(val2, np.ndarray):
+                array, dictionary = val2, val1
+            else:
+                raise TypeError(
+                    "create_attributes(...) must return a NumPy array and a dictionary, "
+                    f"but got types ({type(val1)}, {type(val2)})"
+                )
+            systems_representation = np.asarray(array)
+            if systems_representation.ndim == 2:
+                systems_representation = systems_representation[None, ...]
+            elif systems_representation.ndim != 3:
+                raise ValueError(
+                    f"systems_representation must be 2D or 3D array; got ndim={systems_representation.ndim}"
+                )
+            self.system_representation = systems_representation
+            self.dictionary = dictionary
 
+        # 3) Build keep indices (ensure 0 once; preserve order)
+        keep = list(dict.fromkeys([0] + list(residues_to_keep)))
 
+        # 4) Bounds check
+        n_res = systems_representation.shape[1]
+        for idx in keep:
+            if not (0 <= idx < n_res):
+                raise IndexError(f"Residue index {idx} out of bounds 0..{n_res-1}")
 
-        Notes
-        -----
+        # 5) Fancy-index rows/cols
+        filtered = systems_representation[:, keep, :][:, :, keep]
+        return filtered
 
-        
-        '''
-        if systems_representation is not None:
-            systems_representation=systems_representation
-        if self.system_representation is not None:
-            systems_representation=self.system_representation
-        if self.system_representation is None:
-            self.create_system_representations()
-            systems_representation=self.system_representation
-
-       
-       
-
-        residues_to_keep = [0]+residues_to_keep 
-        if len(systems_representation.shape)==2:
-
-            # Create a mask that marks the rows and columns to keep
-            row_mask = np.isin(systems_representation[:, 0], residues_to_keep)
-            col_mask = np.isin(systems_representation[0, :], residues_to_keep)
-
-            filtered_rows=systems_representation[row_mask,:]
-            filtered_array=filtered_rows[:,col_mask]
-            
-            
-        #3dimensional filtering
-        elif len(systems_representation.shape)==3:
-
-            filtered_array=[]
-
-            for i in range(systems_representation.shape[0]):
-
-                current_frame = systems_representation[i,:,:]
-
-                if len(current_frame.shape)==2:
-
-                    row_mask = np.isin(current_frame[:, 0], residues_to_keep)
-                    col_mask = np.isin(current_frame[0, :], residues_to_keep)
-
-                    filtered_rows=current_frame[row_mask,:]
-                    filtered_frame=filtered_rows[:,col_mask]
-                    filtered_array.append(filtered_frame)
-
-                elif len(current_frame.shape)!=2:
-                    print("frame not correctly indexed")
-                    break
-                
-        filtered_array=np.array(filtered_array)
-        self.filtered_representation=filtered_array
-
-        return filtered_array
 
     def create_system_representations(self,trajectory=None,granularity=None):
         '''Wraps operations for creating systems representations into a nice single method
