@@ -74,11 +74,12 @@ class TrajectoryProcessor():
         if self.system_representation is not None:
             systems_representation=self.system_representation
         if self.system_representation is None:
-            array,dictionary = self.create_attributes(self.trajectory)
-        
-        array,dictionary
-            
+            self.create_system_representations()
+            systems_representation=self.system_representation
+
        
+       
+
         residues_to_keep = [0]+residues_to_keep 
         if len(systems_representation.shape)==2:
 
@@ -191,7 +192,7 @@ class TrajectoryProcessor():
 
         if granularity == 'residue':
             indexes=[residue.resSeq+1 for residue in trajectory.topology.residues]
-            empty_array = np.zeros(shape=(len(indexes)+1,len(indexes)+1),dtype=np.float16) 
+            empty_array = np.zeros(shape=(len(indexes)+1,len(indexes)+1)) 
 
             empty_array[0,1:]=indexes
             empty_array[1:,0]=indexes
@@ -203,7 +204,7 @@ class TrajectoryProcessor():
         
         elif granularity == 'atom':
             indexes=[atom.index+1 for atom in trajectory.topology.atoms]
-            empty_array = np.zeros(shape=(len(indexes)+1,len(indexes)+1),dtype=np.float16) 
+            empty_array = np.zeros(shape=(len(indexes)+1,len(indexes)+1)) 
 
             empty_array[0,1:]=indexes
             empty_array[1:,0]=indexes
@@ -450,8 +451,8 @@ if __name__ == '__main__':
 
     test_trajectory = tp(trajectory_path=traj,topology_path=topology)
 
-    
-    print("succesfully loaded current PDB from included file")
+
+    print("succesfully loaded current PDB from test")
 
     os._exit(0)
 
