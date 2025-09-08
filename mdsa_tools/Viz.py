@@ -5,9 +5,56 @@ import matplotlib.cm as cm
 import pycircos.pycircos as py 
 import seaborn as sns
 from matplotlib.colors import BoundaryNorm
-import pandas as pd
+import matplotlib.colors as mcolors
+from matplotlib.cm import ScalarMappable
 
 #Miscellaneous tools
+def add_continuous_colorbar(scatter, labels, cbar_label=None, ax=None, cmap=None,
+                            extend="neither", format=None):
+    """
+    Continuous colorbar alternative to `add_custom_colorbar`.
+    Works with numeric and non-numeric labels.
+    """
+    if ax is None:
+        ax = plt.gca()
+
+    cmap_obj = plt.get_cmap(cmap or cm.inferno)
+
+    # Build numeric values
+    if labels is None:
+        n = scatter.get_offsets().shape[0]
+        vals = np.arange(n, dtype=float)
+    else:
+        vals = np.asarray(labels)
+
+    if not np.issubdtype(vals.dtype, np.number):
+        _, inv = np.unique(vals, return_inverse=True)
+        vals = inv.astype(float)
+
+    finite = np.isfinite(vals)
+    if not finite.any():
+        vmin, vmax = 0.0, 1.0
+    else:
+        vmin = float(np.nanmin(vals[finite]))
+        vmax = float(np.nanmax(vals[finite]))
+        if vmin == vmax:
+            pad = 0.5 if vmin == 0 else 0.01 * abs(vmin)
+            vmin, vmax = vmin - pad, vmax + pad
+
+    norm = mcolors.Normalize(vmin=vmin, vmax=vmax)
+
+    # Make sure the scatter is actually using this data/norm/cmap
+    scatter.set_norm(norm)
+    scatter.set_cmap(cmap_obj)
+    scatter.set_array(vals)
+
+    mappable = ScalarMappable(norm=norm, cmap=cmap_obj)
+    mappable.set_array(vals)
+    cbar = plt.colorbar(mappable, ax=ax, extend=extend, format=format)
+    if cbar_label:
+        cbar.set_label(cbar_label, fontsize=10)
+    return cbar
+
 def add_custom_colorbar(scatter, labels, cbar_label=None, ax=None, cmap=None):
     if ax is None:
         ax = plt.gca()
@@ -69,10 +116,12 @@ def set_ticks(ax=None):
     return
 
 #Replicate maps
-def replicatemap_from_labels(labels,frame_list,savepath=None,title=None,
-                              xlabel=None, ylabel=None,
-                             cbar_label=None,
-                             cmap=None,
+def replicatemap_from_labels(labels,frame_list,
+                            savepath=None,
+                            title=None,
+                            xlabel=None, ylabel=None,
+                            cbar_label=None,
+                            cmap=None,
                              ) -> np.ndarray:
     '''returns an array consisting of a re-formatted list of labels through which to view a set.
 
@@ -143,7 +192,7 @@ def replicatemap_from_labels(labels,frame_list,savepath=None,title=None,
     y_spacing_factor = 1
     x_spacing_factor = 1
     
-
+    
     scatter=plt.scatter(
                 x=final_coordinates[:,1] * x_spacing_factor,
                 y=final_coordinates[:,0] * y_spacing_factor,
@@ -154,7 +203,10 @@ def replicatemap_from_labels(labels,frame_list,savepath=None,title=None,
                 alpha=1)
     
     #cbar and cbar ticks
-    add_custom_colorbar(scatter,final_coordinates[:,2],cbar_label,plt.gca())
+    if np.unique(final_coordinates).shape[0]>=1000:
+        add_continuous_colorbar(scatter,final_coordinates[:,2],cbar_label,plt.gca())
+    if np.unique(final_coordinates).shape[0]<1000:
+        add_custom_colorbar(scatter,final_coordinates[:,2],cbar_label,plt.gca())
 
     #personal preferences
     plt.grid(visible=False)
@@ -567,14 +619,15 @@ def create_2d_color_mappings(labels=([80]*20)+([160]*10),
         sample_color_mappings = [label_dict[i] for i in labels]
         return sample_color_mappings
 
-def visualize_reduction(embedding_coordinates, color_mappings=None, 
-                  savepath=os.getcwd(), 
-                  title=None, 
-                  cmap=None,
-                  axis_one_label=None,
-                  axis_two_label=None,
-                  cbar_label=None,
-                  gridvisible=False):
+def visualize_reduction(embedding_coordinates, 
+                        color_mappings=None, 
+                        savepath=os.getcwd(), 
+                        title=None, 
+                        cmap=None,
+                        axis_one_label=None,
+                        axis_two_label=None,
+                        cbar_label=None,
+                        gridvisible=False):
 
     axis_one_label=None if axis_one_label is not None else 'Embedding Space Axis 1'
     axis_two_label=None if axis_two_label is not None else 'Embedding Space Axis 2'
@@ -593,15 +646,19 @@ def visualize_reduction(embedding_coordinates, color_mappings=None,
     fig = plt.figure(figsize=(16, 12), dpi=300)
     ax = plt.gca()
 
+
+    if color_mappings is not None and len(color_mappings) > 0:
+        scatter=ax.scatter(embedding_coordinates[:, 0], embedding_coordinates[:, 1],
+                            c=color_mappings, cmap=cmap, alpha=0.6)
+        add_custom_colorbar(scatter, color_mappings, cbar_label, plt.gca(), cmap=cmap)
+ 
     if color_mappings is None or len(color_mappings) == 0:
         color_mappings = np.arange(embedding_coordinates.shape[0])
         print("No color_mappings provided — defaulting to sample index gradient.")
-
-
-    scatter=ax.scatter(embedding_coordinates[:, 0], embedding_coordinates[:, 1],
+        scatter=ax.scatter(embedding_coordinates[:, 0], embedding_coordinates[:, 1],
                             c=color_mappings, cmap=cmap, alpha=0.6)
+        add_continuous_colorbar(scatter, color_mappings, cbar_label, plt.gca(), cmap=cmap)
 
-    add_custom_colorbar(scatter, color_mappings, cbar_label, plt.gca(), cmap=cmap)
 
     # Final touches
     for spine in ax.spines.values():
@@ -620,7 +677,6 @@ def visualize_reduction(embedding_coordinates, color_mappings=None,
     plt.close()
 
     return
-
 
 #RMSD lineplots
 def rmsd_lineplots(pandasdf=None,title='RMSD plot',
