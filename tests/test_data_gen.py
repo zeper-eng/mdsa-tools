@@ -21,3 +21,4 @@ def test_filtered_integrity(filtered):
     assert np.all(fmat >= 0)
     assert np.allclose(fmat, np.swapaxes(fmat, 1, 2))
     assert np.all(np.diagonal(fmat, axis1=1, axis2=2) == 0)
+

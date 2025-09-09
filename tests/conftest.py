@@ -42,11 +42,13 @@ def analysis_systems():
         arrays.append(current_array)
     return arrays
 
+
 @pytest.fixture(scope="session")
 def analyzer(analysis_systems):
     sa = systems_analysis(analysis_systems)  # give both at once
     sa.replicates_to_featurematrix()
     return sa
+
 
 @pytest.fixture(scope="session")
 def small_embedding():
@@ -56,10 +58,12 @@ def small_embedding():
     assert(test_coordinates.shape==(6400,2))
     return test_coordinates
 
+
 @pytest.fixture(scope="session")
 def discrete_colors():
     # Two categories: 0 and 1
     return np.array([0, 0, 1, 1], dtype=int)
+
 
 @pytest.fixture(scope="session")
 def legend_labels_map():
@@ -72,4 +76,31 @@ def simple_labels_and_frames():
 
     labels = np.arange(0,6400,1)  #size of our systems
     frame_list = ((([80] * 20) + ([160] * 10))*2) #should add up to above
+    
     return labels, frame_list
+
+#########################
+#Cpptraj Import Fixtures#
+#########################
+
+@pytest.fixture(scope='session')
+def cpptraj_filesystem(cpptraj):
+    '''Break-On Cpptraj import by default  '''
+    Break_On_Fake_Cpptraj_Data=Path(__file__).parent / "data" / "Break_On_Fake_Cpptraj_Data.dat"
+    
+    return
+
+@pytest.fixture(scope="session")
+def analysis_systems():
+    trajs = [
+        ("CCU_GCU_10frames.mdcrd", "5JUP_N2_GCU_nowat.prmtop"),
+        ("CCU_CGU_10frames.mdcrd", "5JUP_N2_CGU_nowat.prmtop"),
+    ]
+
+    arrays = []
+    for traj, top in trajs:
+        tp = TrajectoryProcessor(DATA / traj, DATA / top)
+        current_array=tp.create_filtered_representations(residues_to_keep=unrestrained_residues)
+        arrays.append(current_array)
+
+    return arrays
