@@ -73,7 +73,7 @@ def legend_labels_map():
 
 @pytest.fixture(scope="session")
 def simple_labels_and_frames():
-
+    
     labels = np.arange(0,6400,1)  #size of our systems
     frame_list = ((([80] * 20) + ([160] * 10))*2) #should add up to above
     
@@ -83,11 +83,25 @@ def simple_labels_and_frames():
 #Cpptraj Import Fixtures#
 #########################
 
-@pytest.fixture(scope='session')
-def cpptraj_filesystem(cpptraj):
-    '''Break-On Cpptraj import by default  '''
-    Break_On_Fake_Cpptraj_Data=Path(__file__).parent / "data" / "Break_On_Fake_Cpptraj_Data.dat"
-    
+DATA = Path(__file__).parent / "data" / "trajectories"
+CASES = [
+    (DATA / "CCU_GCU_10frames.mdcrd", DATA / "5JUP_N2_GCU_nowat.prmtop"),
+    (DATA / "CCU_CGU_10frames.mdcrd", DATA / "5JUP_N2_CGU_nowat.prmtop"),
+]
+CPPTRAJ_CASES=[
+    (Path(__file__).parent / "data" / "cpptraj_fake_data" / "Break_On_Fake_Cpptraj_Data.dat",Path(__file__).parent / "data" / "trajectories" / '5JUP_N2_GCU_nowat.prmtop')
+    ]
+
+from mdsa_tools.
+@pytest.fixture(scope="session", params=CPPTRAJ_CASES, ids=["GCU"])
+def importer(request):
+    '''Break-On Cpptraj import by default'''
+    datfile, top = request.param  
+    importer_instance=cpptraj_hbond_import(datfile, top)
+    rep=importer_instance.create_systems_rep()
+    np.savez_compressed(f'GCU_1_in_10_sampling',rep=rep)
+
+
     return
 
 @pytest.fixture(scope="session")
@@ -104,3 +118,15 @@ def analysis_systems():
         arrays.append(current_array)
 
     return arrays
+
+    @pytest.fixture(scope="session", params=CASES, ids=["GCU"])# for now but hopefully we add in a cgu case and some other topologies since this is strictly an import kind of case
+    def processor(request):
+        traj, top = request.param
+        return TrajectoryProcessor(traj, top)
+
+    file='./GCU_HBond_Matrix.dat'
+    topology='5JUP_N2_GCU_nowat.prmtop'
+
+    importer_instance=cpptraj_hbond_import(file,topology)
+    rep=importer_instance.create_systems_rep()
+    np.savez_compressed(f'GCU_1_in_10_sampling',rep=rep)
