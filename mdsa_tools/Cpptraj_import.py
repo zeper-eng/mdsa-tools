@@ -1,3 +1,7 @@
+import numpy as np
+import mdtraj as md
+from typing import Tuple, Dict
+
 class cpptraj_hbond_import():
 
     def __init__(self,filepath,topology):
