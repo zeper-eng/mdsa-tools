@@ -100,6 +100,6 @@ def importer(request):
     datfile, top = request.param  
     importer_instance=cpptraj_hbond_import(datfile, top)
 
-    return cpptraj_hbond_import
+    return importer_instance
 
 

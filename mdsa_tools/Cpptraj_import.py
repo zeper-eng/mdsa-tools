@@ -35,26 +35,48 @@ class cpptraj_hbond_import():
         return
      
     def extract_headers(self,filepath):
-        '''Smaller module for importing files from cpptraj 
+        '''Parse the cpptraj hydrogen-bond header to get residue–residue pairs.
+
+        This reads only the first line of a cpptraj `hbond ... out <file> series`
+        table and extracts the residue indices for each H-bond column. It expects
+        a leading `#Frame` column followed by columns named like
+        `<prefix>_<res1>@<atom1>_<res2>@<atom2>` (e.g., `HB_12@N_34@O`).
+        The returned pairs are 1-based residue indices (AMBER `resSeq` style),
+        ordered exactly as the data columns appear in the file.
 
         Parameters
         ----------
-
-
+        filepath : str or pathlib.Path
+            Path to the cpptraj `hbond` series output file. Must contain a header
+            line beginning with `#Frame` and column names formatted as described
+            above.
 
         Returns
         -------
-
-
+        indices : list of tuple of int
+            A list of `(res1, res2)` residue index pairs (1-based) corresponding
+            to the non-`#Frame` columns in the header, in column order. These
+            indices are intended to be used later to place column values into a
+            residue×residue adjacency matrix at positions `[res1-1, res2-1]`.
 
         Notes
         -----
-
-
+        - Only the first line is inspected; data lines are not parsed here.
+        - Column names must contain at least three underscore-separated tokens:
+        a freeform prefix, `<res1>@<atom1>`, and `<res2>@<atom2>`. If the
+        format differs, this function will raise on `int(...)` conversion.
+        - The first column must be exactly `#Frame`; it is ignored.
 
         Examples
         --------
+        Suppose the header line looks like::
 
+            #Frame HB_12@N_34@O HB_12@N_35@O HB_25@O_30@H
+
+        Then::
+
+            indices = obj.extract_headers("hbonds.dat")
+            # indices == [(12, 34), (12, 35), (25, 30)]
 
         '''
         filepath = filepath if filepath is not None else None
@@ -70,6 +92,7 @@ class cpptraj_hbond_import():
                 res1 = col_header.split('_')[1].split('@')[0]
                 res2 = col_header.split('_')[2].split('@')[0]
                 indices.append((int(res1),int(res2)))
+                
         return indices
 
     def create_cpptraj_attributes(self,data,topology,granularity=None):
