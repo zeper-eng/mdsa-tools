@@ -1,5 +1,7 @@
 sphinx>=7
 sphinx-rtd-theme
-sphinx-autodoc-typehints
 numpydoc
-
+sphinx>=8,<9
+sphinx-autodoc-typehints>=3.2.0
+myst-parser
+sphinx-copybutton

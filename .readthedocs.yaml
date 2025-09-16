@@ -7,14 +7,13 @@ build:
     python: "3.11"
 
 sphinx:
-  # change if your conf.py lives elsewhere
   configuration: docs/source/conf.py
 
 python:
   install:
-    # Install doc-only requirements (themes, etc.)
-    - requirements: docs/requirements.txt
-    # Install your package so autodoc can import it (we’ll mock heavy deps)
+    # Install your package so autodoc can import it
     - method: pip
       path: .
+    # Install doc-only requirements (themes, extensions)
+    - requirements: docs/requirements.txt
 
