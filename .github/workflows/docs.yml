@@ -21,11 +21,18 @@ jobs:
           pip install -e .
           pip install -r docs/requirements.txt
 
-      - name: Build Sphinx HTML (warnings fail build)
+      # (Optional) quick debug if installs ever fail:
+      - name: Debug deps
         run: |
-          sphinx-build -E -b html docs/source docs/_build/html -W --keep-going
+          echo "=== docs/requirements.txt ==="
+          cat docs/requirements.txt
+          python -c "import pkgutil; print('has sphinx_rtd_theme?', pkgutil.find_loader('sphinx_rtd_theme') is not None)"
 
-      - name: Upload HTML as artifact (optional)
+      - name: Build Sphinx HTML (warnings fail build)
+        run: sphinx-build -E -b html docs/source docs/_build/html -W --keep-going
+
+      - name: Upload HTML as artifact
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: docs-html

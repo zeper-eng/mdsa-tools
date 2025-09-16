@@ -25,5 +25,5 @@ autodoc_default_options = {
     "show-inheritance": True,
 }
 
-html_theme = "sphinx_rtd_theme"
+html_theme = "furo"
 
