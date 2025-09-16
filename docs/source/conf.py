@@ -10,7 +10,6 @@ extensions = [
     "sphinx.ext.autosummary",
     "sphinx.ext.napoleon",
     "sphinx.ext.viewcode",
-    "sphinx_autodoc_typehints",
 ]
 autosummary_generate = True
 napoleon_numpy_docstring = True
