@@ -537,7 +537,50 @@ def mdcircos_graph(empty_circle, residue_dict, savepath=os.getcwd()+'mdcircos_gr
     plt.close(fig_cb)
 
 def extract_properties_from_weightsdf(pca_table):
+    '''
+    Parse a Systems Analysis weights table into residue IDs and per-PC weight mappings.
 
+    Parameters
+    ----------
+    pca_table : pandas.DataFrame
+        Table containing, at minimum, the following columns:
+          - 'Comparisons' : str
+                Pairwise residue identifiers in the form "i-j" (e.g., "12-57").
+                Whitespace around tokens is allowed and will be stripped.
+          - 'PC1_magnitude' : float
+                Magnitude (e.g., absolute eigenvector coefficient/weight) for PC1
+                associated with each residue pair in 'Comparisons'.
+          - 'PC2_magnitude' : float
+                Magnitude for PC2 associated with each residue pair.
+
+    Returns
+    -------
+    residues : list of str
+        Unique residue indices extracted from 'Comparisons', returned as strings.
+        Order follows first appearance in the table (not sorted), which is suitable
+        for constructing PyCircos arcs via `make_MDCircos_object`.
+
+    PC1_weight_dict : dict[str, float]
+        Mapping from the original pair key in 'Comparisons' (e.g., "12-57") to its
+        PC1 magnitude.
+
+    PC2_weight_dict : dict[str, float]
+        Mapping from the original pair key in 'Comparisons' to its PC2 magnitude.
+
+    Notes
+    -----
+    - Residue tokens are obtained by splitting each 'Comparisons' entry on the first
+      '-' and stacking the two sides; extra whitespace is stripped and NaNs dropped.
+    - Residue IDs are coerced to strings to match PyCircos arc IDs.
+    - Any non-numeric or missing magnitudes in the input will propagate as-is
+      (e.g., NaN) in the returned dictionaries.
+    - This function does not enforce symmetry or de-duplicate inverse keys
+      (e.g., "12-57" vs "57-12"); it preserves the keys exactly as provided.
+
+    Examples
+    --------
+   
+    '''
     comps = pca_table['Comparisons'].astype(str)
 
     # split stack and clean
@@ -614,7 +657,7 @@ def create_MDcircos_from_weightsdf(PCA_ranked_weights, outfilepath=None):
     >>> # /tmp/PC2_magnitudeviz.png
     >>> # /tmp/PC2_magnitudeviz_colorbar.png
     '''
-    
+
     outfilepath = outfilepath if outfilepath is not None else os.getcwd()
 
     res_indexes,PC1_magnitude_dict,PC2_magnitude_dict = extract_properties_from_weightsdf(PCA_ranked_weights)

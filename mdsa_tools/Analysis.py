@@ -4,9 +4,7 @@ from sklearn.cluster import KMeans
 import numpy as np
 import os
 from sklearn.decomposition import PCA
-from mdsa_tools.Viz import visualize_reduction
 import pandas as pd
-import matplotlib.cm as cm
 import umap
 import os
 
@@ -722,8 +720,6 @@ class systems_analysis:
         print("weights shape:", weights.shape) 
         
         return X_pca,weights,explained_variances
-
-
 
 if __name__ == '__main__':
 

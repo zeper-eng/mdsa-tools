@@ -1,3 +1,4 @@
+docs/_build/
 new_sampling/
 *manuscript_*
 exploring_embedding_space_example.py
@@ -30,3 +31,4 @@ PDZ_analysis.py
 P53Analysis.py
 compresserz/
 manuscript_explorations/shaved_pca_ns/*.npy*
+docs/build/
