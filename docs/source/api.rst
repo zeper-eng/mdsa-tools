@@ -3,7 +3,6 @@ API reference
 
 .. autosummary::
    :toctree: _autosummary
-   :caption: Modules
 
    mdsa_tools
    mdsa_tools.Analysis
