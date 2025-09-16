@@ -7,6 +7,6 @@ It provides tools for clustering, dimensionality reduction, visualization,
 and hydrogen bond network generation.
 
 .. toctree::
-   :caption: Contents:
-   ::maxdepth: 2
+   :hidden:
+   :caption: Contents
    api
