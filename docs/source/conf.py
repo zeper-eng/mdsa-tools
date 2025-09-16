@@ -26,10 +26,4 @@ autodoc_default_options = {
     "show-inheritance": True,
 }
 
-html_theme = "furo"
-html_title = "mdsa-tools"
-# optional brand color tweak
-html_theme_options = {"light_css_variables": {
-    "color-brand-primary": "#2563eb",
-    "color-brand-content": "#2563eb",
-}}
+html_theme = "groundwork"
