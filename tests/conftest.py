@@ -83,11 +83,7 @@ def simple_labels_and_frames():
 #Cpptraj Import Fixtures#
 #########################
 
-DATA = Path(__file__).parent / "data" / "trajectories"
-CASES = [
-    (DATA / "CCU_GCU_10frames.mdcrd", DATA / "5JUP_N2_GCU_nowat.prmtop"),
-    (DATA / "CCU_CGU_10frames.mdcrd", DATA / "5JUP_N2_CGU_nowat.prmtop"),
-]
+'''CPPTRAJ cases (more to be included)'''
 CPPTRAJ_CASES=[
     (Path(__file__).parent / "data" / "cpptraj_fake_data" / "Break_On_Fake_Cpptraj_Data.dat",Path(__file__).parent / "data" / "trajectories" / '5JUP_N2_GCU_nowat.prmtop')
     ]
@@ -96,10 +92,18 @@ from mdsa_tools.Cpptraj_import import cpptraj_hbond_import
 
 @pytest.fixture(scope="session", params=CPPTRAJ_CASES, ids=["GCU"])
 def importer(request):
-    '''Break-On Cpptraj import by default'''
+    '''Break-On Cpptraj import by default as test files for creating instance of import object'''
     datfile, top = request.param  
     importer_instance=cpptraj_hbond_import(datfile, top)
 
     return importer_instance
 
 
+########################
+#Visualization Fixtures#
+########################
+
+@pytest.fixture(scope='session')
+def less_than_256_bin_colormappings():
+    colormapping=np.concatenate((np.full(3200,1),np.full(3200,2)))
+    return colormapping

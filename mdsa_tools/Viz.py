@@ -555,34 +555,66 @@ def extract_properties_from_weightsdf(pca_table):
     return residues, PC1_weight_dict, PC2_weight_dict
 
 def create_MDcircos_from_weightsdf(PCA_ranked_weights, outfilepath=None):
-    '''Processes Weights table to create MDcircos plots visualizing weightings
+    '''
+    Processes a weights table to create MDcircos plots visualizing eigenvector
+    coefficient magnitudes for PC1 and PC2.
 
     Parameters
     ----------
-    PCA_ranked_weights:Pandas.DataFrame,default=None
-      A table containing the ranked weights we created as a part of the analysis Systems Analysis
-      module. It is expected that it wold contain columns with the headers:
+    PCA_ranked_weights : pandas.DataFrame, default=None
+        Table produced by the Systems Analysis pipeline containing at least the
+        following columns:
+          - 'Comparisons' : str
+                Pairwise residue identifiers in the form "i-j" (e.g., "12-57").
+                Each row represents a chord between residues i and j.
+          - 'PC1_magnitude' : float
+                Magnitude (e.g., absolute eigenvector coefficient or weight)
+                associated with the pair for principal component 1.
+          - 'PC2_magnitude' : float
+                Magnitude associated with the pair for principal component 2.
+        Additional columns are ignored.
+
+    outfilepath : str or None, default=None
+        Path *prefix* for output files. If `None`, defaults to `os.getcwd()`.
+        The function appends the following stems (no separator is inserted):
+            - 'PC1_magnitudeviz'  (main figure and separate colorbar)
+            - 'PC2_magnitudeviz'  (main figure and separate colorbar)
+        For example, `outfilepath='/tmp/'` yields:
+            '/tmp/PC1_magnitudeviz.png', '/tmp/PC1_magnitudeviz_colorbar.png',
+            '/tmp/PC2_magnitudeviz.png', '/tmp/PC2_magnitudeviz_colorbar.png'.
 
     Returns
     -------
     None
+        Saves MDcircos figures (and their colorbars) to disk; no value returned.
 
     Notes
     -----
-    Mdcircos plots where arcs are residue indexes and line thickness and darkness are eigenvector coefficient magnituses. 
-
-
+    - Residue indices are extracted from 'Comparisons' and used to build a
+      PyCircos `Gcircle` via `make_MDCircos_object`.
+    - Chords are drawn for each residue pair; line width and color intensity are
+      scaled by the corresponding magnitudes. Normalization and colorbar export
+      are handled in `mdcircos_graph`.
+    - Two independent visualizations are generated: one for PC1 magnitudes and
+      one for PC2 magnitudes, sharing the same residue arc layout.
 
     Examples
     --------
-
-
-
-    Notes
-    -----
-
-
+    >>> # Minimal schema expected by the function:
+    >>> import pandas as pd
+    >>> df = pd.DataFrame({
+    ...     'Comparisons': ['10-25', '25-40', '10-40'],
+    ...     'PC1_magnitude': [0.12, 0.35, 0.08],
+    ...     'PC2_magnitude': [0.05, 0.22, 0.31],
+    ... })
+    >>> create_MDcircos_from_weightsdf(df, outfilepath='/tmp/')
+    >>> # Files written:
+    >>> # /tmp/PC1_magnitudeviz.png
+    >>> # /tmp/PC1_magnitudeviz_colorbar.png
+    >>> # /tmp/PC2_magnitudeviz.png
+    >>> # /tmp/PC2_magnitudeviz_colorbar.png
     '''
+    
     outfilepath = outfilepath if outfilepath is not None else os.getcwd()
 
     res_indexes,PC1_magnitude_dict,PC2_magnitude_dict = extract_properties_from_weightsdf(PCA_ranked_weights)
@@ -590,6 +622,8 @@ def create_MDcircos_from_weightsdf(PCA_ranked_weights, outfilepath=None):
     pc2_circos_object=make_MDCircos_object(res_indexes)
     mdcircos_graph(pc1_circos_object,PC1_magnitude_dict,outfilepath+'PC1_magnitudeviz')
     mdcircos_graph(pc2_circos_object,PC2_magnitude_dict,outfilepath+'PC2_magnitudeviz') 
+
+    return
 
 #Embeddingspace visualizations
 def create_2d_color_mappings(labels=([80]*20)+([160]*10), 
@@ -628,6 +662,78 @@ def visualize_reduction(embedding_coordinates,
                         axis_two_label=None,
                         cbar_label=None,
                         gridvisible=False):
+    '''
+    Scatter plot of a 2-D embedding with optional color mapping and colorbar; saves the figure to disk.
+
+    Parameters
+    ----------
+    embedding_coordinates : array-like, shape (n_samples, 2)
+        Two-column array of embedding coordinates (e.g., from PCA/UMAP). The first column is plotted
+        on the x-axis and the second on the y-axis.
+
+    color_mappings : array-like of shape (n_samples,) or None, default=None
+        Optional per-sample values used to color points. Can be categorical (e.g., cluster labels) or
+        numeric. **Behavior:** if provided and non-empty, a discrete colorbar is drawn via
+        `add_custom_colorbar`; if omitted or empty, the function defaults to a sample-index gradient
+        and draws a continuous colorbar via `add_continuous_colorbar`.
+
+    savepath : str, default=os.getcwd()
+        Path **including filename** where the figure will be written, e.g. `'/tmp/embedding.png'`.
+        The function calls `plt.savefig(savepath, dpi=500)` directly and does not append an extension.
+
+    title : str or None, default="Dimensional Reduction of Systems"
+        Figure title. If `None`, the default title above is used.
+
+    cmap : matplotlib colormap or str, default=cm.magma_r
+        Colormap applied to the scatter points and colorbar.
+
+    axis_one_label : str or None, default='Embedding Space Axis 1'
+        Label for the x-axis.
+
+    axis_two_label : str or None, default='Embedding Space Axis 2'
+        Label for the y-axis.
+
+    cbar_label : str or None, default='Value'
+        Label for the colorbar.
+
+    gridvisible : bool, default=False
+        If True, shows a background grid on the axes.
+
+    Returns
+    -------
+    None
+        Saves the plot to `savepath` and closes the figure.
+
+    Notes
+    -----
+    - Axes spines are hidden and ticks are adjusted via `set_ticks` for wide ranges.
+    - Points are drawn with `alpha=0.6`. Figure size is 16x12 inches (dpi=300 for the canvas,
+      saved at dpi=500).
+    - When `color_mappings` is provided, the colorbar is treated as categorical (discrete bins).
+      If you prefer a continuous mapping of your own numeric values, either omit `color_mappings`
+      to use the default gradient or adapt the function to call `add_continuous_colorbar` on your
+      numeric array.
+
+    Examples
+    --------
+    # 1) Categorical coloring (e.g., cluster labels)
+    >>> X_2d = umap_result  # shape (n_samples, 2)
+    >>> labels = kmeans.labels_
+    >>> visualize_reduction(
+    ...     embedding_coordinates=X_2d,
+    ...     color_mappings=labels,
+    ...     savepath="embedding_clusters.png",
+    ...     title="UMAP by Cluster",
+    ...     cbar_label="Cluster",
+    ... )
+
+    # 2) Default continuous gradient (no labels provided)
+    >>> visualize_reduction(
+    ...     embedding_coordinates=X_2d,
+    ...     savepath="embedding_default_gradient.png",
+    ...     title="UMAP (Default Gradient)"
+    ... )
+    '''
 
     axis_one_label=None if axis_one_label is not None else 'Embedding Space Axis 1'
     axis_two_label=None if axis_two_label is not None else 'Embedding Space Axis 2'
