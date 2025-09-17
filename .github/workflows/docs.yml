@@ -29,7 +29,7 @@ jobs:
           python -c "import pkgutil; print('has sphinx_rtd_theme?', pkgutil.find_loader('sphinx_rtd_theme') is not None)"
 
       - name: Build Sphinx HTML (warnings fail build)
-        run: sphinx-build -E -b html docs/source docs/_build/html 
+        run: sphinx-build -b html docs/source docs/_build/html -E -v
 
       - name: Upload HTML as artifact
         if: always()
