@@ -4,7 +4,7 @@ This module provides utilities for importing and structuring hydrogen bond data 
 It parses `hbond ... out <file> series` output tables, extracts residue–residue hydrogen-bond
 pairs from the header, and loads the corresponding time series into adjacency-matrix
 representations. These system-level matrices can then be used directly for downstream
-analyses (e.g., clustering, dimensionality reduction, visualization).
+analyses (i.e., clustering, dimensionality reduction, visualization).
 
 Rather than functioning as a generic wrapper, the focus here is on:
 
@@ -38,7 +38,7 @@ class cpptraj_hbond_import():
     filepath : str or pathlib.Path
         Path to a cpptraj `hbond ... out <file> series` output table.
     topology : str or pathlib.Path
-        Path to a topology file readable by MDTraj (e.g., AMBER `prmtop`).
+        Path to a topology file readable by MDTraj (i.e., AMBER `prmtop`).
 
     Attributes
     ----------
@@ -83,7 +83,7 @@ class cpptraj_hbond_import():
         This reads only the first line of a cpptraj `hbond ... out <file> series`
         table and extracts the residue indices for each H-bond column. It expects
         a leading `#Frame` column followed by columns named like
-        `<prefix>_<res1>@<atom1>_<res2>@<atom2>` (e.g., `HB_12@N_34@O`).
+        `<prefix>_<res1>@<atom1>_<res2>@<atom2>` (i.e., `HB_12@N_34@O`).
         The returned pairs are 1-based residue indices (AMBER `resSeq` style),
         ordered exactly as the data columns appear in the file.
 
