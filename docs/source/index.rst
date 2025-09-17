@@ -8,8 +8,9 @@ It provides tools for clustering, dimensionality reduction, visualization,
 and hydrogen bond network generation.
 
 .. autosummary::
-   :toctree: _autosummary
+   :toctree: 
    :nosignatures:
    :recursive:
+   :maxdepth: 2
 
    api
