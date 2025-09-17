@@ -48,5 +48,3 @@ autodoc_default_options = {
 
 #this is theme specifications (see other file its in css so)
 html_theme = "furo"
-html_static_path = ["_static"]
-html_css_files = ["custom.css"]

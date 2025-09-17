@@ -4,7 +4,7 @@ A module for creating and manipulating systems representations of molecular
 dynamics trajectories. Most MD groups typically have access to HPC resources, which makes tasks like high-dimensional clustering tractable. 
 On standard workstations, we recommend down-sampling or masking datasets before use.
 
-For AMBER users we would also recommend the CPPTRAJ_IMPORT module which can import the results oh the hbond command
+For AMBER users we would also recommend the CPPTRAJ_IMPORT module which can import the results of the hbond command
 in series form and maps atomic hbond counts to the residue level.
 
 
