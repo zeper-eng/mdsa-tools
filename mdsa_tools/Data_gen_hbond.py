@@ -272,9 +272,7 @@ class TrajectoryProcessor():
             
             atom_to_residue:Dict, Dict[atom_index]=residue_index
                 Dictionary containing atom to residue index mappings      
-
-            frame:int
-                Integer for indexing what frame we are iterating over in array        
+      
 
                 
             Returns

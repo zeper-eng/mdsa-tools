@@ -6,3 +6,4 @@ sphinx>=8,<9
 myst-parser
 sphinx-copybutton
 groundwork-sphinx-theme
+sphinx_design

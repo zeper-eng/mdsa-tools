@@ -4,27 +4,30 @@ exclude_patterns = ["_api/*"]
 import os, sys
 sys.path.insert(0, os.path.abspath("../..")) 
 
+#Setting our titles and stuff
 project = "mdsa-tools"
+html_title = "mdsa-tools"        
+html_short_title = "mdsa-tools"
+
+
 extensions = [
     "sphinx.ext.autodoc",
     "sphinx.ext.autosummary",
-    "sphinx.ext.napoleon",
     "sphinx.ext.viewcode",
+    "sphinx_design",
+    "numpydoc",
 ]
 
-
-#Since im using Numpy style docstrings the various preferences for things
-napoleon_include_init_with_doc = False
 autosummary_generate = True
+
+# Let numpydoc handle NumPy style; Napoleon only handles Google style:
+napoleon_numpy_docstring = False
 napoleon_google_docstring = True
-napoleon_numpy_docstring = True
-napoleon_use_param = True
-napoleon_use_rtype = True
-autodoc_typehints = "description"
-napoleon_include_special_with_doc = True
-autoclass_content = "both"
-napoleon_use_ivar = True
-napoleon_attr_annotations = True
+
+# Reduce duplication from numpydoc:
+numpydoc_show_class_members = False
+numpydoc_class_members_toctree = False
+
 
 #so I can get attributes to work
 napoleon_custom_sections = [
