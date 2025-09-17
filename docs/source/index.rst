@@ -9,6 +9,7 @@ and hydrogen bond network generation.
 
 .. autosummary::
    :toctree: _autosummary
-   :Modules: 
+   :nosignatures:
+   :recursive:
 
    mdsa_tools
