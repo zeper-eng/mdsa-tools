@@ -2,7 +2,7 @@
 
 Tools for systems-level analysis of Molecular Dynamics (MD) simulations
 
-## Pipeline overview (read the docs [here](https://zeper-eng.github.io/mdsa-tools/))
+## Pipeline overview (read the docs [here](https://mdsa-tools.readthedocs.io/en/latest/))
 
 ![Pipeline](https://raw.githubusercontent.com/zeper-eng/workspace/main/resources/Pipelineflic.png)
 
