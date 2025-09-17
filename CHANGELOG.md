@@ -1,3 +1,6 @@
+## [1.1.2]-2025-08-15
+README now links to live docs for less builds
+
 ## [1.1.1]-2025-08-15
 Improvements to docs and README amongst many other things as well as more tests. This is mainly for the README
 and such on PYPI to be in tune with the Github.
