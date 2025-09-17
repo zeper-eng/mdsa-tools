@@ -12,4 +12,4 @@ and hydrogen bond network generation.
    :nosignatures:
    :recursive:
 
-   mdsa_tools
+   api
