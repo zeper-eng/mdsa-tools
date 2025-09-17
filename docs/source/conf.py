@@ -2,7 +2,7 @@ exclude_patterns = ["_api/*"]
 
 # docs/source/conf.py
 import os, sys
-sys.path.insert(0, os.path.abspath("../.."))  # so 'mdsa_tools' resolves if installed by RTD
+sys.path.insert(0, os.path.abspath("../..")) 
 
 project = "mdsa-tools"
 extensions = [
