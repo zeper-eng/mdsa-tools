@@ -9,5 +9,6 @@ and hydrogen bond network generation.
 
 .. toctree::
    :maxdepth: 2
+   :caption: Contents
 
    api
