@@ -17,8 +17,10 @@ autodoc_typehints = "description"
 
 autodoc_mock_imports = [
     "mdtraj", "matplotlib", "seaborn", "sklearn", "umap", "pandas", "scipy",
-    "pycircos",   
+    "pycircos"
 ]
+
+html_theme = "groundwork"
 
 autodoc_default_options = {
     "members": True,
@@ -26,4 +28,3 @@ autodoc_default_options = {
     "show-inheritance": True,
 }
 
-html_theme = "groundwork"

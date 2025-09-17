@@ -1,4 +1,4 @@
-﻿mdsa\_tools.Viz
+mdsa\_tools.Viz
 ===============
 
 .. automodule:: mdsa_tools.Viz

@@ -80,5 +80,3 @@ def test_replicatemap_from_labels_saves_png(tmp_path, simple_labels_and_frames):
     return
 
 
-#basically parametarize two sets of tests
-#fixtures without an object get janky so we explicitly define parameters for the following test
