@@ -241,28 +241,34 @@ class systems_analysis:
         '''
         Parameters
         ----------
-        feature_matrix:np.ndarray,shape=(sum(n_frames),n_residues*n_residues) where the sum of n_frames refers to the total number of frames.
+        feature_matrix : np.ndarray,shape=(sum(n_frames),n_residues*n_residues) where the sum of n_frames refers to the total number of frames.
             Each row of the new matrix represents a flattened adjacency matrix for each frame, and the frames are stacked
             in such a way that each of the original arrays follow each other sequentially.
         
             
-        n_components:int,default=2
+        n_components : int,default=2
             The number of principal components you would like to reduce your dataset down to
         
             
-        str:outfile_path,default=os.getcwd()
+        str : outfile_path, default=os.getcwd()
             path to where you would like to save your visualization
         
-        min_dist:float,default=0.5
+        method :str, order:{'PCA','UMAP'}
+            Define which method you would like to use to perform dim-reduction. We provide two methods a linear
+            and non-linear method, Principal Components Analysis (PCA) and Uniform Manifold Approximation and Projection
+            (UMAP).
+
+        min_dist : float,default=0.5
             This is a UMAP-specific parameter. It controls how tightly UMAP is allowed to pack points together. 
             Lower values will preserve more of the local clusters in the data whereas higher values will push 
             points further apart.
 
-        n_neighbors:int,default=900
+        n_neighbors : int,default=900
             Another UMAP-specific parameter. It determines the number of neighboring points used in 
             local approximations of the manifold. Larger values result in more global structure being preserved.
  
 
+            
 
         
         Returns
@@ -487,49 +493,62 @@ class systems_analysis:
     def create_PCA_ranked_weights(self,outfile_path=None, weights=None, indexes=None):
         '''Create a ranked table of PCA feature weights for the first two principal components.
 
-        Parameters
-        ----------
+    Parameters
+    ----------
+    outfile_path : str or pathlib.Path, optional
+        Directory where outputs may be written. If ``None``, uses the current working directory.
+    weights : np.ndarray, shape = (n_components, n_features), optional
+        PCA component loadings (rows = components, columns = features). If ``None``, this
+        function calls ``reduce_systems_representations()`` to compute PCA (default n=2)
+        and uses the returned ``weights``.
+    indexes : array-like of int, optional
+        Residue indices used to label pairwise comparisons. If ``None``, uses ``self.indexes``.
+        These indices define the order used to generate upper-triangle residue–residue
+        comparison labels (e.g., "12-47").
 
-        weights : np.ndarray, shape = (n_components, featuresures)
-            PCA component loadings (rows = components, columns = features). If None, this function
-            calls `reduce_systems_representations()` to compute PCA (default n=2) and uses the
-            returned `weights`.
-        indexes : array-like of int
-            Residue indices used to label pairwise comparisons. If None, uses `self.indexes`.
-            These indices define the order used to generate upper-triangle residue–residue
-            comparison labels (e.g., "12-47").
+    Returns
+    -------
+    dataframe: pandas.DataFrame,
+        A table mapping each feature (upper-triangle residue pair) to its PCA weights and
+        magnitudes.
+        
+        
+        Columns include:
 
-        Returns
-        -------
-        pandas.DataFrame
-            A table mapping each feature (upper-triangle residue pair) to its PCA weights and
-            magnitudes. Columns:
-                - 'Comparisons'     : str, "i-j" residue pair label
-                - 'PC1_Weights'     : float, raw loading for PC1
-                - 'PC2_Weights'     : float, raw loading for PC2
-                - 'PC1_magnitude'   : float, (PC1_Weights)**2
-                - 'PC2_magnitude'   : float, (PC2_Weights)**2
-                - 'PC1_mag_norm'    : float, min–max normalized PC1_magnitude to [0,1] (within PC1)
-                - 'PC2_mag_norm'    : float, min–max normalized PC2_magnitude to [0,1] (within PC2)
+        
+        -`Comparisons`    : str   — 'i-j' residue pair label
+        -`PC1_Weights`    : float — raw loading for PC1
+        -`PC2_Weights`    : float — raw loading for PC2
+        -`PC1_magnitude`  : float — (PC1_Weights)**2
+        -`PC2_magnitude`  : float — (PC2_Weights)**2
+        -`PC1_mag_norm`   : float — min–max normalized PC1_magnitude to [0, 1] (within PC1)
+        -`PC2_mag_norm`   : float — min–max normalized PC2_magnitude to [0, 1] (within PC2)
 
-        Notes
-        -----
-        - Only the upper triangle (excluding the diagonal) of the residue–residue matrix is used,
-        so each row corresponds to a unique residue pair.
-        - “Weights” are PCA component loadings (eigenvector entries). Squaring gives a magnitude
-        that is convenient for ranking feature importance within a component (sign is discarded).
-        - The min–max normalization is performed **within each component** to [0,1] and is intended
-        for visualization/ranking. Do not compare these normalized values across different PCA
-        runs unless you control scaling consistently.
-        - This function assumes at least two components are available; it reports PC1 and PC2.
+        
+    Notes
+    -----
+    
 
-        Examples
-        --------
-        >>> sa = systems_analysis([traj_array_sys1, traj_array_sys2])
-        >>> df = sa.create_PCA_ranked_weights()
-        >>> df.head()
+    - Only the upper triangle (excluding the diagonal) of the residue–residue matrix is used,
+    so each row corresponds to a unique residue pair.
+    - “Weights” are PCA component loadings (eigenvector entries). Squaring gives a magnitude
+    that is convenient for ranking feature importance within a component (sign is discarded).
+    - The min–max normalization is performed **within each component** to [0, 1] and is intended
+    for visualization/ranking. Do not compare these normalized values across different PCA
+    runs unless you control scaling consistently.
+    - This function assumes at least two components are available; it reports PC1 and PC2.
 
-        '''
+
+    Examples
+    --------
+
+
+    >>> sa = systems_analysis([traj_array_sys1, traj_array_sys2])  # doctest: +SKIP
+    >>> df = sa.create_PCA_ranked_weights()                         # doctest: +SKIP
+    >>> df.head()                                                   # doctest: +SKIP
+
+    
+    '''
 
         if weights is None:
             _,weights,_ =self.reduce_systems_representations()
