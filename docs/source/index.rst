@@ -7,10 +7,7 @@ mdsa-tools is a python package for systems-level analyses of molecular dynamics 
 It provides tools for clustering, dimensionality reduction, visualization,
 and hydrogen bond network generation.
 
-.. autosummary::
-   :toctree: 
-   :nosignatures:
-   :recursive:
+.. toctree::
    :maxdepth: 2
 
    api
