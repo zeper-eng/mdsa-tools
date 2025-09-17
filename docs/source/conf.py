@@ -52,3 +52,5 @@ autodoc_default_options = {
 html_theme = "pydata_sphinx_theme"
 html_show_sourcelink = False
 
+#html_static_path = ['../_static']
+#html_css_files = ['custom.css']

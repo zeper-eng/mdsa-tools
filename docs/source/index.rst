@@ -58,7 +58,3 @@ A fortunate side-effect is that the analysis and viz modules are data-agnostic: 
       
    
 
-.. toctree::
-   :hidden:
-
-   api
