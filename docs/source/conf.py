@@ -19,13 +19,10 @@ extensions = [
 
 autosummary_generate = True
 
-# Let numpydoc handle NumPy style; Napoleon only handles Google style:
-napoleon_numpy_docstring = False
-napoleon_google_docstring = True
 
 # Reduce duplication from numpydoc:
-numpydoc_show_class_members = False
-numpydoc_class_members_toctree = False
+numpydoc_show_class_members = True
+numpydoc_class_members_toctree = True
 
 
 #so I can get attributes to work
