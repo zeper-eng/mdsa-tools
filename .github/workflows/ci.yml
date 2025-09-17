@@ -32,6 +32,7 @@ jobs:
       # pick ONE of the two install approaches:
       - name: Install docs deps (extras)
         run: pip install -e .[docs]
+        run:pip install groundwork-sphinx-theme
       # OR if you prefer a file:
       # - name: Install docs deps (requirements.txt)
       #   run: pip install -r docs/requirements.txt && pip install -e .
