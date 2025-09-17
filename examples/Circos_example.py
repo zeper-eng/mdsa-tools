@@ -1,8 +1,6 @@
 from mdsa_tools.Analysis import systems_analysis
 import os
 import numpy as np
-from sklearn.decomposition import PCA
-import pandas as pd
 
 #Load in previously generated data
 redone_CCU_GCU_fulltraj=np.load('/Users/luis/Downloads/redone_unrestrained_CCU_GCU_Trajectory_array.npy',allow_pickle=True)

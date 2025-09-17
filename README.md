@@ -12,9 +12,6 @@ We start from an MD trajectory and generate per-frame interaction networks (grap
 
 ```bash
 pip install mdsa-tools
-# Optional:
-# pip install "mdsa-tools[docs]"   # if you want to build the docs locally
-# pip install "mdsa-tools[examples]"  # if you define this extra for demo deps
 ```
 
 ## Systems Problem Area:

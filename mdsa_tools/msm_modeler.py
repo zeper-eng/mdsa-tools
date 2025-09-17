@@ -15,6 +15,7 @@ mdsa_tools.Data_gen_hbond.create_system_representations
     build residue–residue H-bond adjacency matrices.
 numpy.linalg.svd
     linear algebra under the hood.
+    
 '''
 
 import numpy as np
@@ -442,7 +443,6 @@ class MSM_Modeller:
         import numpy as np
         import matplotlib.cm as cm
         import os
-        import pandas as pd
         from mdsa_tools.msm_modeler import MSM_Modeller as msm
 
         # pipeline setup (as in data generation)

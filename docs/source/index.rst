@@ -13,10 +13,16 @@ adjacency matrices from mdtraj or import them from cpptraj.
 A fortunate side-effect is that the analysis and viz modules are data-agnostic: any dataset matching the adjacency-matrix schema will work. 
 
 
-.. toctree::
-   :hidden:
+.. toctree:: 
    :maxdepth: 2
-   :caption: Contents
+   :hidden:
+   
+   api
+   examples
+   mdsa_tools/Cpptraj_import
+   mdsa_tools/Analysis
+   mdsa_tools/Viz
+
 
 .. 2 columns no matter what kind of screen and spacing of 2
 .. grid:: 3 3 3 3

@@ -49,5 +49,27 @@ autodoc_default_options = {
 html_theme = "pydata_sphinx_theme"
 html_show_sourcelink = False
 
-#html_static_path = ['../_static']
-#html_css_files = ['custom.css']
+autodoc_default_options = {
+    "members": True,
+    "undoc-members": True,
+    "show-inheritance": True,
+}
+
+html_theme = "pydata_sphinx_theme"
+
+html_theme_options = {
+    # keep the logo/title at the left
+    "navbar_start": ["navbar-logo"],
+
+    # keep search + theme switcher etc. on the right (optional)
+    "navbar_end": ["search-field.html", "theme-switcher", "navbar-icon-links"],
+    "show_nav_level": 2,
+    "show_toc_level": 2,
+}
+
+html_sidebars = {
+    "index": [],  # no left nav / page TOC on homepage
+    "**": ["search-field.html", "sidebar-nav-bs.html", "page-toc.html"],
+}
+html_static_path = ["_static"]
+html_css_files = ["fullwidth.css"]
