@@ -6,4 +6,3 @@ API reference
    :recursive:
 
    mdsa_tools
-   mdsa_tools
