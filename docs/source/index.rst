@@ -18,12 +18,13 @@ A fortunate side-effect is that the analysis and viz modules are data-agnostic: 
 .. grid:: 3 3 3 3
    :gutter: 3
 
-   .. grid-item-card:: Link to the full python API
+   .. grid-item-card:: 
       :link: api
-      :shadow: md
-      :link-type: ref       
+      :shadow: lg
+      :link-type: doc       
       :text-align: center
       
+      Link to the full python API
       ^^^
       
       .. image:: /resources/Pipelineflic.png
@@ -33,13 +34,20 @@ A fortunate side-effect is that the analysis and viz modules are data-agnostic: 
 
 
       +++
-      Examples of doing all range of things from visualizations to analysis
+      Full description of the modules included as a part of the workflow
 
    
-   .. grid-item-card:: Examples
-      :link: api
+   .. grid-item-card:: 
+      :link: examples
       :link-type: doc        
       :text-align: center
+      
+      Examples
+
+      ^^^
+      something here
+      +++
+      Examples of doing all range of things from visualizations to analysis
 
 
    .. grid-item-card:: link to the Systems Paper
