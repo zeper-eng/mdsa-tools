@@ -1,6 +1,6 @@
 Metadata-Version: 2.4
 Name: mdsa-tools
-Version: 1.1.0
+Version: 1.1.1
 Summary: The Weir Labs H-bond Systems Analyses modules!
 Author-email: Luis Perez <lperez@wesleyan.edu>
 License: MIT
@@ -29,10 +29,6 @@ Requires-Dist: sphinx-copybutton; extra == "docs"
 Provides-Extra: test
 Requires-Dist: pytest; extra == "test"
 Requires-Dist: pytest-cov; extra == "test"
-
-
-
-
 
 # __mdsa-tools__ [![Docs Build](https://github.com/zeper-eng/mdsa-tools/actions/workflows/docs.yml/badge.svg?branch=main)](https://mdsa-tools.readthedocs.io/en/latest/)[![CI](https://github.com/zeper-eng/mdsa-tools/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/zeper-eng/mdsa-tools/actions/workflows/ci.yml)[![PyPI version](https://img.shields.io/pypi/v/mdsa-tools.svg)](https://pypi.org/project/mdsa-tools/)[![License](https://img.shields.io/pypi/l/mdsa-tools.svg)](https://github.com/zeper-eng/mdsa-tools/blob/main/LICENSE)
 
@@ -107,12 +103,12 @@ from mdsa_tools.Analysis import systems_analysis
 all_systems=[test_system_one_,test_system_two_]
 Systems_Analyzer = systems_analysis(all_systems)
 
-#transform adjacency matrices preform clsutering and dimensional reduction and visualizing clusters
+#transform adjacency matrices preform clustering and dimensional reduction
 Systems_Analyzer.replicates_to_featurematrix()
 optimal_k_silhouette_labels,optimal_k_elbow_labels,centers_sillohuette,centers_elbow = Systems_Analyzer.cluster_system_level(outfile_path='./test_',max_clusters=5)
 print('clustering succesfully completed')
 X_pca,weights,explained_variance_ratio_=Systems_Analyzer.reduce_systems_representations(method='PCA') #you could do method=PCA/UMAP here
-print('reduction succesful')
+print('reduction successful')
 
 
 ###
@@ -126,6 +122,6 @@ visualize_reduction(X_pca,color_mappings=optimal_k_silhouette_labels,savepath='.
 
 #If they exist map transitions between the various cluster assignments
 from mdsa_tools.Viz import replicatemap_from_labels
-
-replicatemap_from_labels(cmap=cm.plasma_r,frame_list=[9]*2,labels=optimal_k_silhouette_labels,savepath='./Repmap_')#9 frames each so 
+fake_labels=np.arange(0,18,1)
+replicatemap_from_labels(cmap=cm.plasma_r,frame_list=[9]*2,labels=fake_labels,savepath='./Repmap_')#9 frames each so 
 

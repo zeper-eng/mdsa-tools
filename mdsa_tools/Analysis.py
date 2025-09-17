@@ -1,3 +1,21 @@
+'''
+Mostly functions as a big wrapper for conveniently storing a lot of our analysis methods. 
+
+Generally you can follow our pipeline but,the individual steps are pretty modular if your comfortable doing simple numpy transmutations etc.
+You could for instance use the clustering on various number of n_dimensional datasets, or pull H-bond values using 
+systems_analysis.extract_hbond_values() and use thoose in replicate maps instead of k-means cluster assignments.
+
+Its a very small module so im not going to really include routine listings and such but, I will point to some relevant functions for the work
+being done by it.
+
+See Also
+--------
+mdsa_tools.Viz.visualize_reduction : Plot PCA/UMAP embeddings.
+mdsa_tools.Data_gen_hbond.create_system_representations : Build residue–residue H-bond adjacency matrices.
+numpy.linalg.svd : Linear algebra used under the hood.
+
+'''
+
 import numpy as np
 from sklearn.metrics import silhouette_score
 from sklearn.cluster import KMeans
@@ -9,40 +27,51 @@ import umap
 import os
 
 class systems_analysis:
-    '''A big wrapper for conveniently storing a lot of our analysis methods
     '''
+    Parameters
+    ----------
 
+    systems_representations : list, expected=list[array_1,...,array_n-1] where each array is an np.ndarray with shape=(n_frames,n_residues,n_residues)
+        Each array should have the shape as described above, where each frame has an adjacency matrix of pairwise
+        comparisons between all residues. The only axis that can differ between arrays is the number of frames (n_frames).
+
+    frame_list : listlike, shape=(data,)
+        A list of integers representing the number of frames present in each replicate. This should be in the order
+        of which the various versions of the system, and replicates where concatenated.
+
+    Attributes
+    ----------
+
+    num_systems : int, default=len(systems_representations)
+        Since this was originally built around comparative systems analysis some of the methods work on this concept directly.
+        You can still input a single item as a tuple, similar to the way you do with np.array().
+
+    systems_representations : arraylike,default=systems_representations
+        An attribute for conveniently manipulating the inputted list of arrays. 
+
+    indexes : arraylike,default=systems_representations[0][0,0,1:]
+        Derived from ``systems_representations[0][0,0,1:]``. The arrays include index data, which introduces one extra row
+        and column. This overhead is negligible for most use cases, unless operating on extremely large datasets. The
+        design is not intended for such massive-scale applications.
+    
+        
+    Notes
+    -----
+    * Automatically converts list of arrays into a feature matrix so it’s easy to build in.
+    * Expects systems of the same size for automation. For differently sized systems, you will likely need to
+      preprocess manually.
+    * Provides a general systems perspective on molecular dynamics, so it can serve as a base for other projects.
+
+    Examples
+    --------
+    >>> sa = systems_analysis([...])
+    >>> sa.num_systems
+    3
+    '''
+    
     def __init__(self,systems_representations=None,replicate_distribution=None):
         '''
-        Parameters
-        ----------
-        systems_representations:list, expected=list[array_1,...,array_n-1] where each array is an np.ndarray with shape=(n_frames,n_residues,n_residues)
-            Each array should have the shape as described above, where each frame has an adjacency matrix of pairwise
-            comparisons between all residues. The only axis that can differ between arrays is the number of frames (n_frames).
         
-        frame_list: listlike,shape=(data,)
-            A list of integers representing the number of frames present in each replicate. This should be in the order
-            of which the various versions of the system, and replicates where concatenated.
-        
-
-        Returns
-        -------
-        None its an init
-
-        
-
-
-        Notes
-        -----
-        -automatically will convert list of arrays into a feature matrix so its easy to build it in
-        -Additionally this for now expects systems of the same size for automation, if you want to run some of the downstream tasks
-        you will most likely have to do it yourself if you are trying to analyze differently sized (in terms of frames) systems
-        -Although since really this is a more general systems perspective on molecular dynamics its a great bouncing point for any systems project you may
-        have in mind
-
-
-        Examples
-        --------
         '''
         
         self.num_systems=len(systems_representations) #this is useful later on for when we are doing system_specific operations
@@ -516,13 +545,13 @@ class systems_analysis:
         Columns include:
 
         
-        -`Comparisons`    : str   — 'i-j' residue pair label
-        -`PC1_Weights`    : float — raw loading for PC1
-        -`PC2_Weights`    : float — raw loading for PC2
-        -`PC1_magnitude`  : float — (PC1_Weights)**2
-        -`PC2_magnitude`  : float — (PC2_Weights)**2
-        -`PC1_mag_norm`   : float — min–max normalized PC1_magnitude to [0, 1] (within PC1)
-        -`PC2_mag_norm`   : float — min–max normalized PC2_magnitude to [0, 1] (within PC2)
+        * `Comparisons`    : str   — 'i-j' residue pair label
+        * `PC1_Weights`    : float — raw loading for PC1
+        * `PC2_Weights`    : float — raw loading for PC2
+        * `PC1_magnitude`  : float — (PC1_Weights)**2
+        * `PC2_magnitude`  : float — (PC2_Weights)**2
+        * `PC1_mag_norm`   : float — min–max normalized PC1_magnitude to [0, 1] (within PC1)
+        * `PC2_mag_norm`   : float — min–max normalized PC2_magnitude to [0, 1] (within PC2)
 
         
     Notes

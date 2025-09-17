@@ -1,6 +1,6 @@
-## [1.1.0]-2025-08-15
-Sidelined MSM for the time being, lots of new tests added to CI, and bulletproofing of
-various modules
+## [1.1.1]-2025-08-15
+Improvements to docs and README amongst many other things as well as more tests. This is mainly for the README
+and such on PYPI to be in tune with the Github.
 
 ## [1.0.6]-2025-08-15
 Built in analyses for finding candidate states for msm, msm module incorporation, lots of bugfixes and new tests

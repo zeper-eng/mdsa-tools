@@ -1,3 +1,21 @@
+'''
+Mostly functions as a big wrapper for conveniently storing a lot of our analysis methods. 
+
+Generally you can follow our pipeline but,the individual steps are pretty modular if your comfortable doing simple numpy transmutations etc.
+You could for instance use the clustering on various number of n_dimensions to reduce to, or pull H-bond values using 
+systems_analysis.extract_hbond_values() and use thoose in replicate maps instead of k-means results.
+
+Its a very small module so im not going to really include routine listings and such but, I will point to some relevant functions for the work
+being done by it.
+
+See Also
+--------
+mdsa_tools.Viz.visualize_reduction : Plot PCA/UMAP embeddings.
+mdsa_tools.Data_gen_hbond.create_system_representations : Build residue–residue H-bond adjacency matrices.
+numpy.linalg.svd : Linear algebra used under the hood.
+
+'''
+
 import numpy as np
 import os
 import matplotlib.pyplot as plt

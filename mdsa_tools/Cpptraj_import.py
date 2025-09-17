@@ -1,13 +1,32 @@
+'''
+Mostly functions as a big wrapper for conveniently storing a lot of our analysis methods. 
+
+Generally you can follow our pipeline but,the individual steps are pretty modular if your comfortable doing simple numpy transmutations etc.
+You could for instance use the clustering on various number of n_dimensions to reduce to, or pull H-bond values using 
+systems_analysis.extract_hbond_values() and use thoose in replicate maps instead of k-means results.
+
+Its a very small module so im not going to really include routine listings and such but, I will point to some relevant functions for the work
+being done by it.
+
+See Also
+--------
+mdsa_tools.Viz.visualize_reduction : Plot PCA/UMAP embeddings.
+mdsa_tools.Data_gen_hbond.create_system_representations : Build residue–residue H-bond adjacency matrices.
+numpy.linalg.svd : Linear algebra used under the hood.
+
+'''
 import numpy as np
 import mdtraj as md
 from typing import Tuple, Dict
 
 class cpptraj_hbond_import():
-
-    def __init__(self,filepath,topology):
-        ''' Init takes just the filepath to the desires data and then the topology
+    '''Init takes just the filepath to the desires data and then the topology
 
         Parameters
+        ----------
+
+        
+        Attributes
         ----------
 
 
@@ -28,6 +47,8 @@ class cpptraj_hbond_import():
 
 
         '''
+    def __init__(self,filepath,topology):
+        
         self.indices=self.extract_headers(filepath)
         self.data=np.loadtxt(filepath, skiprows=1, usecols=range(1, len(self.indices)+1), dtype=int)
         self.topology = md.load_topology(topology) 
@@ -61,11 +82,11 @@ class cpptraj_hbond_import():
 
         Notes
         -----
-        - Only the first line is inspected; data lines are not parsed here.
-        - Column names must contain at least three underscore-separated tokens:
+        * Only the first line is inspected; data lines are not parsed here.
+        * Column names must contain at least three underscore-separated tokens:
         a freeform prefix, `<res1>@<atom1>`, and `<res2>@<atom2>`. If the
         format differs, this function will raise on `int(...)` conversion.
-        - The first column must be exactly `#Frame`; it is ignored.
+        * The first column must be exactly `#Frame`; it is ignored.
 
         Examples
         --------

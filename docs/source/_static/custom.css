@@ -1,0 +1,22 @@
+/* Manual big section headers */
+.rst-content .rubric {
+  font-size: 2.3rem;         
+  font-weight: 700;           
+  margin: 1.2rem 0 .6rem;
+  padding-bottom: .25rem;
+  border-bottom: 1px solid var(--color-foreground-muted);
+}
+
+/* Enlarge the term side of field/definition lists (param/attr names) */
+.rst-content dl.field-list > dt,
+.rst-content dl.simple > dt {
+  font-size: 1.05rem;
+  font-weight: 600;
+  margin-top: .4rem;
+}
+
+/* Nicer spacing for descriptions */
+.rst-content dl > dd,
+.rst-content dl.field-list > dd {
+  margin: 0 0 .8rem 0;
+}
