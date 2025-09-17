@@ -7,3 +7,4 @@ myst-parser
 sphinx-copybutton
 groundwork-sphinx-theme
 sphinx_design
+pydata-sphinx-theme

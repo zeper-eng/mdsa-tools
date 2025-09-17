@@ -1,0 +1,11 @@
+/* Light blue card background */
+.sd-card.bg-blue {
+    background-color: #e6f0ff !important;
+    color: #003366 !important;  /* adjust for readability */
+}
+
+/* Dark card variant */
+.sd-card.bg-dark {
+    background-color: #222 !important;
+    color: #f0f0f0 !important;
+}

@@ -13,7 +13,6 @@ html_short_title = "mdsa-tools"
 extensions = [
     "sphinx.ext.autodoc",
     "sphinx.ext.autosummary",
-    "sphinx.ext.viewcode",
     "sphinx_design",
     "numpydoc",
 ]
@@ -50,4 +49,6 @@ autodoc_default_options = {
 }
 
 #this is theme specifications (see other file its in css so)
-html_theme = "furo"
+html_theme = "pydata_sphinx_theme"
+html_show_sourcelink = False
+

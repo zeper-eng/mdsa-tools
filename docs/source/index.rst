@@ -12,27 +12,43 @@ adjacency matrices from mdtraj or import them from cpptraj.
 
 A fortunate side-effect is that the analysis and viz modules are data-agnostic: any dataset matching the adjacency-matrix schema will work. 
 
-.. image:: ../resources/Pipelineflic.png
-   :alt: PCA clusters for system A
-   :width: 60%
-   :align: center
+
 
 .. 2 columns no matter what kind of screen and spacing of 2
-.. grid:: 2 2 2 2
-   :gutter: 2
+.. grid:: 3 3 3 3
+   :gutter: 3
 
    .. grid-item-card:: Link to the full python API
       :link: api
-      :link-type: doc        
+      :shadow: md
+      :link-type: ref       
       :text-align: center
+      
+      ^^^
+      
+      .. image:: /resources/Pipelineflic.png
+         :alt: PCA clusters for system A
+         :width: 100%
+         :align: center
+
+
+      +++
+      Examples of doing all range of things from visualizations to analysis
 
    
-   .. grid-item-card:: Link to the systems paper
+   .. grid-item-card:: Examples
       :link: api
       :link-type: doc        
       :text-align: center
 
-      The paper as the basis for aggregation into modules
+
+   .. grid-item-card:: link to the Systems Paper
+      :link: api
+      :link-type: doc        
+      :text-align: center
+
+      
+   
 
 .. toctree::
    :hidden:
