@@ -8,3 +8,7 @@ sphinx-copybutton
 groundwork-sphinx-theme
 sphinx_design
 pydata-sphinx-theme
+sphinx_material
+breathe
+sphinx_press_theme
+bootstrap

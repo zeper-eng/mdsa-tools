@@ -42,9 +42,7 @@ autodoc_default_options = {
     "show-inheritance": True,
 }
 
-# This is theme specifications (see other file its in css so)
-html_theme = "pydata_sphinx_theme"
-html_show_sourcelink = False
+
 
 html_theme_options = {
     # Keep the logo/title at the left
@@ -57,7 +55,7 @@ html_theme_options = {
 }
 
 # Theme settings (pydata_sphinx_theme)
-html_theme = "groundwork-sphinx-theme"
+html_theme = "pydata_sphinx_theme"
 html_show_sourcelink = False
 
 html_theme_options = {

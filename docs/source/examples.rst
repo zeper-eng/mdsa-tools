@@ -1,11 +1,4 @@
-﻿Examples
-========
-
-Here you can find worked-out example scripts that demonstrate 
-how to use **mdsa-tools** for clustering, visualization, and 
-analysis of molecular dynamics data.
-
-.. grid:: 2 2 2 2
+﻿.. grid:: 2 2 2 2
    :gutter: 2
    :class-container: full-width 
 
@@ -20,7 +13,8 @@ analysis of molecular dynamics data.
       ^^^
       .. image:: /resources/analysis_pipeline.png
          :alt: Example of clustering analysis
-         :width: 100%
+         :width: 200px
+         :height: 150px
          :align: center
 
       +++
@@ -37,7 +31,8 @@ analysis of molecular dynamics data.
       ^^^
       .. image:: /resources/circos_example.png
          :alt: Circos example visualization
-         :width: 100%
+         :width: 200px
+         :height: 150px
          :align: center
 
       +++
@@ -54,7 +49,8 @@ analysis of molecular dynamics data.
       ^^^
       .. image:: /resources/datagen.png
          :alt: Data generation workflow
-         :width: 100%
+         :width: 200px
+         :height: 150px
          :align: center
 
       +++
@@ -71,7 +67,8 @@ analysis of molecular dynamics data.
       ^^^
       .. image:: /resources/Amberlogo.png
          :alt: Import from cpptraj
-         :width: 100%
+         :width: 200px
+         :height: 150px
          :align: center
 
       +++
@@ -88,7 +85,8 @@ analysis of molecular dynamics data.
       ^^^
       .. image:: /resources/kmeans_example.png
          :alt: KMeans visualization
-         :width: 100%
+         :width: 200px
+         :height: 150px
          :align: center
 
       +++
@@ -105,19 +103,9 @@ analysis of molecular dynamics data.
       ^^^
       .. image:: /resources/example_systems.png
          :alt: Example systems
-         :width: 100%
+         :width: 200px
+         :height: 150px
          :align: center
 
       +++
       Test systems provided with mdsa-tools for validation and tutorials
-
-
-.. toctree::
-   :hidden:
-
-   examples/example_of_clustering_analysis
-   examples/circos_style_visualization
-   examples/data_generation_workflow
-   examples/import_from_cpptraj
-   examples/kmeans_visualization
-   examples/example_systems
