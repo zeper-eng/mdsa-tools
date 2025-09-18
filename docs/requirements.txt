@@ -8,3 +8,4 @@ sphinx-copybutton
 groundwork-sphinx-theme
 sphinx_design
 pydata-sphinx-theme
+sphinx_rtd_theme
