@@ -222,9 +222,9 @@ def replicatemap_from_labels(labels,frame_list,
     
     #cbar and cbar ticks
     if np.unique(final_coordinates).shape[0]>=1000:
-        add_continuous_colorbar(scatter,final_coordinates[:,2],cbar_label,plt.gca())
+        add_continuous_colorbar(scatter,final_coordinates[:,2],cbar_label,plt.gca(),cmap=cmap)
     if np.unique(final_coordinates).shape[0]<1000:
-        add_custom_colorbar(scatter,final_coordinates[:,2],cbar_label,plt.gca())
+        add_custom_colorbar(scatter,final_coordinates[:,2],cbar_label,plt.gca(),cmap=cmap)
 
     #personal preferences
     plt.grid(visible=False)

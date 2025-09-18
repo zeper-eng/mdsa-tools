@@ -15,7 +15,7 @@ mdsa_tools.Data_gen_hbond.create_system_representations : Build residue–residu
 numpy.linalg.svd : Linear algebra used under the hood.
 
 '''
-
+from mdsa_tools.Data_gen_hbond import TrajectoryProcessor
 import numpy as np
 from sklearn.metrics import silhouette_score
 from sklearn.cluster import KMeans
@@ -28,6 +28,7 @@ import os
 
 class systems_analysis:
     '''
+
     Parameters
     ----------
 
@@ -77,7 +78,7 @@ class systems_analysis:
         self.num_systems=len(systems_representations) #this is useful later on for when we are doing system_specific operations
         self.systems_representations=systems_representations
         self.indexes = systems_representations[0][0, 0, 1:] #bc list then 3d array
-        
+        self.feature_matrix=None
         if replicate_distribution is not None:
             self.replicate_distribution=replicate_distribution
             
@@ -151,7 +152,7 @@ class systems_analysis:
 
         return final_frames
 
-    def extract_hbond_values(self,systems_array,residues,mode="sum"):
+    def extract_hbond_values(self,residues,systems_array=None,mode="sum"):
         ''' returns a 1dimensional array of "average" values per entry in the array
         
         Parameters
@@ -162,7 +163,7 @@ class systems_analysis:
             frames of the trajectory and will assume an averaged matrix has been provided. Alternatively
             this function can take a single frame from anywhere in the trajectory if you wish to analyze it
 
-        residues:list,shape=(res_indexes,)
+        residues:list,shape=(res_indexes,), where res_indexes==int
             A list denoting all of the residue indexes that you would like to analyze pairwise interactions for.
             This can be two residues meaning you just want to see the pairwise interactions between them or
             more residues and then you would get *all possible pairwise combinations of theese residues interactions*
@@ -186,19 +187,34 @@ class systems_analysis:
         for just thoose frames and see which is best.
 
         '''
+        if systems_array is not None:
+            systems_array=systems_array
+        if systems_array is None:
+            systems_array=np.concatenate(self.systems_representations)
 
-        # we always assume it comes with indixes but filter res accounts for this
-        # this note in relation to the lines after filter res in the clauses
+
+        # making it a static function felt like too big a jump but this toy attribute feels neat
+        # grabbing filter function from datagen with a simplenamespace
+        from types import SimpleNamespace
+        fake_self = SimpleNamespace(
+            system_representation=systems_array,
+            create_system_representations=lambda: None,
+        )
+
+        filtered = TrajectoryProcessor.create_filtered_representations(
+            fake_self, residues_to_keep=residues, systems_representation=systems_array
+        )
+        
 
         if mode == "average":
             systems_array,residues
-            filtered_t_a_array=filtered_t_a_array[:,1:,1:]        
-            ta_labels = np.mean(np.triu(filtered_t_a_array, k=1), axis=(1, 2)) #accounting for symmetry
+            filtered_array=filtered[:,1:,1:]        
+            ta_labels = np.mean(np.triu(filtered_array, k=1), axis=(1, 2)) #accounting for symmetry
         
         if mode == "sum":      
             systems_array,residues
-            filtered_t_a_array=filtered_t_a_array[:,1:,1:]
-            ta_labels = np.sum(np.triu(filtered_t_a_array, k=1), axis=(1, 2)) #accounting for symmetry
+            filtered_array=filtered[:,1:,1:]
+            ta_labels = np.sum(np.triu(filtered_array, k=1), axis=(1, 2)) #accounting for symmetry
         
         return ta_labels
 

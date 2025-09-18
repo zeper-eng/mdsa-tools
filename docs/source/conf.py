@@ -55,7 +55,7 @@ html_theme_options = {
 }
 
 # Theme settings (pydata_sphinx_theme)
-html_theme = "pydata_sphinx_theme"
+html_theme = "ansys_sphinx_theme"
 html_show_sourcelink = False
 
 html_theme_options = {

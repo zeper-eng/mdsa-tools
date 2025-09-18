@@ -3,21 +3,18 @@ Welcome to mdsa-tools!
 ======================
 
 
-mdsa-tools is a python package for systems-level analyses of molecular dynamics data.
-It provides tools for clustering, dimensionality reduction, visualization,
-and hydrogen bond network generation.
+mdsa-tools is a Python package for systems-level analysis of molecular-dynamics (MD) data. It provides utilities for clustering, dimensionality reduction (PCA, UMAP), visualization, and residue–residue hydrogen-bond network generation.
+Focused on label-free (unsupervised) workflows—PCA/UMAP, clustering, and Markov state modeling (MSM)—it can build hydrogen-bond adjacency matrices from MDTraj or import them from Cpptraj.
+By design, the analysis and visualization modules are data-agnostic: they operate on either (i) an n×n adjacency matrix or (ii) an edge list (long-format table) of (i, j, weight) in the expected schema.
 
-Focused on classical unsupervised methods (PCA/UMAP, clustering, MSM), mdsa-tools can generate residue–residue 
-adjacency matrices from mdtraj or import them from cpptraj. 
-
-A fortunate side-effect is that the analysis and viz modules are data-agnostic: any dataset matching the adjacency-matrix schema will work. 
 
 .. toctree:: 
-   :maxdepth: 3
+   :maxdepth: 1
    :hidden:
    
    api
    examples
+
 
 .. 2 columns no matter what kind of screen and spacing of 2
 .. grid:: 3 3 3 3
@@ -29,7 +26,7 @@ A fortunate side-effect is that the analysis and viz modules are data-agnostic: 
       :link-type: doc       
       :text-align: center
       
-      Link to the full python API
+      **Link to the full python API**
       ^^^
       
       .. image:: /resources/Pipelineflic.png
@@ -39,28 +36,43 @@ A fortunate side-effect is that the analysis and viz modules are data-agnostic: 
 
 
       +++
-      Full description of the modules included as a part of the workflow
+      **Full description of the modules included as a part of the workflow**
 
    
    .. grid-item-card:: 
       :link: examples
       :link-type: doc        
       :text-align: center
+
+      **Examples**
       
-      Examples
-
       ^^^
-      something here
+      .. image:: /resources/examplescover.png
+         :alt: PCA clusters for system A
+         :width: 100%
+         :align: center
+
+
       +++
-      Examples of doing all range of things from visualizations to analysis
+      **Examples of doing all range of things from visualizations to analysis**
 
 
-   .. grid-item-card:: link to the Systems Paper
+   .. grid-item-card:: 
       :link: api
       :link-type: doc        
       :text-align: center
 
+      **link to the Systems Paper**
+
+      ^^^
+
+      .. image:: /resources/paperfigure.png
+         :alt: PCA clusters for system A
+         :width: 100%
+         :align: center
+
+      +++
+      **A Systems Analysis of Ribosomal CAR-site Dynamics**
       
    
-
 

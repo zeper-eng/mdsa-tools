@@ -10,4 +10,5 @@ sphinx_design
 pydata-sphinx-theme
 sphinx_material
 breathe
-sphinx_press_theme
+sphinx-press-theme
+ansys-sphinx-theme
