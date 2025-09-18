@@ -1,5 +1,8 @@
 ## Theese changes are mainly for the pipi releases you can download the most recent version straight from github always
 
+# [1.1.4]-2025-08-15
+Filled some flaws in analysis and in the colorbar function
+
 # [1.1.3]-2025-08-15
 Git Sync. Most Doc strings finished, and docs are working with some examples missing.
 

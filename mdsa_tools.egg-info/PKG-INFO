@@ -1,6 +1,6 @@
 Metadata-Version: 2.4
 Name: mdsa-tools
-Version: 1.1.2
+Version: 1.1.4
 Summary: The Weir Labs H-bond Systems Analyses modules!
 Author-email: Luis Perez <lperez@wesleyan.edu>
 License: MIT
@@ -44,9 +44,6 @@ We start from an MD trajectory and generate per-frame interaction networks (grap
 
 ```bash
 pip install mdsa-tools
-# Optional:
-# pip install "mdsa-tools[docs]"   # if you want to build the docs locally
-# pip install "mdsa-tools[examples]"  # if you define this extra for demo deps
 ```
 
 ## Systems Problem Area:
