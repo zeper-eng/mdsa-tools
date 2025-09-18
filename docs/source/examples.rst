@@ -13,8 +13,8 @@
       ^^^
       .. image:: /resources/analysis_pipeline.png
          :alt: Example of clustering analysis
-         :width: 200px
-         :height: 200px
+         :width: 400px
+         :height: 400px
          :align: center
 
       +++
@@ -31,8 +31,8 @@
       ^^^
       .. image:: /resources/circos_example.png
          :alt: Circos example visualization
-         :width: 200px
-         :height: 200px
+         :width: 400px
+         :height: 400px
          :align: center
 
       +++
@@ -49,8 +49,8 @@
       ^^^
       .. image:: /resources/datagen.png
          :alt: Data generation workflow
-         :width: 200px
-         :height: 200px
+         :width: 400px
+         :height: 400px
          :align: center
 
       +++
@@ -67,8 +67,8 @@
       ^^^
       .. image:: /resources/Amberlogo.png
          :alt: Import from cpptraj
-         :width: 200px
-         :height: 200px
+         :width: 400px
+         :height: 400px
          :align: center
 
       +++
@@ -85,8 +85,8 @@
       ^^^
       .. image:: /resources/kmeans_example.png
          :alt: KMeans visualization
-         :width: 200px
-         :height: 200px
+         :width: 400px
+         :height: 400px
          :align: center
 
       +++
@@ -103,8 +103,8 @@
       ^^^
       .. image:: /resources/example_systems.png
          :alt: Example systems
-         :width: 200px
-         :height: 200px
+         :width: 400px
+         :height: 400px
          :align: center
 
       +++
