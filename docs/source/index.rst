@@ -73,6 +73,6 @@ Focused on leveraging unsupervised learning algorithm workflows—PCA/UMAP, clus
          :align: center
 
       +++
-      **From visualizations to analysis**
+      **Use cases from Visualization to Analysis**
 
  
