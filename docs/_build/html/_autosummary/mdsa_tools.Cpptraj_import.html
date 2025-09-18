@@ -1,0 +1,675 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>mdsa_tools.Cpptraj_import &#8212; mdsa-tools</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=8f2a1f02" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
+    <link rel="stylesheet" type="text/css" href="../_static/fullwidth.css" />
+  
+  <!-- So that users can add custom icons -->
+  <script src="../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
+
+    <script src="../_static/jquery.js?v=5d32c60e"></script>
+    <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+    <script src="../_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/design-tabs.js?v=f930bc37"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = '_autosummary/mdsa_tools.Cpptraj_import';</script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="mdsa_tools.Viz" href="mdsa_tools.Viz.html" />
+    <link rel="prev" title="mdsa_tools.msm_modeler" href="mdsa_tools.msm_modeler.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="" />
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="../api.html">
+    mdsa-tools Python API
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../examples.html">
+    <no title>
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+      
+        <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/esakkas24/stacker" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://pypi.org/project/pistacker/" title="PyPI" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><img src="https://raw.githubusercontent.com/esakkas24/stacker/refs/heads/main/docs/images/pypi.svg" class="icon-link-image" alt="PyPI"/></a>
+        </li>
+</ul></div>
+      
+        <div class="navbar-item">
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button></div>
+      
+    </div>
+    
+  </div>
+  
+  
+
+  
+    <button class="pst-navbar-icon sidebar-toggle secondary-toggle" aria-label="On this page">
+      <span class="fa-solid fa-outdent"></span>
+    </button>
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          
+          
+            <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="../api.html">
+    mdsa-tools Python API
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../examples.html">
+    <no title>
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+          
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/esakkas24/stacker" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://pypi.org/project/pistacker/" title="PyPI" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><img src="https://raw.githubusercontent.com/esakkas24/stacker/refs/heads/main/docs/images/pypi.svg" class="icon-link-image" alt="PyPI"/></a>
+        </li>
+</ul></div>
+        
+          <div class="navbar-item">
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button></div>
+        
+      </div>
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+<nav class="bd-docs-nav bd-links"
+     aria-label="Section Navigation">
+  <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
+  <div class="bd-toc-item navbar-nav"><ul class="current nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="mdsa_tools.Data_gen_hbond.html">mdsa_tools.Data_gen_hbond</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mdsa_tools.msm_modeler.html">mdsa_tools.msm_modeler</a></li>
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">mdsa_tools.Cpptraj_import</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mdsa_tools.Viz.html">mdsa_tools.Viz</a></li>
+</ul>
+</div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+<nav aria-label="Breadcrumb" class="d-print-none">
+  <ul class="bd-breadcrumbs">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="../index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+    
+    <li class="breadcrumb-item"><a href="../api.html" class="nav-link">mdsa-tools Python API</a></li>
+    
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">mdsa_tools.Cpptraj_import</span></li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section id="module-mdsa_tools.Cpptraj_import">
+<span id="mdsa-tools-cpptraj-import"></span><h1>mdsa_tools.Cpptraj_import<a class="headerlink" href="#module-mdsa_tools.Cpptraj_import" title="Link to this heading">#</a></h1>
+<p>This module provides utilities for importing and structuring hydrogen bond data generated by cpptraj.</p>
+<p>It parses <cite>hbond … out &lt;file&gt; series</cite> output tables, extracts residue–residue hydrogen-bond
+pairs from the header, and loads the corresponding time series into adjacency-matrix
+representations. These system-level matrices can then be used directly for downstream
+analyses (i.e., clustering, dimensionality reduction, visualization).</p>
+<p>Rather than functioning as a generic wrapper, the focus here is on:</p>
+<ul class="simple">
+<li><p>Mapping atom-level cpptraj outputs to residue-level indices.</p></li>
+<li><p>Constructing per-frame residue×residue H-bond matrices.</p></li>
+<li><p>Providing template arrays for efficient modification and integration with the broader mdsa_tools pipeline.</p></li>
+</ul>
+<section id="see-also">
+<h2>See Also<a class="headerlink" href="#see-also" title="Link to this heading">#</a></h2>
+<dl class="simple">
+<dt>mdsa_tools.Viz.visualize_reduction</dt><dd><p>Plot PCA/UMAP embeddings of reduced systems.</p>
+</dd>
+<dt>mdsa_tools.Data_gen_hbond.create_system_representations</dt><dd><p>Build system-level adjacency matrices from trajectories.</p>
+</dd>
+<dt>numpy.linalg.svd</dt><dd><p>Linear algebra backend for certain reduction methods.</p>
+</dd>
+</dl>
+</section>
+<p class="rubric">Classes</p>
+<div class="pst-scrollable-table-container"><table class="autosummary longtable table">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#mdsa_tools.Cpptraj_import.cpptraj_hbond_import" title="mdsa_tools.Cpptraj_import.cpptraj_hbond_import"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cpptraj_hbond_import</span></code></a>(filepath, topology)</p></td>
+<td><p>Lightweight loader for cpptraj hydrogen-bond (series) output.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<dl class="py class">
+<dt class="sig sig-object py" id="mdsa_tools.Cpptraj_import.cpptraj_hbond_import">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mdsa_tools.Cpptraj_import.</span></span><span class="sig-name descname"><span class="pre">cpptraj_hbond_import</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filepath</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">topology</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mdsa_tools.Cpptraj_import.cpptraj_hbond_import" title="Link to this definition">#</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Lightweight loader for cpptraj hydrogen-bond (series) output.</p>
+<p>Init takes the filepath to the desired data file and the associated topology.
+After construction, the header is parsed to determine residue–residue index
+pairs and the time-series data are loaded into memory.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>filepath</strong><span class="classifier">str or pathlib.Path</span></dt><dd><p>Path to a cpptraj <cite>hbond … out &lt;file&gt; series</cite> output table.</p>
+</dd>
+<dt><strong>topology</strong><span class="classifier">str or pathlib.Path</span></dt><dd><p>Path to a topology file readable by MDTraj (i.e., AMBER <cite>prmtop</cite>).</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Attributes<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt><strong>indices</strong><span class="classifier">list of tuple of int</span></dt><dd><p>Parsed residue index pairs <cite>(res1, res2)</cite> (1-based, AMBER <cite>resSeq</cite> style)
+in the same order as data columns (excluding <cite>#Frame</cite>).</p>
+</dd>
+<dt><strong>data</strong><span class="classifier">np.ndarray of int, shape=(n_frames, n_pairs)</span></dt><dd><p>Binary/indicator series where each column corresponds to a header pair
+in <cite>indices</cite>. Rows are frames.</p>
+</dd>
+<dt><strong>topology</strong><span class="classifier">mdtraj.Topology</span></dt><dd><p>Loaded MDTraj topology associated with the series table.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<p class="rubric">Methods</p>
+<div class="pst-scrollable-table-container"><table class="autosummary longtable table">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#mdsa_tools.Cpptraj_import.cpptraj_hbond_import.create_cpptraj_attributes" title="mdsa_tools.Cpptraj_import.cpptraj_hbond_import.create_cpptraj_attributes"><code class="xref py py-obj docutils literal notranslate"><span class="pre">create_cpptraj_attributes</span></code></a>(data, topology[, ...])</p></td>
+<td><p>Create a template array for per-frame residue adjacency matrices.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#mdsa_tools.Cpptraj_import.cpptraj_hbond_import.create_systems_rep" title="mdsa_tools.Cpptraj_import.cpptraj_hbond_import.create_systems_rep"><code class="xref py py-obj docutils literal notranslate"><span class="pre">create_systems_rep</span></code></a>([data, topology, indices])</p></td>
+<td><p>Fill a residue×residue H-bond matrix series from cpptraj columns.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#mdsa_tools.Cpptraj_import.cpptraj_hbond_import.extract_headers" title="mdsa_tools.Cpptraj_import.cpptraj_hbond_import.extract_headers"><code class="xref py py-obj docutils literal notranslate"><span class="pre">extract_headers</span></code></a>(filepath)</p></td>
+<td><p>Parse the cpptraj hydrogen-bond header to get residue–residue pairs.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt>None</dt><dd><p>Object is initialized with parsed attributes.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<p>This class assumes a header where the first field is <cite>#Frame</cite> followed by
+columns named like <cite>&lt;prefix&gt;_&lt;res1&gt;&#64;&lt;atom1&gt;_&lt;res2&gt;&#64;&lt;atom2&gt;</cite>.</p>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">loader</span> <span class="o">=</span> <span class="n">cpptraj_hbond_import</span><span class="p">(</span><span class="s2">&quot;hbonds.dat&quot;</span><span class="p">,</span> <span class="s2">&quot;system.prmtop&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">loader</span><span class="o">.</span><span class="n">indices</span><span class="p">[:</span><span class="mi">3</span><span class="p">]</span>
+<span class="go">[(12, 34), (12, 35), (25, 30)]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">loader</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">shape</span>
+<span class="go">(n_frames, n_pairs)</span>
+</pre></div>
+</div>
+<dl class="py method">
+<dt class="sig sig-object py" id="mdsa_tools.Cpptraj_import.cpptraj_hbond_import.create_cpptraj_attributes">
+<span class="sig-name descname"><span class="pre">create_cpptraj_attributes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">topology</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">granularity</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mdsa_tools.Cpptraj_import.cpptraj_hbond_import.create_cpptraj_attributes" title="Link to this definition">#</a></dt>
+<dd><p>Create a template array for per-frame residue adjacency matrices.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>data</strong><span class="classifier">np.ndarray, shape=(n_frames, n_pairs)</span></dt><dd><p>The loaded cpptraj series table values (without the <cite>#Frame</cite> column).</p>
+</dd>
+<dt><strong>topology</strong><span class="classifier">str or mdtraj.Topology</span></dt><dd><p>Path to a topology file, or an existing <cite>mdtraj.Topology</cite>. If <cite>None</cite>,
+uses <cite>self.topology</cite>.</p>
+</dd>
+<dt><strong>granularity</strong><span class="classifier">{‘residue’}, optional</span></dt><dd><p>Level of coarse-graining for the template. Only ‘residue’ is currently
+supported; other values are reserved for future use.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt><strong>template_array</strong><span class="classifier">np.ndarray, shape=(n_frames, n_res+1, n_res+1)</span></dt><dd><p>A zero-initialized array containing one residue×residue matrix per
+frame. The first row and first column (index 0) store 1-based residue
+indices for convenience; the submatrix <cite>[1:, 1:]</cite> is the numeric
+adjacency that will be filled by <cite>create_systems_rep</cite>.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<p>We materialize a single reusable data structure (the “template”) and
+fill it later for efficiency. Diagonals are initialized to 0; indexing
+labels are stored in row/column 0.</p>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">template</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">create_cpptraj_attributes</span><span class="p">(</span><span class="n">obj</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="n">obj</span><span class="o">.</span><span class="n">topology</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">template</span><span class="o">.</span><span class="n">shape</span>
+<span class="go">(n_frames, n_res+1, n_res+1)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mdsa_tools.Cpptraj_import.cpptraj_hbond_import.create_systems_rep">
+<span class="sig-name descname"><span class="pre">create_systems_rep</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">topology</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">indices</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mdsa_tools.Cpptraj_import.cpptraj_hbond_import.create_systems_rep" title="Link to this definition">#</a></dt>
+<dd><p>Fill a residue×residue H-bond matrix series from cpptraj columns.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>data</strong><span class="classifier">np.ndarray, shape=(n_frames, n_pairs), optional</span></dt><dd><p>If provided, use this series matrix; otherwise uses <cite>self.data</cite>.</p>
+</dd>
+<dt><strong>topology</strong><span class="classifier">mdtraj.Topology or str, optional</span></dt><dd><p>Topology or path to topology; if <cite>None</cite>, uses <cite>self.topology</cite>.</p>
+</dd>
+<dt><strong>indices</strong><span class="classifier">list of tuple of int, optional</span></dt><dd><p>Residue index pairs <cite>(res1, res2)</cite> (1-based) in column order;
+if <cite>None</cite>, uses <cite>self.indices</cite>.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt><strong>systems</strong><span class="classifier">np.ndarray, shape=(n_frames, n_res+1, n_res+1)</span></dt><dd><p>A time series of residue-level adjacency matrices. Row/column 0 hold
+1-based residue indices; the numeric adjacency is in <cite>[1:, 1:]</cite>.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<ul class="simple">
+<li><p>Self-contacts (where <cite>res1 == res2</cite>) are skipped and left as zeros.</p></li>
+<li><p>Each column in <cite>data</cite> is placed at <cite>[res1-1, res2-1]</cite> for all frames.</p></li>
+<li><p>This function does not symmetrize; if directionality matters for your
+definition, you may post-process the result.</p></li>
+</ul>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">systems</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">create_systems_rep</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">systems</span><span class="o">.</span><span class="n">shape</span>
+<span class="go">(n_frames, n_res+1, n_res+1)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mdsa_tools.Cpptraj_import.cpptraj_hbond_import.extract_headers">
+<span class="sig-name descname"><span class="pre">extract_headers</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filepath</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mdsa_tools.Cpptraj_import.cpptraj_hbond_import.extract_headers" title="Link to this definition">#</a></dt>
+<dd><p>Parse the cpptraj hydrogen-bond header to get residue–residue pairs.</p>
+<p>This reads only the first line of a cpptraj <cite>hbond … out &lt;file&gt; series</cite>
+table and extracts the residue indices for each H-bond column. It expects
+a leading <cite>#Frame</cite> column followed by columns named like
+<cite>&lt;prefix&gt;_&lt;res1&gt;&#64;&lt;atom1&gt;_&lt;res2&gt;&#64;&lt;atom2&gt;</cite> (i.e., <cite>HB_12&#64;N_34&#64;O</cite>).
+The returned pairs are 1-based residue indices (AMBER <cite>resSeq</cite> style),
+ordered exactly as the data columns appear in the file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>filepath</strong><span class="classifier">str or pathlib.Path</span></dt><dd><p>Path to the cpptraj <cite>hbond</cite> series output file. Must contain a header
+line beginning with <cite>#Frame</cite> and column names formatted as described
+above.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt><strong>indices</strong><span class="classifier">list of tuple of int</span></dt><dd><p>A list of <cite>(res1, res2)</cite> residue index pairs (1-based) corresponding
+to the non-<cite>#Frame</cite> columns in the header, in column order. These
+indices are intended to be used later to place column values into a
+residue×residue adjacency matrix at positions <cite>[res1-1, res2-1]</cite>.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt>FileNotFoundError</dt><dd><p>If <cite>filepath</cite> does not exist.</p>
+</dd>
+<dt>ValueError</dt><dd><p>If a header token cannot be parsed into integer residue indices.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<ul class="simple">
+<li><p>Only the first line is inspected; data lines are not parsed here.</p></li>
+<li><p>Column names must contain at least three underscore-separated tokens:
+a freeform prefix, <cite>&lt;res1&gt;&#64;&lt;atom1&gt;</cite>, and <cite>&lt;res2&gt;&#64;&lt;atom2&gt;</cite>.</p></li>
+</ul>
+<p class="rubric">Examples</p>
+<p>Suppose the header line looks like:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1">#Frame HB_12@N_34@O HB_12@N_35@O HB_25@O_30@H</span>
+</pre></div>
+</div>
+<p>Then:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">indices</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">extract_headers</span><span class="p">(</span><span class="s2">&quot;hbonds.dat&quot;</span><span class="p">)</span>
+<span class="c1"># indices == [(12, 34), (12, 35), (25, 30)]</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+                </article>
+              
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="mdsa_tools.msm_modeler.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">mdsa_tools.msm_modeler</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="mdsa_tools.Viz.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">mdsa_tools.Viz</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <dialog id="pst-secondary-sidebar-modal"></dialog>
+                <div id="pst-secondary-sidebar" class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+<div
+    id="pst-page-navigation-heading-2"
+    class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> On this page
+  </div>
+  <nav class="bd-toc-nav page-toc" aria-labelledby="pst-page-navigation-heading-2">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#see-also">See Also</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#mdsa_tools.Cpptraj_import.cpptraj_hbond_import"><code class="docutils literal notranslate"><span class="pre">cpptraj_hbond_import</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mdsa_tools.Cpptraj_import.cpptraj_hbond_import.create_cpptraj_attributes"><code class="docutils literal notranslate"><span class="pre">cpptraj_hbond_import.create_cpptraj_attributes()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mdsa_tools.Cpptraj_import.cpptraj_hbond_import.create_systems_rep"><code class="docutils literal notranslate"><span class="pre">cpptraj_hbond_import.create_systems_rep()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mdsa_tools.Cpptraj_import.cpptraj_hbond_import.extract_headers"><code class="docutils literal notranslate"><span class="pre">cpptraj_hbond_import.extract_headers()</span></code></a></li>
+</ul>
+</li>
+</ul>
+  </nav></div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
+<script defer src="../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+
+  <p class="sphinx-version">
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3.
+    <br/>
+  </p>
+</div>
+      
+    </div>
+  
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item">
+<p class="theme-version">
+  <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.16.1.
+</p></div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>

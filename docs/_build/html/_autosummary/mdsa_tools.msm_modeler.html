@@ -1,0 +1,750 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>mdsa_tools.msm_modeler &#8212; mdsa-tools</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=8f2a1f02" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
+    <link rel="stylesheet" type="text/css" href="../_static/fullwidth.css" />
+  
+  <!-- So that users can add custom icons -->
+  <script src="../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
+
+    <script src="../_static/jquery.js?v=5d32c60e"></script>
+    <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+    <script src="../_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/design-tabs.js?v=f930bc37"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = '_autosummary/mdsa_tools.msm_modeler';</script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="mdsa_tools.Cpptraj_import" href="mdsa_tools.Cpptraj_import.html" />
+    <link rel="prev" title="mdsa_tools.Data_gen_hbond" href="mdsa_tools.Data_gen_hbond.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="" />
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="../api.html">
+    mdsa-tools Python API
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../examples.html">
+    <no title>
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+      
+        <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/esakkas24/stacker" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://pypi.org/project/pistacker/" title="PyPI" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><img src="https://raw.githubusercontent.com/esakkas24/stacker/refs/heads/main/docs/images/pypi.svg" class="icon-link-image" alt="PyPI"/></a>
+        </li>
+</ul></div>
+      
+        <div class="navbar-item">
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button></div>
+      
+    </div>
+    
+  </div>
+  
+  
+
+  
+    <button class="pst-navbar-icon sidebar-toggle secondary-toggle" aria-label="On this page">
+      <span class="fa-solid fa-outdent"></span>
+    </button>
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          
+          
+            <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="../api.html">
+    mdsa-tools Python API
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../examples.html">
+    <no title>
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+          
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/esakkas24/stacker" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://pypi.org/project/pistacker/" title="PyPI" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><img src="https://raw.githubusercontent.com/esakkas24/stacker/refs/heads/main/docs/images/pypi.svg" class="icon-link-image" alt="PyPI"/></a>
+        </li>
+</ul></div>
+        
+          <div class="navbar-item">
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button></div>
+        
+      </div>
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+<nav class="bd-docs-nav bd-links"
+     aria-label="Section Navigation">
+  <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
+  <div class="bd-toc-item navbar-nav"><ul class="current nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="mdsa_tools.Data_gen_hbond.html">mdsa_tools.Data_gen_hbond</a></li>
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">mdsa_tools.msm_modeler</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mdsa_tools.Cpptraj_import.html">mdsa_tools.Cpptraj_import</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mdsa_tools.Viz.html">mdsa_tools.Viz</a></li>
+</ul>
+</div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+<nav aria-label="Breadcrumb" class="d-print-none">
+  <ul class="bd-breadcrumbs">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="../index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+    
+    <li class="breadcrumb-item"><a href="../api.html" class="nav-link">mdsa-tools Python API</a></li>
+    
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">mdsa_tools.msm_modeler</span></li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section id="module-mdsa_tools.msm_modeler">
+<span id="mdsa-tools-msm-modeler"></span><h1>mdsa_tools.msm_modeler<a class="headerlink" href="#module-mdsa_tools.msm_modeler" title="Link to this heading">#</a></h1>
+<p>Use results of systems analysis as candidate states for MarkovStateModel Kinetics analysis (or foundations of)
+- cluster pca/umap embeddings at different target n_dimensions,
+- or pull H-bond values via systems_analysis.extract_hbond_values()</p>
+<blockquote>
+<div><p>and use those in replicate maps instead of k-means labels.</p>
+</div></blockquote>
+<p>Some features are specific to our workflow (see the paper) we use (cohesion over time, transition matrices,
+implied timescales, ck test, etc.).</p>
+<section id="see-also">
+<h2>See Also<a class="headerlink" href="#see-also" title="Link to this heading">#</a></h2>
+<dl class="simple">
+<dt>mdsa_tools.Viz.visualize_reduction</dt><dd><p>plot pca/umap embeddings.</p>
+</dd>
+<dt>mdsa_tools.Data_gen_hbond.create_system_representations</dt><dd><p>build residue–residue H-bond adjacency matrices.</p>
+</dd>
+<dt>numpy.linalg.svd</dt><dd><p>linear algebra under the hood.</p>
+</dd>
+</dl>
+</section>
+<p class="rubric">Classes</p>
+<div class="pst-scrollable-table-container"><table class="autosummary longtable table">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#mdsa_tools.msm_modeler.MSM_Modeller" title="mdsa_tools.msm_modeler.MSM_Modeller"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MSM_Modeller</span></code></a>(labels, centers, ...)</p></td>
+<td><p>tiny helper for poking at candidate states and building a very simple msm from an embedding space (think: pca/umap coords + k-means labels).</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<dl class="py class">
+<dt class="sig sig-object py" id="mdsa_tools.msm_modeler.MSM_Modeller">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mdsa_tools.msm_modeler.</span></span><span class="sig-name descname"><span class="pre">MSM_Modeller</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">labels</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">centers</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reduced_coordinates</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">frame_scale</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mdsa_tools.msm_modeler.MSM_Modeller" title="Link to this definition">#</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>tiny helper for poking at candidate states and building a very simple msm
+from an embedding space (think: pca/umap coords + k-means labels).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>labels</strong><span class="classifier">array-like (n_frames,)</span></dt><dd><p>integer state/cluster labels per frame (0-based, lines up with centers rows).</p>
+</dd>
+<dt><strong>centers</strong><span class="classifier">array-like (n_states, n_dims)</span></dt><dd><p>cluster centers in the same space as <cite>reduced_coordinates</cite>; row i == label i.</p>
+</dd>
+<dt><strong>reduced_coordinates</strong><span class="classifier">array-like (n_frames, n_dims)</span></dt><dd><p>low-d embedding coords (pca/umap) for all frames, concatenated by replicate.</p>
+</dd>
+<dt><strong>frame_scale</strong><span class="classifier">list[int]</span></dt><dd><p>number of frames per replicate in the same order used for labels/coords.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Attributes<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt><strong>labels, centers, reduced_coordinates, frame_scale</strong><span class="classifier">stored as given (or None)</span></dt><dd></dd>
+<dt><strong>transition_probability_matrix</strong><span class="classifier">np.ndarray</span></dt><dd><p>set after calling create_transition_probability_matrix(); shape (n+1, n+1)
+with headers (row/col 0 hold state ids).</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<p class="rubric">Methods</p>
+<div class="pst-scrollable-table-container"><table class="autosummary longtable table">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#mdsa_tools.msm_modeler.MSM_Modeller.chapman_kolmogorov_test" title="mdsa_tools.msm_modeler.MSM_Modeller.chapman_kolmogorov_test"><code class="xref py py-obj docutils literal notranslate"><span class="pre">chapman_kolmogorov_test</span></code></a>([labels, ...])</p></td>
+<td><p>ck check: compare T(lag)^k vs T(k*lag) for k=1..steps.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#mdsa_tools.msm_modeler.MSM_Modeller.compute_implied_timescales" title="mdsa_tools.msm_modeler.MSM_Modeller.compute_implied_timescales"><code class="xref py py-obj docutils literal notranslate"><span class="pre">compute_implied_timescales</span></code></a>(lags[, labels, ...])</p></td>
+<td><p>implied timescales τ_i(lag) = -lag / ln(<a href="#id1"><span class="problematic" id="id2">|λ_i|</span></a>) from eigenvalues of T(lag).</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#mdsa_tools.msm_modeler.MSM_Modeller.create_transition_probability_matrix" title="mdsa_tools.msm_modeler.MSM_Modeller.create_transition_probability_matrix"><code class="xref py py-obj docutils literal notranslate"><span class="pre">create_transition_probability_matrix</span></code></a>([...])</p></td>
+<td><p>build a row-normalized transition matrix from labels (no cross-replicate jumps).</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#mdsa_tools.msm_modeler.MSM_Modeller.evaluate_Chapman_Kolmogorov" title="mdsa_tools.msm_modeler.MSM_Modeller.evaluate_Chapman_Kolmogorov"><code class="xref py py-obj docutils literal notranslate"><span class="pre">evaluate_Chapman_Kolmogorov</span></code></a>([...])</p></td>
+<td><p>single-number ck summary via frobenius norm: Δ = || T(lag)^n − T(n*lag) ||_F  (smaller is “more markovian”).</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#mdsa_tools.msm_modeler.MSM_Modeller.evaluate_cohesion_shrinkingwindow" title="mdsa_tools.msm_modeler.MSM_Modeller.evaluate_cohesion_shrinkingwindow"><code class="xref py py-obj docutils literal notranslate"><span class="pre">evaluate_cohesion_shrinkingwindow</span></code></a>([labels, ...])</p></td>
+<td><p><em>shrinking-from-the-start</em> window (aka keep the tail).</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#mdsa_tools.msm_modeler.MSM_Modeller.evaluate_cohesion_slidingwindow" title="mdsa_tools.msm_modeler.MSM_Modeller.evaluate_cohesion_slidingwindow"><code class="xref py py-obj docutils literal notranslate"><span class="pre">evaluate_cohesion_slidingwindow</span></code></a>([labels, ...])</p></td>
+<td><p>fixed-size <em>sliding window</em> per replicate.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#mdsa_tools.msm_modeler.MSM_Modeller.extract_stationary_states" title="mdsa_tools.msm_modeler.MSM_Modeller.extract_stationary_states"><code class="xref py py-obj docutils literal notranslate"><span class="pre">extract_stationary_states</span></code></a>([...])</p></td>
+<td><p>stationary distribution π from the transition matrix.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#mdsa_tools.msm_modeler.MSM_Modeller.rmsd_from_centers" title="mdsa_tools.msm_modeler.MSM_Modeller.rmsd_from_centers"><code class="xref py py-obj docutils literal notranslate"><span class="pre">rmsd_from_centers</span></code></a>(X, labels, centers)</p></td>
+<td><p>per-cluster rmsd of points to their assigned cluster center.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p class="rubric">Notes</p>
+<p>intentionally lightweight—we stash the common artifacts so you don’t have to
+pass them to every call.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="mdsa_tools.msm_modeler.MSM_Modeller.chapman_kolmogorov_test">
+<span class="sig-name descname"><span class="pre">chapman_kolmogorov_test</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">labels</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">frame_list</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lag</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">steps</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">4</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mdsa_tools.msm_modeler.MSM_Modeller.chapman_kolmogorov_test" title="Link to this definition">#</a></dt>
+<dd><p>ck check: compare T(lag)^k vs T(k*lag) for k=1..steps.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>labels, frame_list</strong><span class="classifier">optional</span></dt><dd><p>override stored labels/frame_scale.</p>
+</dd>
+<dt><strong>lag</strong><span class="classifier">int, default 30</span></dt><dd><p>base lag (frames).</p>
+</dd>
+<dt><strong>steps</strong><span class="classifier">int, default 4</span></dt><dd><p>number of multiples (k) to compare.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt>dict[int, tuple[np.ndarray, np.ndarray]]</dt><dd><p>k -&gt; (T_pred, T_direct), both (n_states, n_states).</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mdsa_tools.msm_modeler.MSM_Modeller.compute_implied_timescales">
+<span class="sig-name descname"><span class="pre">compute_implied_timescales</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">lags</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">labels</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">frame_list</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_timescales</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mdsa_tools.msm_modeler.MSM_Modeller.compute_implied_timescales" title="Link to this definition">#</a></dt>
+<dd><p>implied timescales τ_i(lag) = -lag / ln(<a href="#id3"><span class="problematic" id="id4">|λ_i|</span></a>) from eigenvalues of T(lag).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>lags</strong><span class="classifier">list[int]</span></dt><dd><p>lag times (frames) at which to estimate the transition matrix.</p>
+</dd>
+<dt><strong>labels, frame_list</strong><span class="classifier">optional</span></dt><dd><p>override stored labels/frame_scale.</p>
+</dd>
+<dt><strong>n_timescales</strong><span class="classifier">int, default 10</span></dt><dd><p>number of slowest timescales to return (skip the trivial λ=1).</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt>dict[int, np.ndarray]</dt><dd><p>map lag -&gt; array (n_timescales,) of slowest implied timescales.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<p>uses eigenvalues of the row-normalized T; takes real(abs(.)).
+timescales are in frames—multiply by dt for physical time.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mdsa_tools.msm_modeler.MSM_Modeller.create_transition_probability_matrix">
+<span class="sig-name descname"><span class="pre">create_transition_probability_matrix</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">labels</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">frame_list</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lag</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mdsa_tools.msm_modeler.MSM_Modeller.create_transition_probability_matrix" title="Link to this definition">#</a></dt>
+<dd><p>build a row-normalized transition matrix from labels (no cross-replicate jumps).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>labels</strong><span class="classifier">array-like (n_frames,), optional</span></dt><dd><p>override stored labels. integer states per frame (0-based).</p>
+</dd>
+<dt><strong>frame_list</strong><span class="classifier">list[int], optional</span></dt><dd><p>override stored frame_scale. frames per replicate, in concat order.</p>
+</dd>
+<dt><strong>lag</strong><span class="classifier">int, default 1</span></dt><dd><p>transition lag (frames). skip replicates with length &lt;= lag.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt>np.ndarray (n_states+1, n_states+1)</dt><dd><p>header row/col hold state ids; core block is row-normalized probs.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<ul class="simple">
+<li><p>we keep rows with zero outgoing counts as all zeros.</p></li>
+<li><p>prints raw counts pre-normalization (quick sanity check).</p></li>
+</ul>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mdsa_tools.msm_modeler.MSM_Modeller.evaluate_Chapman_Kolmogorov">
+<span class="sig-name descname"><span class="pre">evaluate_Chapman_Kolmogorov</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">transition_probability_matrix</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">labels</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">original_lag</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mdsa_tools.msm_modeler.MSM_Modeller.evaluate_Chapman_Kolmogorov" title="Link to this definition">#</a></dt>
+<dd><p>single-number ck summary via frobenius norm:
+Δ = || T(lag)^n − T(n*lag) ||_F  (smaller is “more markovian”).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>transition_probability_matrix</strong><span class="classifier">np.ndarray, optional</span></dt><dd><p>if None, builds from stored data with <cite>original_lag</cite>.</p>
+</dd>
+<dt><strong>n</strong><span class="classifier">int, default 4</span></dt><dd><p>exponent on T(lag) for the predicted evolution.</p>
+</dd>
+<dt><strong>labels</strong><span class="classifier">array-like, optional</span></dt><dd><p>override stored labels if rebuilding.</p>
+</dd>
+<dt><strong>original_lag</strong><span class="classifier">int, default 1</span></dt><dd><p>lag used to construct T(lag) when rebuilding.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt>float</dt><dd><p>frobenius norm of the difference.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mdsa_tools.msm_modeler.MSM_Modeller.evaluate_cohesion_shrinkingwindow">
+<span class="sig-name descname"><span class="pre">evaluate_cohesion_shrinkingwindow</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">labels</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">centers</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reduced_coordinates</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">frame_scale</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">step_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mdsa_tools.msm_modeler.MSM_Modeller.evaluate_cohesion_shrinkingwindow" title="Link to this definition">#</a></dt>
+<dd><p><em>shrinking-from-the-start</em> window (aka keep the tail). at step j, drop
+the first <cite>creepingstart</cite> frames of each replicate and use the rest.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>labels, centers, reduced_coordinates, frame_scale</strong><span class="classifier">optional</span></dt><dd><p>override stored attributes. shapes follow __init__.</p>
+</dd>
+<dt><strong>step_size</strong><span class="classifier">int, default 10</span></dt><dd><p>how much to move the left edge each step.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt>pandas.DataFrame</dt><dd><p>columns: [‘cluster’, ‘rmsd’, ‘window’].</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<p>complements the sliding-window view—asks whether cohesion improves as
+you toss early frames.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mdsa_tools.msm_modeler.MSM_Modeller.evaluate_cohesion_slidingwindow">
+<span class="sig-name descname"><span class="pre">evaluate_cohesion_slidingwindow</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">labels</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">centers</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reduced_coordinates</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">frame_scale</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">step_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mdsa_tools.msm_modeler.MSM_Modeller.evaluate_cohesion_slidingwindow" title="Link to this definition">#</a></dt>
+<dd><p>fixed-size <em>sliding window</em> per replicate. at window j, take a slice of
+length <cite>step_size</cite> from each replicate, concat, then compute per-cluster
+rmsd to centers for that slice. advance by <cite>step_size</cite> each step.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>labels, centers, reduced_coordinates, frame_scale</strong><span class="classifier">optional</span></dt><dd><p>override stored attributes. shapes follow __init__.</p>
+</dd>
+<dt><strong>step_size</strong><span class="classifier">int, default 10</span></dt><dd><p>window length (in frames) and hop size.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt>pandas.DataFrame</dt><dd><p>columns: [‘cluster’, ‘rmsd’, ‘window’] where window is 1-based.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<ul class="simple">
+<li><p>replicates shorter than the current window start contribute nothing.</p></li>
+<li><p>windows never cross replicate boundaries.</p></li>
+<li><p>handy for checking “settling”/drift of clusters over time.</p></li>
+</ul>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mdsa_tools.msm_modeler.MSM_Modeller.extract_stationary_states">
+<span class="sig-name descname"><span class="pre">extract_stationary_states</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">final_transition_prob_matrix</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mdsa_tools.msm_modeler.MSM_Modeller.extract_stationary_states" title="Link to this definition">#</a></dt>
+<dd><p>stationary distribution π from the transition matrix.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>final_transition_prob_matrix</strong><span class="classifier">np.ndarray, optional</span></dt><dd><p>if None, rebuild from stored labels/frame lengths at lag=1.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt>np.ndarray (n_states,)</dt><dd><p>π (nonnegative, sums to 1), aligned with the header state order.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mdsa_tools.msm_modeler.MSM_Modeller.rmsd_from_centers">
+<span class="sig-name descname"><span class="pre">rmsd_from_centers</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">labels</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">centers</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mdsa_tools.msm_modeler.MSM_Modeller.rmsd_from_centers" title="Link to this definition">#</a></dt>
+<dd><p>per-cluster rmsd of points to their assigned cluster center.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>X</strong><span class="classifier">array-like (n_samples, n_dims)</span></dt><dd><p>points in embedding space (pca/umap) for the slice you care about.</p>
+</dd>
+<dt><strong>labels</strong><span class="classifier">array-like (n_samples,)</span></dt><dd><p>cluster labels for each row of X (0-based).</p>
+</dd>
+<dt><strong>centers</strong><span class="classifier">array-like (n_states, n_dims)</span></dt><dd><p>cluster centers; centers[i] corresponds to label i.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt>np.ndarray (n_present_states, 2)</dt><dd><p>columns: (cluster_id, rmsd). ints then floats.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<p>euclidean norm in the embedding space; no cluster-size weighting.</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+                </article>
+              
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="mdsa_tools.Data_gen_hbond.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">mdsa_tools.Data_gen_hbond</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="mdsa_tools.Cpptraj_import.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">mdsa_tools.Cpptraj_import</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <dialog id="pst-secondary-sidebar-modal"></dialog>
+                <div id="pst-secondary-sidebar" class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+<div
+    id="pst-page-navigation-heading-2"
+    class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> On this page
+  </div>
+  <nav class="bd-toc-nav page-toc" aria-labelledby="pst-page-navigation-heading-2">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#see-also">See Also</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#mdsa_tools.msm_modeler.MSM_Modeller"><code class="docutils literal notranslate"><span class="pre">MSM_Modeller</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mdsa_tools.msm_modeler.MSM_Modeller.chapman_kolmogorov_test"><code class="docutils literal notranslate"><span class="pre">MSM_Modeller.chapman_kolmogorov_test()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mdsa_tools.msm_modeler.MSM_Modeller.compute_implied_timescales"><code class="docutils literal notranslate"><span class="pre">MSM_Modeller.compute_implied_timescales()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mdsa_tools.msm_modeler.MSM_Modeller.create_transition_probability_matrix"><code class="docutils literal notranslate"><span class="pre">MSM_Modeller.create_transition_probability_matrix()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mdsa_tools.msm_modeler.MSM_Modeller.evaluate_Chapman_Kolmogorov"><code class="docutils literal notranslate"><span class="pre">MSM_Modeller.evaluate_Chapman_Kolmogorov()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mdsa_tools.msm_modeler.MSM_Modeller.evaluate_cohesion_shrinkingwindow"><code class="docutils literal notranslate"><span class="pre">MSM_Modeller.evaluate_cohesion_shrinkingwindow()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mdsa_tools.msm_modeler.MSM_Modeller.evaluate_cohesion_slidingwindow"><code class="docutils literal notranslate"><span class="pre">MSM_Modeller.evaluate_cohesion_slidingwindow()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mdsa_tools.msm_modeler.MSM_Modeller.extract_stationary_states"><code class="docutils literal notranslate"><span class="pre">MSM_Modeller.extract_stationary_states()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mdsa_tools.msm_modeler.MSM_Modeller.rmsd_from_centers"><code class="docutils literal notranslate"><span class="pre">MSM_Modeller.rmsd_from_centers()</span></code></a></li>
+</ul>
+</li>
+</ul>
+  </nav></div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
+<script defer src="../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+
+  <p class="sphinx-version">
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3.
+    <br/>
+  </p>
+</div>
+      
+    </div>
+  
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item">
+<p class="theme-version">
+  <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.16.1.
+</p></div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>
