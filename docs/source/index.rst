@@ -3,8 +3,9 @@ Welcome to mdsa-tools!
 ======================
 
 
-mdsa-tools is a Python package for systems-level analysis of molecular-dynamics (MD) data. It provides utilities for clustering, dimensionality reduction (PCA, UMAP), visualization, and residue–residue hydrogen-bond network generation.
-Focused on label-free (unsupervised) workflows—PCA/UMAP, clustering, and Markov state modeling (MSM)—it can build hydrogen-bond adjacency matrices from MDTraj or import them from Cpptraj.
+mdsa-tools is a Python package for systems-level analysis of molecular-dynamics (MD) data. It provides utilities for clustering, dimensionality reduction (PCA, UMAP), visualization, and hydrogen-bond network generation.
+
+Focused on leveraging unsupervised learning algorithm workflows—PCA/UMAP, clustering, and Markov state modeling (MSM)—it can build hydrogen-bond adjacency matrices from MDTraj or import them from Cpptraj.
 By design, the analysis and visualization modules are data-agnostic: they operate on either (i) an n×n adjacency matrix or (ii) an edge list (long-format table) of (i, j, weight) in the expected schema.
 
 
