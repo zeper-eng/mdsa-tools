@@ -12,3 +12,4 @@ breathe
 sphinx-press-theme
 ansys-sphinx-theme
 sphinx-book-theme
+renku-sphinx-theme
