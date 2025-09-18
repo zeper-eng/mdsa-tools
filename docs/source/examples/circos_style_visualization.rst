@@ -1,6 +1,6 @@
 .. _analysis:
 
-Analysis & MDcircos (PCA-weighted contacts)
+MDcircos (PCA-weighted contacts)
 ===========================================
 
 Use :class:`mdsa_tools.Analysis.systems_analysis` to build feature matrices from
@@ -19,6 +19,8 @@ Quickstart
 ----------
 Minimal example using two previously generated systems (``.npy`` arrays created by
 :class:`mdsa_tools.Data_gen_hbond.TrajectoryProcessor` or :mod:`mdsa_tools.Cpptraj_import`).
+
+If you are unfamiliar with making theese see :ref:`datagen`.
 
 .. code-block:: python
 

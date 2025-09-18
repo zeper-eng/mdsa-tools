@@ -22,6 +22,7 @@ numpy.linalg.svd
     Linear algebra backend for certain reduction methods.
 
 '''
+
 import numpy as np
 import mdtraj as md
 from typing import Tuple, Dict
