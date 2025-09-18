@@ -57,7 +57,7 @@ html_theme_options = {
 }
 
 # Theme settings (pydata_sphinx_theme)
-html_theme = "furo"
+html_theme = "groundwork-sphinx-theme"
 html_show_sourcelink = False
 
 html_theme_options = {

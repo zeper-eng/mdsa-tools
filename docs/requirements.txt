@@ -1,11 +1,10 @@
 sphinx>=7
 furo
 numpydoc
-sphinx-rtd-theme>=2.0.0
+sphinx-rtd-theme
 sphinx>=8,<9
 myst-parser
 sphinx-copybutton
 groundwork-sphinx-theme
 sphinx_design
 pydata-sphinx-theme
-sphinx_rtd_theme
