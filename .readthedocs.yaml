@@ -1,4 +1,4 @@
-# .readthedocs.yaml
+#Read the docs setup is sphinx with various downloaded themes
 version: 2
 
 build:
@@ -11,9 +11,7 @@ sphinx:
 
 python:
   install:
-    # Install your package so autodoc can import it
     - method: pip
       path: .
-    # Install doc-only requirements (themes, extensions)
-    - requirements: docs/requirements.txt
+    - requirements: docs/requirements.txt 
 
