@@ -11,4 +11,3 @@ pydata-sphinx-theme
 sphinx_material
 breathe
 sphinx_press_theme
-bootstrap
