@@ -32,7 +32,7 @@ analysis of molecular dynamics data.
       **Circos Example**
 
       ^^^
-      .. image:: /resources/circos_example.png
+      .. image:: /resources/circos_example_Medium.png
          :alt: Circos example visualization
          :width: 100%
          :align: center

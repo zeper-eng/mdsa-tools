@@ -1,24 +1,18 @@
-
 Welcome to mdsa-tools!
 ======================
 
-
-mdsa-tools is a Python package for systems-level analysis of molecular-dynamics (MD) data. It provides utilities for clustering, dimensionality reduction (PCA, UMAP), visualization, and residue–residue hydrogen-bond network generation.
-Focused on label-free (unsupervised) workflows—PCA/UMAP, clustering, and Markov state modeling (MSM)—it can build hydrogen-bond adjacency matrices from MDTraj or import them from Cpptraj.
-By design, the analysis and visualization modules are data-agnostic: they operate on either (i) an n×n adjacency matrix or (ii) an edge list (long-format table) of (i, j, weight) in the expected schema.
-
+mdsa-tools is a Python package for systems-level analysis of molecular-dynamics (MD) data. It provides utilities for clustering, dimensionality reduction (PCA, UMAP), visualization, and hydrogen-bond network generation.
 
 .. toctree:: 
-   :maxdepth: 1
+   :maxdepth: 2
    :hidden:
    
    api
    examples
 
-
-.. 2 columns no matter what kind of screen and spacing of 2
-.. grid:: 3 3 3 3
-   :gutter: 3
+.. grid:: 1 1 1 1
+   :gutter: 2
+   :margin: 3
 
    .. grid-item-card:: 
       :link: api
@@ -34,45 +28,51 @@ By design, the analysis and visualization modules are data-agnostic: they operat
          :width: 100%
          :align: center
 
-
       +++
       **Full description of the modules included as a part of the workflow**
 
-   
-   .. grid-item-card:: 
-      :link: examples
-      :link-type: doc        
-      :text-align: center
 
-      **Examples**
-      
-      ^^^
-      .. image:: /resources/examplescover.png
-         :alt: PCA clusters for system A
-         :width: 100%
-         :align: center
+**Excerpt from our paper:**
 
+With the impressive development of force field parameters that allow successful computational simulations of biological molecules, bringing in systems modes of analysis is a natural next step to begin to understand the molecular dynamics behaviors that emerge from these experiments. We think of this as trying out and exploring lenses that can reveal different important behaviors. 
 
-      +++
-      **Examples of doing all range of things from visualizations to analysis**
+Following the approaches of classical molecular genetics, we use a “computational genetics” paradigm where we introduce changes (mutations) in potentially important residues—changing their identities or modifying their chemical properties—and ask how the dynamic system responds to these changes. 
 
+While some systems analytical approaches are “black box” in nature, making it harder to dissect the basis of observed behaviors, we have also explored network representations that allow us to home in on structural components whose behaviors are altered by the “computational mutations.” Applied to our ribosome neighborhood, this revealed unexpected changes in behavior at the ribosome peptidyl site (P site) in response to mutating mRNA residues next to the aminoacyl site (A site) codon, 
+suggesting long-range allosteric interactions across the neighborhood.  
 
    .. grid-item-card:: 
       :link: api
       :link-type: doc        
       :text-align: center
 
-      **link to the Systems Paper**
-
+      **Link to the Systems Paper**
       ^^^
 
       .. image:: /resources/paperfigure.png
-         :alt: PCA clusters for system A
+         :alt: Paper figure
          :width: 100%
          :align: center
 
       +++
       **A Systems Analysis of Ribosomal CAR-site Dynamics**
-      
-   
 
+Focused on leveraging unsupervised learning algorithm workflows—PCA/UMAP, clustering, and Markov state modeling (MSM)—our pipeline can build hydrogen-bond adjacency matrices from MDTraj or import them from Cpptraj. By design, the analysis and visualization modules are data-agnostic: they operate on either (i) an n×n adjacency matrix or (ii) an edge list (long-format table) of (i, j, weight) in the expected schema.
+
+   .. grid-item-card:: 
+      :link: examples
+      :link-type: doc        
+      :text-align: center
+
+      **Examples**
+      ^^^
+
+      .. image:: /resources/examplescover.png
+         :alt: Example cover image
+         :width: 100%
+         :align: center
+
+      +++
+      **From visualizations to analysis**
+
+ 

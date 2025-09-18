@@ -1,8 +1,7 @@
-sphinx>=7
+sphinx
 furo
 numpydoc
 sphinx-rtd-theme
-sphinx>=8,<9
 myst-parser
 sphinx-copybutton
 groundwork-sphinx-theme
@@ -12,3 +11,4 @@ sphinx_material
 breathe
 sphinx-press-theme
 ansys-sphinx-theme
+sphinx-book-theme

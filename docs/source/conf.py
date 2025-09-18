@@ -54,8 +54,8 @@ html_theme_options = {
     "show_toc_level": 2,
 }
 
-# Theme settings (pydata_sphinx_theme)
-html_theme = "ansys_sphinx_theme"
+# Theme settings 
+html_theme = "renku"
 html_show_sourcelink = False
 
 html_theme_options = {
