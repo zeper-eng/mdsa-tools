@@ -24,7 +24,7 @@
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="&lt;no title&gt;" href="import_from_cpptraj.html" />
+    <link rel="next" title="cpptraj (series) → residue×residue H-bond matrices" href="import_from_cpptraj.html" />
     <link rel="prev" title="MDcircos (PCA-weighted contacts)" href="circos_style_visualization.html" /> 
 </head>
 
@@ -60,6 +60,7 @@
 <li class="toctree-l3"><a class="reference internal" href="#see-also">See also</a></li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="import_from_cpptraj.html">cpptraj (series) → residue×residue H-bond matrices</a></li>
 <li class="toctree-l2"><a class="reference internal" href="hbond_replicate_maps.html">Replicate maps (discrete H-bond labels)</a></li>
 </ul>
 </li>
@@ -91,7 +92,7 @@
              
   <section id="data-generation-h-bond-matrices">
 <span id="datagen"></span><h1>Data generation (H-bond matrices)<a class="headerlink" href="#data-generation-h-bond-matrices" title="Link to this heading"></a></h1>
-<p>Use <a class="reference internal" href="../_autosummary/mdsa_tools.Data_gen_hbond.html#mdsa_tools.Data_gen_hbond.TrajectoryProcessor" title="mdsa_tools.Data_gen_hbond.TrajectoryProcessor"><code class="xref py py-class docutils literal notranslate"><span class="pre">mdsa_tools.Data_gen_hbond.TrajectoryProcessor</span></code></a> to turn trajectories
+<p>Use <code class="xref py py-class docutils literal notranslate"><span class="pre">mdsa_tools.Data_gen_hbond.TrajectoryProcessor</span></code> to turn trajectories
 (+ a topology) into per-frame residue×residue hydrogen-bond adjacency matrices.
 These arrays feed directly into the rest of the pipeline (clustering, PCA/UMAP,
 MSM bits).</p>
@@ -131,6 +132,10 @@ MSM bits).</p>
 
 <span class="nb">print</span><span class="p">(</span><span class="n">system_one</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>  <span class="c1"># (n_res+1, n_res+1)</span>
 <span class="nb">print</span><span class="p">(</span><span class="n">system_two</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+
+<span class="c1"># (optional) focus on residues of interest</span>
+<span class="n">filtered</span> <span class="o">=</span> <span class="n">traj_one</span><span class="o">.</span><span class="n">create_filtered_representations</span><span class="p">(</span><span class="n">residues_to_keep</span><span class="o">=</span><span class="p">[</span><span class="mi">10</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="mi">30</span><span class="p">])</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">filtered</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>  <span class="c1"># (n_frames, 1+len(residues_to_keep), 1+len(residues_to_keep))</span>
 
 <span class="c1"># save for later steps in the pipeline</span>
 <span class="n">outdir</span> <span class="o">=</span> <span class="s2">&quot;/path/to/example_systems&quot;</span>
@@ -176,7 +181,7 @@ see <a class="reference internal" href="../_autosummary/mdsa_tools.Cpptraj_impor
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="circos_style_visualization.html" class="btn btn-neutral float-left" title="MDcircos (PCA-weighted contacts)" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="import_from_cpptraj.html" class="btn btn-neutral float-right" title="&lt;no title&gt;" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="import_from_cpptraj.html" class="btn btn-neutral float-right" title="cpptraj (series) → residue×residue H-bond matrices" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

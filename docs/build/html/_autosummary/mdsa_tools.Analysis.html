@@ -58,7 +58,7 @@
 <li class="toctree-l4"><a class="reference internal" href="#mdsa_tools.Analysis.systems_analysis.create_PCA_ranked_weights"><code class="docutils literal notranslate"><span class="pre">systems_analysis.create_PCA_ranked_weights()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#mdsa_tools.Analysis.systems_analysis.create_pearsontest_for_kmeans_distributions"><code class="docutils literal notranslate"><span class="pre">systems_analysis.create_pearsontest_for_kmeans_distributions()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#mdsa_tools.Analysis.systems_analysis.extract_hbond_values"><code class="docutils literal notranslate"><span class="pre">systems_analysis.extract_hbond_values()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#mdsa_tools.Analysis.systems_analysis.preform_clust_opt"><code class="docutils literal notranslate"><span class="pre">systems_analysis.preform_clust_opt()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mdsa_tools.Analysis.systems_analysis.perform_clust_opt"><code class="docutils literal notranslate"><span class="pre">systems_analysis.perform_clust_opt()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#mdsa_tools.Analysis.systems_analysis.reduce_systems_representations"><code class="docutils literal notranslate"><span class="pre">systems_analysis.reduce_systems_representations()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#mdsa_tools.Analysis.systems_analysis.replicates_to_featurematrix"><code class="docutils literal notranslate"><span class="pre">systems_analysis.replicates_to_featurematrix()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#mdsa_tools.Analysis.systems_analysis.run_PCA"><code class="docutils literal notranslate"><span class="pre">systems_analysis.run_PCA()</span></code></a></li>
@@ -104,8 +104,6 @@
 <p>Generally you can follow our pipeline but,the individual steps are pretty modular if your comfortable doing simple numpy transmutations etc.
 You could for instance use the clustering on various number of n_dimensional datasets, or pull H-bond values using 
 systems_analysis.extract_hbond_values() and use thoose in replicate maps instead of k-means cluster assignments.</p>
-<p>Its a very small module so im not going to really include routine listings and such but, I will point to some relevant functions for the work
-being done by it.</p>
 <section id="see-also">
 <h2>See Also<a class="headerlink" href="#see-also" title="Link to this heading"></a></h2>
 <p>mdsa_tools.Viz.visualize_reduction : Plot PCA/UMAP embeddings.
@@ -116,7 +114,7 @@ numpy.linalg.svd : Linear algebra used under the hood.</p>
 <table class="autosummary longtable docutils align-default">
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="#mdsa_tools.Analysis.systems_analysis" title="mdsa_tools.Analysis.systems_analysis"><code class="xref py py-obj docutils literal notranslate"><span class="pre">systems_analysis</span></code></a>([systems_representations, ...])</p></td>
-<td><p></p></td>
+<td><p>Container for systems-level analyses on residue–residue adjacency matrices.</p></td>
 </tr>
 </tbody>
 </table>
@@ -124,27 +122,39 @@ numpy.linalg.svd : Linear algebra used under the hood.</p>
 <dt class="sig sig-object py" id="mdsa_tools.Analysis.systems_analysis">
 <em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mdsa_tools.Analysis.</span></span><span class="sig-name descname"><span class="pre">systems_analysis</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">systems_representations</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">replicate_distribution</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mdsa_tools.Analysis.systems_analysis" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Container for systems-level analyses on residue–residue adjacency matrices.</p>
+<p>This class assumes each “system representation” is a 3D array with shape
+<code class="docutils literal notranslate"><span class="pre">(n_frames,</span> <span class="pre">n_residues,</span> <span class="pre">n_residues)</span></code> where a single frame contains a
+residue×residue adjacency matrix (e.g., H-bond counts/weights). Many methods
+operate on a <em>feature matrix</em> constructed by flattening/stacking per-frame
+upper triangles.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl class="simple">
-<dt><strong>systems_representations</strong><span class="classifier">list, expected=list[array_1,…,array_n-1] where each array is an np.ndarray with shape=(n_frames,n_residues,n_residues)</span></dt><dd><p>Each array should have the shape as described above, where each frame has an adjacency matrix of pairwise
-comparisons between all residues. The only axis that can differ between arrays is the number of frames (n_frames).</p>
+<dt><strong>systems_representations</strong><span class="classifier">list of np.ndarray</span></dt><dd><p>Expected format: <code class="docutils literal notranslate"><span class="pre">[array_1,</span> <span class="pre">...,</span> <span class="pre">array_m]</span></code>, where each array has
+shape <code class="docutils literal notranslate"><span class="pre">(n_frames,</span> <span class="pre">n_residues,</span> <span class="pre">n_residues)</span></code>. The only permitted
+difference across arrays is <code class="docutils literal notranslate"><span class="pre">n_frames</span></code>; all systems should share
+the same residue dimension.</p>
 </dd>
-<dt><strong>frame_list</strong><span class="classifier">listlike, shape=(data,)</span></dt><dd><p>A list of integers representing the number of frames present in each replicate. This should be in the order
-of which the various versions of the system, and replicates where concatenated.</p>
+<dt><strong>replicate_distribution</strong><span class="classifier">array-like of int or None, optional</span></dt><dd><p>Optional labels or indices describing how frames are distributed
+across replicates/systems. If <code class="docutils literal notranslate"><span class="pre">None</span></code>, defaults to
+<code class="docutils literal notranslate"><span class="pre">np.arange(0,</span> <span class="pre">systems_representations[0].shape[0])</span></code>.</p>
 </dd>
 </dl>
 </dd>
 <dt class="field-even">Attributes<span class="colon">:</span></dt>
 <dd class="field-even"><dl class="simple">
-<dt><strong>num_systems</strong><span class="classifier">int, default=len(systems_representations)</span></dt><dd><p>Since this was originally built around comparative systems analysis some of the methods work on this concept directly.
-You can still input a single item as a tuple, similar to the way you do with np.array().</p>
+<dt><strong>num_systems</strong><span class="classifier">int</span></dt><dd><p>Number of systems provided (i.e., <code class="docutils literal notranslate"><span class="pre">len(systems_representations)</span></code>).</p>
 </dd>
-<dt><strong>systems_representations</strong><span class="classifier">arraylike,default=systems_representations</span></dt><dd><p>An attribute for conveniently manipulating the inputted list of arrays.</p>
+<dt><strong>systems_representations</strong><span class="classifier">list of np.ndarray</span></dt><dd><p>Original input, retained for convenience.</p>
 </dd>
-<dt><strong>indexes</strong><span class="classifier">arraylike,default=systems_representations[0][0,0,1:]</span></dt><dd><p>Derived from <code class="docutils literal notranslate"><span class="pre">systems_representations[0][0,0,1:]</span></code>. The arrays include index data, which introduces one extra row
-and column. This overhead is negligible for most use cases, unless operating on extremely large datasets. The
-design is not intended for such massive-scale applications.</p>
+<dt><strong>indexes</strong><span class="classifier">np.ndarray</span></dt><dd><p>Derived from <code class="docutils literal notranslate"><span class="pre">systems_representations[0][0,</span> <span class="pre">0,</span> <span class="pre">1:]</span></code>. Arrays include
+index data, introducing one extra row/column (negligible overhead for
+typical datasets).</p>
+</dd>
+<dt><strong>feature_matrix</strong><span class="classifier">np.ndarray or None</span></dt><dd><p>Cached 2D feature matrix produced by <code class="docutils literal notranslate"><span class="pre">replicates_to_featurematrix</span></code>.</p>
+</dd>
+<dt><strong>replicate_distribution</strong><span class="classifier">np.ndarray</span></dt><dd><p>Distribution vector set from the provided argument or default.</p>
 </dd>
 </dl>
 </dd>
@@ -153,7 +163,7 @@ design is not intended for such massive-scale applications.</p>
 <table class="autosummary longtable docutils align-default">
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="#mdsa_tools.Analysis.systems_analysis.cluster_embeddingspace" title="mdsa_tools.Analysis.systems_analysis.cluster_embeddingspace"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cluster_embeddingspace</span></code></a>([...])</p></td>
-<td><p>A function for looking at conformational states in embedding space</p></td>
+<td><p>Currently depreciated</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#mdsa_tools.Analysis.systems_analysis.cluster_system_level" title="mdsa_tools.Analysis.systems_analysis.cluster_system_level"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cluster_system_level</span></code></a>([outfile_path, ...])</p></td>
 <td><p></p></td>
@@ -162,13 +172,13 @@ design is not intended for such massive-scale applications.</p>
 <td><p>Create a ranked table of PCA feature weights for the first two principal components.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#mdsa_tools.Analysis.systems_analysis.create_pearsontest_for_kmeans_distributions" title="mdsa_tools.Analysis.systems_analysis.create_pearsontest_for_kmeans_distributions"><code class="xref py py-obj docutils literal notranslate"><span class="pre">create_pearsontest_for_kmeans_distributions</span></code></a>(...)</p></td>
-<td><p>Currently depreciated</p></td>
+<td><p>A function that is meant for the</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#mdsa_tools.Analysis.systems_analysis.extract_hbond_values" title="mdsa_tools.Analysis.systems_analysis.extract_hbond_values"><code class="xref py py-obj docutils literal notranslate"><span class="pre">extract_hbond_values</span></code></a>(residues[, ...])</p></td>
 <td><p>returns a 1dimensional array of &quot;average&quot; values per entry in the array</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#mdsa_tools.Analysis.systems_analysis.preform_clust_opt" title="mdsa_tools.Analysis.systems_analysis.preform_clust_opt"><code class="xref py py-obj docutils literal notranslate"><span class="pre">preform_clust_opt</span></code></a>(outfile_path[, ...])</p></td>
-<td><p></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#mdsa_tools.Analysis.systems_analysis.perform_clust_opt" title="mdsa_tools.Analysis.systems_analysis.perform_clust_opt"><code class="xref py py-obj docutils literal notranslate"><span class="pre">perform_clust_opt</span></code></a>(outfile_path[, ...])</p></td>
+<td><p>Optimize KMeans over a range of K and return labels/centers for the silhouette- and elbow-selected optima, or run a single-K fit.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#mdsa_tools.Analysis.systems_analysis.reduce_systems_representations" title="mdsa_tools.Analysis.systems_analysis.reduce_systems_representations"><code class="xref py py-obj docutils literal notranslate"><span class="pre">reduce_systems_representations</span></code></a>([...])</p></td>
 <td><p></p></td>
@@ -183,60 +193,15 @@ design is not intended for such massive-scale applications.</p>
 </table>
 <p class="rubric">Notes</p>
 <ul class="simple">
-<li><p>Automatically converts list of arrays into a feature matrix so it’s easy to build in.</p></li>
-<li><p>Expects systems of the same size for automation. For differently sized systems, you will likely need to
-preprocess manually.</p></li>
-<li><p>Provides a general systems perspective on molecular dynamics, so it can serve as a base for other projects.</p></li>
+<li><p>Many operations expect systems of the same residue size.</p></li>
+<li><p>Designed for comparative analyses but also works with a single system.</p></li>
+<li><p>The class focuses on simple, modular wrappers around common steps
+(flattening, reduction, clustering) for downstream use.</p></li>
 </ul>
-<p class="rubric">Examples</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">sa</span> <span class="o">=</span> <span class="n">systems_analysis</span><span class="p">([</span><span class="o">...</span><span class="p">])</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">sa</span><span class="o">.</span><span class="n">num_systems</span>
-<span class="go">3</span>
-</pre></div>
-</div>
 <dl class="py method">
 <dt class="sig sig-object py" id="mdsa_tools.Analysis.systems_analysis.cluster_embeddingspace">
 <span class="sig-name descname"><span class="pre">cluster_embeddingspace</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">reduced_coordinates</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">outfile_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_systems</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">val_metric</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mdsa_tools.Analysis.systems_analysis.cluster_embeddingspace" title="Link to this definition"></a></dt>
-<dd><p>A function for looking at conformational states in embedding space</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><dl class="simple">
-<dt><strong>outfilepath:str</strong></dt><dd><p>path to save</p>
-</dd>
-<dt><strong>reduced_coordinates:np.Ndarray,default=self.reduced_coordinates,shape=</strong></dt><dd><p>A feature matrix to be used for analysis</p>
-</dd>
-<dt><strong>n:int,default=2</strong></dt><dd><p>number of principal components to reduce to</p>
-</dd>
-<dt><strong>max_clusters:int,default=10</strong></dt><dd><p>The defualt number</p>
-</dd>
-<dt><strong>val_metric:str,default=’sillohuete’</strong></dt><dd><p>The validation metric you would like to use for picking an “ideal number of clusters’</p>
-</dd>
-</dl>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><dl class="simple">
-<dt>candidate_states_per_system:list,shape=(n_systems,)</dt><dd><p>A list where each entry corresponds to a system. Each entry is a tuple of
-(labels, centers) representing the cluster assignments for that system and
-the cluster centers determined by the chosen validation metric.</p>
-</dd>
-</dl>
-</dd>
-</dl>
-<p class="rubric">Notes</p>
-<p>This function runs clustering for each system independently, based on the 
-dimensionality-reduced feature space. Both elbow and sillohuete methods are 
-computed internally, but only the method specified in val_metric is returned.
-Returned states are meant for downstream analysis such as transition probability 
-calculations, replicate maps, or visualization.</p>
-<p class="rubric">Examples</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">systems_clusters</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">cluster_embeddingspace</span><span class="p">(</span><span class="n">reduced_coordinates</span><span class="o">=</span><span class="n">X_pca</span><span class="p">,</span>
-<span class="gp">... </span>                                              <span class="n">outfile_path</span><span class="o">=</span><span class="s1">&#39;/results/&#39;</span><span class="p">,</span>
-<span class="gp">... </span>                                              <span class="n">num_systems</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
-<span class="gp">... </span>                                              <span class="n">val_metric</span><span class="o">=</span><span class="s1">&#39;sillohuete&#39;</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">systems_clusters</span><span class="p">))</span>
-<span class="go">2</span>
-</pre></div>
-</div>
+<dd><p>Currently depreciated</p>
 </dd></dl>
 
 <dl class="py method">
@@ -334,7 +299,53 @@ runs unless you control scaling consistently.
 <dl class="py method">
 <dt class="sig sig-object py" id="mdsa_tools.Analysis.systems_analysis.create_pearsontest_for_kmeans_distributions">
 <span class="sig-name descname"><span class="pre">create_pearsontest_for_kmeans_distributions</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">labels</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">coordinates</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cluster_centers</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mdsa_tools.Analysis.systems_analysis.create_pearsontest_for_kmeans_distributions" title="Link to this definition"></a></dt>
-<dd><p>Currently depreciated</p>
+<dd><p>A function that is meant for the</p>
+<dl class="field-list">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>labels:listlike</strong></dt><dd><p>A list or array of labels that tell us which cluster each sample belongs to</p>
+</dd>
+<dt><strong>coordinates:array,shape=(n_samples,featuresures)</strong></dt><dd><p>An array which tells us the coordinates of each sample so we can form distributions from them and run statistical tests
+(pearson corellation coefficient)</p>
+</dd>
+<dt><strong>cluster_centers:listlike,shape=k</strong></dt><dd><p>A list of arrays which tell us the coordinates for each cluster center so that we can calculate distributions
+to them</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl>
+<dt><strong>correlation_df</strong><span class="classifier">pandas.DataFrame</span></dt><dd><p>Long-form table of pairwise Pearson correlations between <em>equal-length</em> samples
+drawn from per-cluster distance distributions (truncated to the shortest length
+across clusters). Columns:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">cluster_i</span></code> (int): first cluster id</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">cluster_j</span></code> (int): second cluster id</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">pearson_r</span></code> (float): correlation coefficient</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">p_value</span></code> (float): two-sided p-value</p></li>
+</ul>
+</div></blockquote>
+</dd>
+</dl>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<p>Distances are computed as Euclidean distances from each point to the center of its
+assigned cluster. Because clusters can have different sizes, distributions are
+truncated to the minimum cluster size before computing pairwise correlations to
+avoid unequal-sample artifacts.</p>
+<p>This is a simple exploratory comparison of cluster compactness/shape; interpret
+p-values cautiously, especially when sample sizes are small or heavily truncated.</p>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># labels: shape (n_samples,), coordinates: (n_samples, n_features)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># cluster_centers: (k, n_features)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">df</span> <span class="o">=</span> <span class="n">systems_analysis</span><span class="o">.</span><span class="n">create_pearsontest_for_kmeans_distributions</span><span class="p">(</span>
+<span class="gp">... </span>    <span class="bp">self</span><span class="p">,</span> <span class="n">labels</span><span class="p">,</span> <span class="n">coordinates</span><span class="p">,</span> <span class="n">cluster_centers</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">list</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">)</span>
+<span class="go">[&#39;cluster_i&#39;, &#39;cluster_j&#39;, &#39;pearson_r&#39;, &#39;p_value&#39;]</span>
+</pre></div>
+</div>
 </dd></dl>
 
 <dl class="py method">
@@ -375,49 +386,37 @@ for just thoose frames and see which is best.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="mdsa_tools.Analysis.systems_analysis.preform_clust_opt">
-<span class="sig-name descname"><span class="pre">preform_clust_opt</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">outfile_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_clusters</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">k</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mdsa_tools.Analysis.systems_analysis.preform_clust_opt" title="Link to this definition"></a></dt>
-<dd><dl class="field-list simple">
+<dt class="sig sig-object py" id="mdsa_tools.Analysis.systems_analysis.perform_clust_opt">
+<span class="sig-name descname"><span class="pre">perform_clust_opt</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">outfile_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_clusters</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">k</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mdsa_tools.Analysis.systems_analysis.perform_clust_opt" title="Link to this definition"></a></dt>
+<dd><p>Optimize KMeans over a range of K and return labels/centers for the
+silhouette- and elbow-selected optima, or run a single-K fit.</p>
+<dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl class="simple">
-<dt><strong>data</strong><span class="classifier">np.ndarray, shape = (n_samples, featuresures)</span></dt><dd><p>A feature matrix of any kind (ideally produced earlier in this pipeline).
-This is just a scikit-learn wrapper, so you can plug anything you want really.
-If None, defaults to <cite>self.feature_matrix</cite>.</p>
+<dt><strong>outfile_path</strong><span class="classifier">str</span></dt><dd><p>Directory prefix where per-K label arrays are saved via <code class="docutils literal notranslate"><span class="pre">np.save</span></code> as
+<code class="docutils literal notranslate"><span class="pre">&quot;&lt;outfile_path&gt;kluster_labels_{K}clust.npy&quot;</span></code> (suffix omitted in code).</p>
 </dd>
-<dt><strong>outfile_path</strong><span class="classifier">str, default = os.getcwd()</span></dt><dd><p>Path prefix where per-K label arrays will be saved via <cite>np.save</cite>.
-A file is written for each tested K as
-“&lt;outfile_path&gt;kluster_labels_{K}clust.npy”.
-(If you don’t pass a trailing separator, this will be concatenated verbatim.)</p>
+<dt><strong>max_clusters</strong><span class="classifier">int, optional</span></dt><dd><p>Upper bound (inclusive) of the search range when <code class="docutils literal notranslate"><span class="pre">k</span> <span class="pre">is</span> <span class="pre">None</span></code>.
+Defaults to 10.</p>
 </dd>
-<dt><strong>max_clusters</strong><span class="classifier">int, default = 10</span></dt><dd><p>When <cite>k is None</cite>, we grid-search KMeans for K in [2, …, max_clusters]
-to compute inertia (elbow) and sillohuette scores.</p>
+<dt><strong>data</strong><span class="classifier">np.ndarray, shape = (n_samples, n_features), optional</span></dt><dd><p>Feature matrix to cluster. If <code class="docutils literal notranslate"><span class="pre">None</span></code>, uses <code class="docutils literal notranslate"><span class="pre">self.feature_matrix</span></code>.</p>
 </dd>
-<dt><strong>k</strong><span class="classifier">int or None, default = None</span></dt><dd><p>If provided, we skip optimization and run a single KMeans with exactly <cite>k</cite>
-clusters (useful when you already know the K you want to keep).</p>
+<dt><strong>k</strong><span class="classifier">int or None, optional</span></dt><dd><p>If provided, fit KMeans once at this K and return <code class="docutils literal notranslate"><span class="pre">(labels,</span> <span class="pre">centers)</span></code>.
+If <code class="docutils literal notranslate"><span class="pre">None</span></code>, grid-searches K in <code class="docutils literal notranslate"><span class="pre">[2,</span> <span class="pre">...,</span> <span class="pre">max_clusters]</span></code>.</p>
 </dd>
 </dl>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><dl class="simple">
-<dt>If <cite>k is not None</cite>:</dt><dd><dl class="simple">
-<dt>(cluster_labels, cluster_centers)<span class="classifier">tuple</span></dt><dd><dl class="simple">
-<dt>cluster_labels<span class="classifier">np.ndarray, shape = (n_samples,)</span></dt><dd><p>The assignment of each sample to its cluster.</p>
-</dd>
-<dt>cluster_centers<span class="classifier">np.ndarray, shape = (k, featuresures)</span></dt><dd><p>The KMeans centroids for the requested K.</p>
+<dt>If k is not None:</dt><dd><dl class="simple">
+<dt>(cluster_labels, cluster_centers)<span class="classifier">tuple</span></dt><dd><p>Labels and centers from the single-K fit.</p>
 </dd>
 </dl>
 </dd>
-</dl>
-</dd>
-<dt>If <cite>k is None</cite> (optimization path):</dt><dd><dl class="simple">
-<dt>(optimal_k_silhouette_labels, optimal_k_elbow_labels, centers_sillohuette, centers_elbow)<span class="classifier">tuple</span></dt><dd><dl class="simple">
-<dt>optimal_k_silhouette_labels<span class="classifier">np.ndarray, shape = (n_samples,)</span></dt><dd><p>Labels for the K that maximizes sillohuette score over the tested range.</p>
-</dd>
-<dt>optimal_k_elbow_labels<span class="classifier">np.ndarray, shape = (n_samples,)</span></dt><dd><p>Labels for the K chosen by the elbow (inertia) heuristic.</p>
-</dd>
-<dt>centers_sillohuette<span class="classifier">np.ndarray, shape = (K_sillohuette, featuresures)</span></dt><dd><p>Centroids corresponding to the sillohuette-optimal labels.</p>
-</dd>
-<dt>centers_elbow<span class="classifier">np.ndarray, shape = (K_elbow, featuresures)</span></dt><dd><p>Centroids corresponding to the elbow-optimal labels.</p>
+<dt>If k is None:</dt><dd><dl class="simple">
+<dt>(optimal_k_silhouette_labels, optimal_k_elbow_labels,</dt><dd><dl class="simple">
+<dt>centers_sillohuette, centers_elbow)<span class="classifier">tuple</span></dt><dd><p>Labels/centers corresponding to the best K by silhouette score and
+the elbow criterion, respectively.</p>
 </dd>
 </dl>
 </dd>
@@ -428,29 +427,11 @@ clusters (useful when you already know the K you want to keep).</p>
 </dl>
 <p class="rubric">Notes</p>
 <ul class="simple">
-<li><p>KMeans config here is <cite>init=’random’</cite>, <cite>n_init=k</cite> (or <cite>n_init=K</cite> inside the loop),</p></li>
+<li><p>Silhouette scores are computed for each K and used to select one optimum.</p></li>
+<li><p>Inertia (elbow) values are tracked for each K, except for a special-case
+skip when <code class="docutils literal notranslate"><span class="pre">max_clusters</span> <span class="pre">==</span> <span class="pre">3</span> <span class="pre">and</span> <span class="pre">k</span> <span class="pre">==</span> <span class="pre">3</span></code> to avoid degenerate elbow logic.</p></li>
+<li><p>Deterministic runs are ensured via <code class="docutils literal notranslate"><span class="pre">random_state=0</span></code> and <code class="docutils literal notranslate"><span class="pre">init='random'</span></code>.</p></li>
 </ul>
-<p>and <cite>random_state=0</cite> for reproducibility—kept consistent with the rest of this code.
-- Validation metrics:</p>
-<blockquote>
-<div><ul class="simple">
-<li><p><strong>Sillohuette</strong> (via <cite>sklearn.metrics.silhouette_score</cite>) favors compact, well-separated clusters.</p></li>
-<li><p><strong>Elbow</strong> uses raw inertia (within-cluster SSE) to pick a knee in the curve.</p></li>
-</ul>
-</div></blockquote>
-<p>The helper functions <cite>plot_sillohette_scores</cite> and <cite>plot_elbow_scores</cite> (from <cite>mdsa_tools.Viz</cite>)
-are called to optionally save plots and to return the selected K values.
-- Side effects: for each tested K in <cite>[2, max_clusters]</cite>, this writes labels to disk using
-<cite>np.save(f”{outfile_path}kluster_labels_{K}clust”, labels)</cite>. Numpy will append the <cite>.npy</cite>
-extension if not present.</p>
-<p class="rubric">Examples</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># 1) Let the function pick K by sillohuette and elbow</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">opt_sil_labels</span><span class="p">,</span> <span class="n">opt_elb_labels</span><span class="p">,</span> <span class="n">sil_centers</span><span class="p">,</span> <span class="n">elb_centers</span> <span class="o">=</span>         <span class="o">...</span>     <span class="n">sa</span><span class="o">.</span><span class="n">preform_clust_opt</span><span class="p">(</span><span class="n">outfile_path</span><span class="o">=</span><span class="s1">&#39;/results/&#39;</span><span class="p">,</span> <span class="n">max_clusters</span><span class="o">=</span><span class="mi">12</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">sa</span><span class="o">.</span><span class="n">feature_matrix</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt;</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="c1"># 2) Run a fixed-K clustering (no optimization)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">labels_k5</span><span class="p">,</span> <span class="n">centers_k5</span> <span class="o">=</span> <span class="n">sa</span><span class="o">.</span><span class="n">preform_clust_opt</span><span class="p">(</span><span class="n">outfile_path</span><span class="o">=</span><span class="s1">&#39;/results/&#39;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">sa</span><span class="o">.</span><span class="n">feature_matrix</span><span class="p">,</span> <span class="n">k</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
-</pre></div>
-</div>
 </dd></dl>
 
 <dl class="py method">
@@ -552,8 +533,26 @@ in such a way that each of the original arrays follow each other sequentially.</
 </dl>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"></dd>
+<dd class="field-even"><dl class="simple">
+<dt><strong>X_pca</strong><span class="classifier">np.ndarray, shape = (n_samples, n)</span></dt><dd><p>Transformed coordinates in the principal-component space.</p>
+</dd>
+<dt><strong>weights</strong><span class="classifier">np.ndarray, shape = (n, n_features)</span></dt><dd><p>PCA component loadings (rows = components, columns = original features).</p>
+</dd>
+<dt><strong>explained_variances</strong><span class="classifier">np.ndarray, shape = (n,)</span></dt><dd><p>Fraction of variance explained by each selected component.</p>
+</dd>
 </dl>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<p>This is a thin wrapper around <code class="docutils literal notranslate"><span class="pre">sklearn.decomposition.PCA</span></code> that fits on the
+provided feature matrix and returns the transformed coordinates, component
+loadings, and explained-variance ratios.</p>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">X_pca</span><span class="p">,</span> <span class="n">W</span><span class="p">,</span> <span class="n">evr</span> <span class="o">=</span> <span class="n">systems_analysis</span><span class="o">.</span><span class="n">run_PCA</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">feature_matrix</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">X_pca</span><span class="o">.</span><span class="n">shape</span>
+<span class="go">(feature_matrix.shape[0], 2)</span>
+</pre></div>
+</div>
 </dd></dl>
 
 </dd></dl>

@@ -25,7 +25,7 @@
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="Data generation (H-bond matrices)" href="data_generation_workflow.html" />
-    <link rel="prev" title="Feature Matrix and exploratory clustering" href="example_of_clustering_analysis.html" /> 
+    <link rel="prev" title="Feature matrix &amp; exploratory clustering" href="example_of_clustering_analysis.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -50,7 +50,7 @@
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../api.html">mdsa-tools Python API</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="../examples.html">Examples</a><ul class="current">
-<li class="toctree-l2"><a class="reference internal" href="example_of_clustering_analysis.html">Feature Matrix and exploratory clustering</a></li>
+<li class="toctree-l2"><a class="reference internal" href="example_of_clustering_analysis.html">Feature matrix &amp; exploratory clustering</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">MDcircos (PCA-weighted contacts)</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#what-you-get">What you get</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#quickstart">Quickstart</a></li>
@@ -60,6 +60,7 @@
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="data_generation_workflow.html">Data generation (H-bond matrices)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="import_from_cpptraj.html">cpptraj (series) → residue×residue H-bond matrices</a></li>
 <li class="toctree-l2"><a class="reference internal" href="hbond_replicate_maps.html">Replicate maps (discrete H-bond labels)</a></li>
 </ul>
 </li>
@@ -107,7 +108,7 @@ most salient residue–residue contacts with <a class="reference internal" href=
 <section id="quickstart">
 <h2>Quickstart<a class="headerlink" href="#quickstart" title="Link to this heading"></a></h2>
 <p>Minimal example using two previously generated systems (<code class="docutils literal notranslate"><span class="pre">.npy</span></code> arrays created by
-<a class="reference internal" href="../_autosummary/mdsa_tools.Data_gen_hbond.html#mdsa_tools.Data_gen_hbond.TrajectoryProcessor" title="mdsa_tools.Data_gen_hbond.TrajectoryProcessor"><code class="xref py py-class docutils literal notranslate"><span class="pre">mdsa_tools.Data_gen_hbond.TrajectoryProcessor</span></code></a> or <a class="reference internal" href="../_autosummary/mdsa_tools.Cpptraj_import.html#module-mdsa_tools.Cpptraj_import" title="mdsa_tools.Cpptraj_import"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mdsa_tools.Cpptraj_import</span></code></a>).</p>
+<code class="xref py py-class docutils literal notranslate"><span class="pre">mdsa_tools.Data_gen_hbond.TrajectoryProcessor</span></code> or <a class="reference internal" href="../_autosummary/mdsa_tools.Cpptraj_import.html#module-mdsa_tools.Cpptraj_import" title="mdsa_tools.Cpptraj_import"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mdsa_tools.Cpptraj_import</span></code></a>).</p>
 <p>If you are unfamiliar with making theese see <a class="reference internal" href="data_generation_workflow.html#datagen"><span class="std std-ref">Data generation (H-bond matrices)</span></a>.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
@@ -173,7 +174,7 @@ so you can re-run the analysis when trajectory preprocessing changes.</p></li>
 <section id="where-this-fits">
 <h2>Where this fits<a class="headerlink" href="#where-this-fits" title="Link to this heading"></a></h2>
 <ul class="simple">
-<li><p>Generate the adjacency arrays with <a class="reference internal" href="../_autosummary/mdsa_tools.Data_gen_hbond.html#mdsa_tools.Data_gen_hbond.TrajectoryProcessor" title="mdsa_tools.Data_gen_hbond.TrajectoryProcessor"><code class="xref py py-class docutils literal notranslate"><span class="pre">mdsa_tools.Data_gen_hbond.TrajectoryProcessor</span></code></a>
+<li><p>Generate the adjacency arrays with <code class="xref py py-class docutils literal notranslate"><span class="pre">mdsa_tools.Data_gen_hbond.TrajectoryProcessor</span></code>
 (or build from cpptraj tables via <a class="reference internal" href="../_autosummary/mdsa_tools.Cpptraj_import.html#module-mdsa_tools.Cpptraj_import" title="mdsa_tools.Cpptraj_import"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mdsa_tools.Cpptraj_import</span></code></a>), then pass them here.</p></li>
 <li><p>After identifying key contacts with PCA/MDcircos, you can:
 - Cluster or label states with <a class="reference internal" href="../_autosummary/mdsa_tools.Analysis.html#module-mdsa_tools.Analysis" title="mdsa_tools.Analysis"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mdsa_tools.Analysis</span></code></a>.
@@ -196,7 +197,7 @@ so you can re-run the analysis when trajectory preprocessing changes.</p></li>
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="example_of_clustering_analysis.html" class="btn btn-neutral float-left" title="Feature Matrix and exploratory clustering" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="example_of_clustering_analysis.html" class="btn btn-neutral float-left" title="Feature matrix &amp; exploratory clustering" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
         <a href="data_generation_workflow.html" class="btn btn-neutral float-right" title="Data generation (H-bond matrices)" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 

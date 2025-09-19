@@ -1,41 +1,98 @@
 .. _full_example:
 
+Feature matrix & exploratory clustering
+=======================================
 
-Feature Matrix and exploratory clustering
-=========================================
+Use :class:`mdsa_tools.Analysis.systems_analysis` to assemble feature matrices
+from previously saved H-bond adjacency stacks and run **K-means** across a range
+of :math:`K`. Then generate low-dimensional embeddings (``PCA`` or ``UMAP``) and,
+optionally, perform a second clustering pass directly in embedding space.
 
-If you separated out the data generation phase and saved your systems earlier, you
-can start here. This uses two saved ``.npy`` arrays and runs clustering + reduction
-(including an embedding-space clustering pass).
+What you get
+------------
+- A :class:`~mdsa_tools.Analysis.systems_analysis` instance bound to your systems.
+- Per-K label arrays saved to disk as ``kluster_labels_{K}clust.npy`` plus
+  elbow/silhouette score plots and the **optimal K** by each criterion.
+- 2D embedding figures (colored by cluster labels) saved to your output folder.
+- Optional **embedding-space** cluster labels for finer structure in PCA/UMAP space.
 
-Otherwise see :ref:`datagen`.
+Quickstart
+----------
+Minimal example using two previously generated systems (``.npy`` arrays created by
+:class:`mdsa_tools.Data_gen_hbond.TrajectoryProcessor` or :mod:`mdsa_tools.Cpptraj_import`).
+
+If you are unfamiliar with making these, see :ref:`datagen`.
 
 .. code-block:: python
 
-   from mdsa_tools.Convenience import unrestrained_residues
-   from mdsa_tools.Analysis import systems_analysis
    import os
    import numpy as np
+   from mdsa_tools.Analysis import systems_analysis
 
-   #We seperate out the data generation phase and assume you generated and saved your data prior
-   redone_CCU_GCU_fulltraj=np.load('/Users/luis/Downloads/redone_unrestrained_CCU_GCU_Trajectory_array.npy',allow_pickle=True)
-   redone_CCU_CGU_fulltraj=np.load('/Users/luis/Downloads/redone_unrestrained_CCU_CGU_Trajectory_array.npy',allow_pickle=True)
-   all_systems=[redone_CCU_GCU_fulltraj,redone_CCU_CGU_fulltraj]
+   #########################################
+   # Load systems (each is a list of frames)
+   #########################################
+   system_a = np.load("/path/to/CCU_GCU_Trajectory_array.npy", allow_pickle=True)
+   system_b = np.load("/path/to/CCU_CGU_Trajectory_array.npy", allow_pickle=True)
+   all_systems = [system_a, system_b]
 
-   Systems_Analyzer = systems_analysis(all_systems)
+   #########################################
+   # Build analyzer
+   #########################################
+   SA = systems_analysis(all_systems)
 
-   #Clustering and visualizing clusters 
-   optimal_k_silhouette_labels,optimal_k_elbow_labels,centers_sillohuette,centers_elbow = Systems_Analyzer.cluster_system_level(outfile_path='/Users/luis/Desktop/workspacetwo/manuscript_explorations/syskmeans/',max_clusters=25)
-   print('clustering succesfully completed')
+   #########################################
+   # System-level K-means sweep (elbow & silhouette)
+   #########################################
+   k_labels_sil, k_labels_elbow, centers_sil, centers_elbow = SA.cluster_system_level(
+       outfile_path="/path/to/output/syskmeans/",
+       max_clusters=25
+   )
+   print("Clustering successfully completed.")
 
-   Systems_Analyzer.reduce_systems_representations(outfile_path='/Users/luis/Desktop/workspace/test_output/PCA/test_',colormappings=optimal_k_silhouette_labels) #you could do method=PCA/UMAP here
-   print('PCA reduction succesful')
+   #########################################
+   # Dimensionality reduction (PCA or UMAP)
+   #########################################
+   SA.reduce_systems_representations(
+       outfile_path="/path/to/output/reduction/test_",
+       colormappings=k_labels_sil,         # color points by silhouette-optimal labels
+       method="PCA"                         # or "UMAP"
+   )
+   print("Reduction successful.")
 
-   Systems_Analyzer.cluster_embeddingspace(outfile_path='/Users/luis/Desktop/workspace/test_output/cluster_embeddingspace/',max_clusters=10,elbow_or_sillohuette='sillohuette')
-   print('Embedding space clustering succesfully completed')
+   #########################################
+   # Optional: cluster directly in embedding space
+   #########################################
+   SA.cluster_embeddingspace(
+       outfile_path="/path/to/output/cluster_embeddingspace/",
+       max_clusters=10,
+       elbow_or_sillohuette="sillohuette"   # use "elbow" to switch criterion
+   )
+   print("Embedding-space clustering successfully completed.")
+
+Notes
+-----
+- **Inputs:** Each system should be an array-like of shape
+  ``(n_frames, n_res+1, n_res+1)``, with the ``0``-th row/col storing **1-based**
+  residue IDs. Slice ``[1:, 1:]`` to work with the numeric adjacency submatrix.
+- **Saved outputs:** During the K sweep, per-K labels are saved as
+  ``kluster_labels_{K}clust.npy`` under ``outfile_path`` along with score plots.
+- **Coloring:** Pass any label vector (e.g., silhouette-optimal) via ``colormappings``
+  to color points consistently across PCA/UMAP figures.
+- **Reproducibility:** Keep inputs/figures in versioned folders so reruns are trivial
+  when preprocessing changes.
+
+Where this fits
+---------------
+- Generate adjacency arrays with :class:`mdsa_tools.Data_gen_hbond.TrajectoryProcessor`
+  (or build from cpptraj via :mod:`mdsa_tools.Cpptraj_import`), then run clustering here.
+- After clustering:
+  - Explore embeddings and replicate maps with :mod:`mdsa_tools.Viz`.
 
 See also
-
-- :mod:`mdsa_tools.Data_gen_hbond` for creating the per-frame adjacency matrices.
-- :class:`mdsa_tools.Analysis.systems_analysis` for clustering and reduction helpers.
-- :mod:`mdsa_tools.Viz` for embedding plots and replicate maps.
+--------
+- :mod:`mdsa_tools.Data_gen_hbond` — build per-frame H-bond adjacency matrices.
+- :mod:`mdsa_tools.Cpptraj_import` — construct the same matrices from cpptraj series tables.
+- :meth:`mdsa_tools.Analysis.systems_analysis.cluster_system_level` — K-sweep with elbow/silhouette.
+- :meth:`mdsa_tools.Analysis.systems_analysis.reduce_systems_representations` — PCA/UMAP embeddings.
+- :meth:`mdsa_tools.Analysis.systems_analysis.cluster_embeddingspace` — clustering in embedding space.

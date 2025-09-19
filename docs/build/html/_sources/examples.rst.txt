@@ -46,7 +46,7 @@ analysis of molecular dynamics data.
       **Data Generation Example**
 
       ^^^
-      .. image:: ../resources/datagen.png
+      .. image:: ../resources/datagenn.png
          :alt: Data generation workflow
          :width: 100%
          :align: center
@@ -66,15 +66,15 @@ analysis of molecular dynamics data.
          :align: center
 
    .. grid-item-card::
-      :link: examples/kmeans_visualization
+      :link: examples/MSM_Example
       :link-type: doc
       :shadow: lg
       :text-align: center
 
-      **Visualizing KMeans**
+      **Exploratory MSM (from embeddings)**
 
       ^^^
-      .. image:: ../resources/kmeans_example.png
+      .. image:: ../resources/msmhelper.png
          :alt: KMeans visualization
          :width: 100%
          :align: center

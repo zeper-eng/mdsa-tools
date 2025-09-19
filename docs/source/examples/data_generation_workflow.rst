@@ -46,6 +46,10 @@ Minimal example with two systems (adjust paths for your machine).
    print(system_one[0].shape)  # (n_res+1, n_res+1)
    print(system_two[0].shape)
 
+   # (optional) focus on residues of interest
+   filtered = traj_one.create_filtered_representations(residues_to_keep=[10, 20, 30])
+   print(filtered.shape)  # (n_frames, 1+len(residues_to_keep), 1+len(residues_to_keep))
+
    # save for later steps in the pipeline
    outdir = "/path/to/example_systems"
    os.makedirs(outdir, exist_ok=True)
@@ -68,8 +72,6 @@ Where this fits
 - Reduce and plot with :mod:`mdsa_tools.Viz`.
 - If your H-bond data comes from cpptraj text outputs instead of trajectories,
   see :mod:`mdsa_tools.Cpptraj_import`.
-
-
 
 See also
 --------
