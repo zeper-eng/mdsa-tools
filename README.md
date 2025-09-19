@@ -6,7 +6,7 @@ Tools for systems-level analysis of Molecular Dynamics (MD) simulations
 
 ![Pipeline](https://raw.githubusercontent.com/zeper-eng/workspace/main/resources/Pipelineflic.png)
 
-We start from an MD trajectory and generate per-frame interaction networks (graphs/adjacency matrices). Adjacencies are flattened (row-wise) into vectors; stacking these per-frame vectors yields a feature matrix suitable for clustering (e.g., k-means) and dimensionality reduction (PCA/UMAP). Results can be visualized with graphs, scatter plots, MDCcircos plots (residue H-bonding), or replicate maps of frame-level measurements of interest. These clustered vstates can then serve as candidate substates for constructing and analyzing Markov state models (MSMs), enabling exploration of long-timescale dynamics and transition pathways.
+We start from an MD trajectory and generate per-frame interaction networks (graphs/adjacency matrices). Adjacencies are flattened (row-wise) into vectors; stacking these per-frame vectors yields a feature matrix suitable for clustering (e.g., k-means) and dimensionality reduction (PCA/UMAP). Results can be visualized with graphs, scatter plots, MDcircos plots (residue H-bonding), or replicate maps of frame-level measurements of interest. These clustered states can then serve as candidate substates for constructing and analyzing Markov state models (MSMs), enabling exploration of long-timescale dynamics and transition pathways.
 
 ## Install
 
