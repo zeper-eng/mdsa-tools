@@ -52,26 +52,20 @@ def test_replicates_to_featurematrix_accepts_single_array(analysis_systems):
     from mdsa_tools.Analysis import systems_analysis as sas
     single_array=analysis_systems[0]
     analyzer = sas([single_array])
-    X = analyzer.replicates_to_featurematrix()
-    assert np.count_nonzero(X) > 0
+    Feature_Matrix = analyzer.replicates_to_featurematrix()
+    assert np.count_nonzero(Feature_Matrix) > 0
 
-def test_preform_clust_opt_fixed_k_returns_shapes(tmp_path, analyzer):
-    X = analyzer.feature_matrix
-    labels, centers = analyzer.preform_clust_opt(outfile_path=str(tmp_path) + os.sep, data=X, k=2)
-    assert labels.shape[0] == X.shape[0]
-    assert centers.shape == (2, X.shape[1])
+def test_perform_clust_opt_fixed_k_returns_shapes(tmp_path, analyzer):
+    Feature_Matrix = analyzer.replicates_to_featurematrix()
+    labels, centers = analyzer.perform_clust_opt(outfile_path=str(tmp_path) + os.sep, data=Feature_Matrix, k=2)
+    assert labels.shape[0] == Feature_Matrix.shape[0]
+    assert centers.shape == (2, Feature_Matrix.shape[1])
 
-
-
-'''def test_preform_clust_opt_saves_label_files(tmp_path, analyzer):
-    X = analyzer.feature_matrix
-    _ = analyzer.preform_clust_opt(outfile_path=str(tmp_path) + os.sep, data=X, max_clusters=3)
-    for k in (2, 3):
-        f = tmp_path / f"kluster_labels_{k}clust.npy"
-        assert f.exists()
-        arr = np.load(f)
-        assert arr.shape[0] == X.shape[0]
-
+def test_cluster_system_level_k_path(tmp_path, analyzer):
+    Fm = analyzer.feature_matrix
+    labels, centers = analyzer.cluster_system_level(outfile_path=str(tmp_path) + os.sep, data=Fm, k=2)
+    assert labels.shape[0] == Fm.shape[0]
+    assert centers.shape[0] == 2
 
 def test_cluster_system_level_k_path(tmp_path, analyzer):
     X = analyzer.feature_matrix
@@ -87,8 +81,6 @@ def test_create_pearsontest_for_kmeans_distributions_shape(analyzer):
     df = analyzer.create_pearsontest_for_kmeans_distributions(labels, coords, centers)
     assert list(df.columns) == ["cluster_i", "cluster_j", "pearson_r", "p_value"]
     assert len(df) == 1
-
-'''
 
 
 

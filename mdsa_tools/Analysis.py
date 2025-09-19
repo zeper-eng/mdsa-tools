@@ -265,7 +265,7 @@ class systems_analysis:
         k=k if k is not None else None
 
         if k is None:
-            optimal_k_silhouette_labels,optimal_k_elbow_labels,centers_sillohuette,centers_elbow=self.preform_clust_opt(outfile_path=outfile_path,data=data,max_clusters=max_clusters)
+            optimal_k_silhouette_labels,optimal_k_elbow_labels,centers_sillohuette,centers_elbow=self.perform_clust_opt(outfile_path=outfile_path,data=data,max_clusters=max_clusters)
         
         if k is not None:
             kmeans = KMeans(n_clusters=k, init='random', n_init=k, random_state=0)
@@ -450,7 +450,7 @@ class systems_analysis:
         print(individual_systems[0].shape)
         candidate_states_per_system=[]
         for i in individual_systems:
-            optimal_k_silhouette_labels,optimal_k_elbow_labels,centers_sillohuette,centers_elbow=self.preform_clust_opt(outfile_path,data=i)
+            optimal_k_silhouette_labels,optimal_k_elbow_labels,centers_sillohuette,centers_elbow=self.perform_clust_opt(outfile_path,data=i)
             if val_metric=='sillohuette':
                 candidate_states_per_system.append((optimal_k_silhouette_labels,centers_sillohuette))
             if val_metric=='elbow':
@@ -623,122 +623,54 @@ class systems_analysis:
 
 
     #Algorithm wrappers 
-    def preform_clust_opt(self,outfile_path, max_clusters=None, data=None,k=None):
-        '''
-        Parameters
-        ----------
-        data : np.ndarray, shape = (n_samples, featuresures)
-            A feature matrix of any kind (ideally produced earlier in this pipeline).
-            This is just a scikit-learn wrapper, so you can plug anything you want really.
-            If None, defaults to `self.feature_matrix`.
-        
-        outfile_path : str, default = os.getcwd()
-            Path prefix where per-K label arrays will be saved via `np.save`.
-            A file is written for each tested K as
-            "<outfile_path>kluster_labels_{K}clust.npy".
-            (If you don’t pass a trailing separator, this will be concatenated verbatim.)
-
-        max_clusters : int, default = 10
-            When `k is None`, we grid-search KMeans for K in [2, ..., max_clusters]
-            to compute inertia (elbow) and sillohuette scores.
-
-        k : int or None, default = None
-            If provided, we skip optimization and run a single KMeans with exactly `k`
-            clusters (useful when you already know the K you want to keep).
-
-        Returns
-        ----------
-        If `k is not None`:
-            (cluster_labels, cluster_centers) : tuple
-                cluster_labels : np.ndarray, shape = (n_samples,)
-                    The assignment of each sample to its cluster.
-                cluster_centers : np.ndarray, shape = (k, featuresures)
-                    The KMeans centroids for the requested K.
-
-        If `k is None` (optimization path):
-            (optimal_k_silhouette_labels, optimal_k_elbow_labels, centers_sillohuette, centers_elbow) : tuple
-                optimal_k_silhouette_labels : np.ndarray, shape = (n_samples,)
-                    Labels for the K that maximizes sillohuette score over the tested range.
-                optimal_k_elbow_labels : np.ndarray, shape = (n_samples,)
-                    Labels for the K chosen by the elbow (inertia) heuristic.
-                centers_sillohuette : np.ndarray, shape = (K_sillohuette, featuresures)
-                    Centroids corresponding to the sillohuette-optimal labels.
-                centers_elbow : np.ndarray, shape = (K_elbow, featuresures)
-                    Centroids corresponding to the elbow-optimal labels.
-
-        Notes
-        ----------
-        - KMeans config here is `init='random'`, `n_init=k` (or `n_init=K` inside the loop),
-        and `random_state=0` for reproducibility—kept consistent with the rest of this code.
-        - Validation metrics:
-            * **Sillohuette** (via `sklearn.metrics.silhouette_score`) favors compact, well-separated clusters.
-            * **Elbow** uses raw inertia (within-cluster SSE) to pick a knee in the curve.
-        The helper functions `plot_sillohette_scores` and `plot_elbow_scores` (from `mdsa_tools.Viz`)
-        are called to optionally save plots and to return the selected K values.
-        - Side effects: for each tested K in `[2, max_clusters]`, this writes labels to disk using
-        `np.save(f"{outfile_path}kluster_labels_{K}clust", labels)`. Numpy will append the `.npy`
-        extension if not present.
-
-        Examples
-        ----------
-        >>> # 1) Let the function pick K by sillohuette and elbow
-        >>> opt_sil_labels, opt_elb_labels, sil_centers, elb_centers = \
-        ...     sa.preform_clust_opt(outfile_path='/results/', max_clusters=12, data=sa.feature_matrix)
-        >>>
-        >>> # 2) Run a fixed-K clustering (no optimization)
-        >>> labels_k5, centers_k5 = sa.preform_clust_opt(outfile_path='/results/', data=sa.feature_matrix, k=5)
-        '''
-        
+    def perform_clust_opt(self,outfile_path, max_clusters=None, data=None,k=None):
         data = data if data is not None else self.feature_matrix
         outfile_path = outfile_path if outfile_path is not None else os.getcwd()
         max_clusters = max_clusters if max_clusters is not None else 10
-        k=k if k is not None else None
-        
-        if k is not None: #basically single use run so you can just run a specific k instead of going from
+        k = k if k is not None else None
+
+        if k is not None:
             kmeans = KMeans(n_clusters=k, init='random', n_init=k, random_state=0)
             kmeans.fit(data)
-            cluster_centers, inertia, cluster_labels = kmeans.cluster_centers_,kmeans.inertia_,kmeans.labels_
-            return cluster_labels,cluster_centers
-        
-        if k is None:
-            #keeping track of our scores 
-            inertia_scores,silhouette_scores,all_labels,centers = [],[],[],[]
-            cluster_range = range(2, max_clusters+1)
+            cluster_centers, inertia, cluster_labels = kmeans.cluster_centers_, kmeans.inertia_, kmeans.labels_
+            return cluster_labels, cluster_centers
 
-            for k in cluster_range:
-                kmeans = KMeans(n_clusters=k, init='random', n_init=k, random_state=0) #we set
-                kmeans.fit(data) #fit data and now we have everything transformed
-                cluster_centers, inertia, cluster_labels = kmeans.cluster_centers_,kmeans.inertia_,kmeans.labels_
-                sil_score = silhouette_score(data, cluster_labels)
-                
-                centers.append(cluster_centers)
+        inertia_scores, silhouette_scores, all_labels, centers = [], [], [], []
+        inertia_Ks = []
+        cluster_range = range(2, max_clusters + 1)
+
+        for k in cluster_range:
+            kmeans = KMeans(n_clusters=k, init='random', n_init=k, random_state=0)
+            kmeans.fit(data)
+            cluster_centers, inertia, cluster_labels = kmeans.cluster_centers_, kmeans.inertia_, kmeans.labels_
+            sil_score = silhouette_score(data, cluster_labels)
+
+            centers.append(cluster_centers)
+            silhouette_scores.append(sil_score)
+            all_labels.append(cluster_labels)
+
+            if not (max_clusters == 3 and k == 3):
                 inertia_scores.append(inertia)
-                silhouette_scores.append(sil_score)
-                all_labels.append(cluster_labels)
+                inertia_Ks.append(k)
 
+            np.save(f"/{outfile_path}kluster_labels_{k}clust", cluster_labels)
 
-                np.save(f"{outfile_path}kluster_labels_{k}clust",cluster_labels)
+        from mdsa_tools.Viz import plot_elbow_scores, plot_sillohette_scores
 
-            
-            #so we save unless your calling this specific optimization
-            from mdsa_tools.Viz import plot_elbow_scores,plot_sillohette_scores
+        optimal_sillohuette = plot_sillohette_scores(cluster_range, silhouette_scores, outfile_path)
 
-            
-            optimal_sillohuette=plot_sillohette_scores(cluster_range,silhouette_scores,outfile_path)
-            optimal_elbow=plot_elbow_scores(cluster_range,inertia_scores,outfile_path)
+        if len(inertia_scores) < 3:
+            optimal_elbow = inertia_Ks[int(np.argmin(np.asarray(inertia_scores)))]
+        else:
+            optimal_elbow = plot_elbow_scores(inertia_Ks, inertia_scores, outfile_path)
 
-            #print(f"\nsize of labels:{len(all_labels)} ,optimal_elbow: {optimal_elbow}:optimal_sillohuette {optimal_sillohuette}")
+        optimal_k_silhouette_labels = all_labels[optimal_sillohuette - 2]
+        optimal_k_elbow_labels = all_labels[optimal_elbow - 2]
+        centers_sillohuette = centers[optimal_sillohuette - 2]
+        centers_elbow = centers[optimal_elbow - 2]
 
-            # Now you can return optimal k values
-            
-            optimal_k_silhouette_labels = all_labels[optimal_sillohuette-2] 
-            optimal_k_elbow_labels = all_labels[optimal_elbow-2]
-            centers_sillohuette = centers[optimal_sillohuette-2] 
-            centers_elbow = centers[optimal_elbow-2] 
-
-            
-            return optimal_k_silhouette_labels,optimal_k_elbow_labels,centers_sillohuette,centers_elbow
-    
+        return optimal_k_silhouette_labels, optimal_k_elbow_labels, centers_sillohuette, centers_elbow
+        
     def run_PCA(self,feature_matrix,n):
         '''small function for running principal components analysis
 
