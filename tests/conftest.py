@@ -129,3 +129,8 @@ def kvals_and_inertiascores():
     inertia_scores = np.array([500, 320, 220, 180, 170]) 
     return k_vals, inertia_scores
 
+@pytest.fixture(scope='session')
+def rankedweights_df(analyzer):
+    PCA_ranked_weights = analyzer.create_PCA_ranked_weights()
+    return PCA_ranked_weights
+

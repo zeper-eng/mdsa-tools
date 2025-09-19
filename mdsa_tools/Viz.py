@@ -403,7 +403,7 @@ def plot_elbow_scores(cluster_range, inertia_scores, outfile_path=None,
     plt.grid(True)
     plt.savefig(outfile_path + 'elbow_plot', dpi=300)
     plt.close()
-    
+
     return optimal_k
 
 # Circos plots
@@ -660,6 +660,7 @@ def create_MDcircos_from_weightsdf(PCA_ranked_weights, outfilepath=None):
     the residue IDs present in 'Comparisons'.
     """
     outfilepath = outfilepath if outfilepath is not None else os.getcwd()
+    
     res_indexes, PC1_magnitude_dict, PC2_magnitude_dict = extract_properties_from_weightsdf(PCA_ranked_weights)
     pc1_circos_object = make_MDCircos_object(res_indexes)
     pc2_circos_object = make_MDCircos_object(res_indexes)
@@ -668,46 +669,41 @@ def create_MDcircos_from_weightsdf(PCA_ranked_weights, outfilepath=None):
     return
 
 # Embedding-space visualizations
-def create_2d_color_mappings(labels=([80] * 20) + ([160] * 10),
-                             colors_list=('purple', 'orange', 'green', 'yellow', 'blue',
-                                          'red', 'pink', 'cyan', 'grey', 'brown'),
-                             clustering=True):
+def create_2d_color_mappings(
+    labels=([80] * 20) + ([160] * 10),
+    colors_list=('purple', 'orange', 'green', 'yellow', 'blue',
+                 'red', 'pink', 'cyan', 'grey', 'brown'),
+):
     """
-    Produce a list of colors for 2-D scatter points given labels.
+    Produce a list of colors for 2-D scatter points given discrete labels.
 
     Parameters
     ----------
     labels : array-like of shape (n_samples,), default=([80]*20)+([160]*10)
         Discrete labels per sample (e.g., cluster IDs).
 
-    colors_list : sequence of str, default=('purple','orange','green','yellow','blue','red','pink','cyan','grey','brown')
+    colors_list : sequence of str, default=('purple','orange','green','yellow',
+                                            'blue','red','pink','cyan','grey','brown')
         Palette to cycle through for unique labels.
-
-    clustering : bool, default=True
-        If True, assign discrete colors per unique label. If False, returns None
-        (use a continuous colormap downstream).
 
     Returns
     -------
-    list[str] or None
-        A color per sample if `clustering=True`; otherwise None.
+    list[str]
+        A color per sample.
 
     Examples
     --------
     >>> labels = [0, 0, 1, 2, 2, 2]
     >>> colors = create_2d_color_mappings(labels)
     """
-    if clustering is True:
-        label_dict = {}
-        i = 0
-        for label in labels:
-            if label not in label_dict:
-                label_dict[label] = colors_list[i % len(colors_list)]
-                i += 1
-        sample_color_mappings = [label_dict[i] for i in labels]
-        return sample_color_mappings
-    # if clustering is False, intentionally return None so downstream uses a colormap
-    return None
+    label_dict = {}
+    i = 0
+    for label in labels:
+        if label not in label_dict:
+            label_dict[label] = colors_list[i % len(colors_list)]
+            i += 1
+    return [label_dict[i] for i in labels]
+
 
 def visualize_reduction(embedding_coordinates,
                         color_mappings=None,

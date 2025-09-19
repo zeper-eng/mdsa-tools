@@ -123,7 +123,119 @@ def test_plot_elbow_scores(tmp_path,kvals_and_inertiascores):
     # Verify the returned optimal k
     assert best_k == 5 
 
-
-
+def test_plot_elbow_scores(tmp_path,kvals_and_inertiascores):
+    k_vals, inertia_scores=kvals_and_inertiascores
+    out_prefix = tmp_path / "elbow_test"  
     
+    best_k = vz.plot_elbow_scores(
+        cluster_range=k_vals,
+        inertia_scores=inertia_scores,
+        outfile_path=str(out_prefix),
+        title="Elbow Test",
+        xlabel="k",
+        ylabel="Inertia"
+    )
+
+    # Verify the returned optimal k
+    assert best_k == 5 
+
+###############################
+#Moving into MDcircos Creation#
+###############################
+
+def test_MDcircos_creation(tmp_path,rankedweights_df):
+    vz.create_MDcircos_from_weightsdf(rankedweights_df,str(tmp_path))
+    return
+
+#nice to see the submodules are working as intended
+def test_extract_properties_from_weightsdf(rankedweights_df):
+    vz.extract_properties_from_weightsdf(rankedweights_df)
+    return
+
+
+
+import matplotlib.pyplot as plt
+
+
+def test_add_continuous_colorbar_runs(emptyplotting_space,tmp_path):
+    fig, ax = emptyplotting_space
+    scatter = ax.scatter([0, 1, 2], [0, 1, 2], c=[0.1, 0.2, 0.3])
+    cbar = vz.add_continuous_colorbar(scatter, labels=[0.1, 0.2, 0.3], cbar_label="val", ax=ax)
+    assert cbar is not None
+    plt.close(fig)
+
+
+def test_add_discrete_colorbar_runs(emptyplotting_space,tmp_path):
+    fig, ax = emptyplotting_space
+    labels = ["A", "B", "A"]
+    scatter = ax.scatter([0, 1, 2], [0, 1, 2], c=[0, 1, 0])
+    cbar = vz.add_discrete_colorbar(scatter, labels, cbar_label="cats", ax=ax)
+    assert cbar is not None
+    plt.close(fig)
+
+
+def test_set_ticks_runs(emptyplotting_space):
+    fig, ax = emptyplotting_space
+    ax.set_xlim(0, 200)
+    ax.set_ylim(0, 200)
+    vz.set_ticks(ax=ax)  # should adjust ticks, not error
+    plt.close(fig)
+
+
+def test_create_2d_color_mappings_returns_colors():
+    labels = [0, 0, 1, 2]
+    colors = vz.create_2d_color_mappings(labels, clustering=True)
+    assert len(colors) == len(labels)
+    # when clustering=False, should return None
+    assert vz.create_2d_color_mappings(labels, clustering=False) is None
+
+
+def test_rmsd_lineplots(tmp_path):
+    df = pd.DataFrame({
+        "window": [1, 2, 1, 2],
+        "rmsd": [0.5, 0.6, 0.7, 0.8],
+        "cluster": ["A", "A", "B", "B"]
+    })
+    out = tmp_path / "rmsd"
+    vz.rmsd_lineplots(df, outfilepath=str(out))
+    assert (tmp_path / "rmsd_rmsdlineplot").exists()
+
+
+def test_contour_embedding_space(tmp_path):
+    coords = np.random.rand(50, 2)
+    out = tmp_path / "contour.png"
+    vz.contour_embedding_space(str(out), coords, levels=5)
+    assert out.exists()
+
+
+def test_make_MDCircos_object_small_and_large():
+    small = vz.make_MDCircos_object([1, 2, 3])
+    assert small is not None
+    large = vz.make_MDCircos_object(list(range(60)))
+    assert large is not None
+
+
+def test_get_Circos_coordinates_and_mdcircos_graph(tmp_path):
+    circle = vz.make_MDCircos_object(["1", "2"])
+    arc = vz.get_Circos_coordinates("1", circle)
+    assert isinstance(arc, tuple)
+    weights = {"1-2": 0.5}
+    outprefix = str(tmp_path / "circos")
+    vz.mdcircos_graph(circle, weights, savepath=outprefix)
+    assert (tmp_path / "circos.png").exists()
+    assert (tmp_path / "circos_colorbar.png").exists()
+
+
+def test_extract_properties_and_create_MDcircos(tmp_path):
+    df = pd.DataFrame({
+        "Comparisons": ["1-2", "2-3"],
+        "PC1_magnitude": [0.1, 0.2],
+        "PC2_magnitude": [0.3, 0.4],
+    })
+    residues, d1, d2 = vz.extract_properties_from_weightsdf(df)
+    assert "1" in residues and "2" in residues
+    outprefix = str(tmp_path / "weights")
+    vz.create_MDcircos_from_weightsdf(df, outfilepath=outprefix)
+    assert (tmp_path / "weightsPC1_magnitudeviz.png").exists()
+    assert (tmp_path / "weightsPC2_magnitudeviz.png").exists()
 
