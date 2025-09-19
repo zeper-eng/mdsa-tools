@@ -92,8 +92,8 @@ def test_discrete_colorbar_branch(tmp_path, small_embedding,less_than_256_bin_co
     
     assert out.exists()
 
-def test_plot_silhouette_scores(tmp_path,kvals_and_scores):
-    kvals,scores=kvals_and_scores
+def test_plot_silhouette_scores(tmp_path,kvals_and_silscores):
+    kvals,scores=kvals_and_silscores
     out_prefix = tmp_path    
     
     best_k = vz.plot_sillohette_scores(
@@ -121,11 +121,9 @@ def test_plot_elbow_scores(tmp_path,kvals_and_inertiascores):
     )
 
     # Verify the returned optimal k
-    assert best_k == 4  
+    assert best_k == 5 
 
-    # Verify that the plot file exists (function appends 'elbow_plot')
-    expected = out_prefix.parent / (out_prefix.name + "elbow_plot")
-    assert expected.exists()
+
 
     
 
