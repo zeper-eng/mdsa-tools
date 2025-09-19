@@ -26,51 +26,63 @@ import os
 
 class systems_analysis:
     '''
+    Container for systems-level analyses on residue–residue adjacency matrices.
+
+    This class assumes each “system representation” is a 3D array with shape
+    ``(n_frames, n_residues, n_residues)`` where a single frame contains a
+    residue×residue adjacency matrix (e.g., H-bond counts/weights). Many methods
+    operate on a *feature matrix* constructed by flattening/stacking per-frame
+    upper triangles.
 
     Parameters
     ----------
-
-    systems_representations : list, expected=list[array_1,...,array_n-1] where each array is an np.ndarray with shape=(n_frames,n_residues,n_residues)
-        Each array should have the shape as described above, where each frame has an adjacency matrix of pairwise
-        comparisons between all residues. The only axis that can differ between arrays is the number of frames (n_frames).
-
-    frame_list : listlike, shape=(data,)
-        A list of integers representing the number of frames present in each replicate. This should be in the order
-        of which the various versions of the system, and replicates where concatenated.
+    systems_representations : list of np.ndarray
+        Expected format: ``[array_1, ..., array_m]``, where each array has
+        shape ``(n_frames, n_residues, n_residues)``. The only permitted
+        difference across arrays is ``n_frames``; all systems should share
+        the same residue dimension.
+    replicate_distribution : array-like of int or None, optional
+        Optional labels or indices describing how frames are distributed
+        across replicates/systems. If ``None``, defaults to
+        ``np.arange(0, systems_representations[0].shape[0])``.
 
     Attributes
     ----------
+    num_systems : int
+        Number of systems provided (i.e., ``len(systems_representations)``).
+    systems_representations : list of np.ndarray
+        Original input, retained for convenience.
+    indexes : np.ndarray
+        Derived from ``systems_representations[0][0, 0, 1:]``. Arrays include
+        index data, introducing one extra row/column (negligible overhead for
+        typical datasets).
+    feature_matrix : np.ndarray or None
+        Cached 2D feature matrix produced by ``replicates_to_featurematrix``.
+    replicate_distribution : np.ndarray
+        Distribution vector set from the provided argument or default.
 
-    num_systems : int, default=len(systems_representations)
-        Since this was originally built around comparative systems analysis some of the methods work on this concept directly.
-        You can still input a single item as a tuple, similar to the way you do with np.array().
-
-    systems_representations : arraylike,default=systems_representations
-        An attribute for conveniently manipulating the inputted list of arrays. 
-
-    indexes : arraylike,default=systems_representations[0][0,0,1:]
-        Derived from ``systems_representations[0][0,0,1:]``. The arrays include index data, which introduces one extra row
-        and column. This overhead is negligible for most use cases, unless operating on extremely large datasets. The
-        design is not intended for such massive-scale applications.
-    
-        
     Notes
     -----
-    * Automatically converts list of arrays into a feature matrix so it’s easy to build in.
-    * Expects systems of the same size for automation. For differently sized systems, you will likely need to
-      preprocess manually.
-    * Provides a general systems perspective on molecular dynamics, so it can serve as a base for other projects.
-
-    Examples
-    --------
-    >>> sa = systems_analysis([...])
-    >>> sa.num_systems
-    3
+    * Many operations expect systems of the same residue size.
+    * Designed for comparative analyses but also works with a single system.
+    * The class focuses on simple, modular wrappers around common steps
+      (flattening, reduction, clustering) for downstream use.
     '''
     
     def __init__(self,systems_representations=None,replicate_distribution=None):
         '''
-        
+        Initialize the analysis container.
+
+        Parameters
+        ----------
+        systems_representations : list of np.ndarray
+            List of system arrays, each shaped ``(n_frames, n_residues, n_residues)``.
+        replicate_distribution : array-like of int or None, optional
+            Optional frame-level indexing/labels for downstream bookkeeping.
+
+        Returns
+        -------
+        None
         '''
         
         self.num_systems=len(systems_representations) #this is useful later on for when we are doing system_specific operations
@@ -479,18 +491,34 @@ class systems_analysis:
 
         Returns
         -------
-
-
+        correlation_df : pandas.DataFrame
+            Long-form table of pairwise Pearson correlations between *equal-length* samples
+            drawn from per-cluster distance distributions (truncated to the shortest length
+            across clusters). Columns:
+              - ``cluster_i`` (int): first cluster id
+              - ``cluster_j`` (int): second cluster id
+              - ``pearson_r`` (float): correlation coefficient
+              - ``p_value`` (float): two-sided p-value
 
 
         Notes
         -----
+        Distances are computed as Euclidean distances from each point to the center of its
+        assigned cluster. Because clusters can have different sizes, distributions are
+        truncated to the minimum cluster size before computing pairwise correlations to
+        avoid unequal-sample artifacts.
 
-
+        This is a simple exploratory comparison of cluster compactness/shape; interpret
+        p-values cautiously, especially when sample sizes are small or heavily truncated.
 
         Examples
         --------
-
+        >>> # labels: shape (n_samples,), coordinates: (n_samples, n_features)
+        >>> # cluster_centers: (k, n_features)
+        >>> df = systems_analysis.create_pearsontest_for_kmeans_distributions(
+        ...     self, labels, coordinates, cluster_centers)  # doctest: +SKIP
+        >>> list(df.columns)                                  # doctest: +SKIP
+        ['cluster_i', 'cluster_j', 'pearson_r', 'p_value']
 
         
         '''
@@ -624,6 +652,41 @@ class systems_analysis:
 
     #Algorithm wrappers 
     def perform_clust_opt(self,outfile_path, max_clusters=None, data=None,k=None):
+        """Optimize KMeans over a range of K and return labels/centers for the
+        silhouette- and elbow-selected optima, or run a single-K fit.
+
+        Parameters
+        ----------
+        outfile_path : str
+            Directory prefix where per-K label arrays are saved via ``np.save`` as
+            ``"<outfile_path>kluster_labels_{K}clust.npy"`` (suffix omitted in code).
+        max_clusters : int, optional
+            Upper bound (inclusive) of the search range when ``k is None``.
+            Defaults to 10.
+        data : np.ndarray, shape = (n_samples, n_features), optional
+            Feature matrix to cluster. If ``None``, uses ``self.feature_matrix``.
+        k : int or None, optional
+            If provided, fit KMeans once at this K and return ``(labels, centers)``.
+            If ``None``, grid-searches K in ``[2, ..., max_clusters]``.
+
+        Returns
+        -------
+        If k is not None:
+            (cluster_labels, cluster_centers) : tuple
+                Labels and centers from the single-K fit.
+        If k is None:
+            (optimal_k_silhouette_labels, optimal_k_elbow_labels,
+             centers_sillohuette, centers_elbow) : tuple
+                Labels/centers corresponding to the best K by silhouette score and
+                the elbow criterion, respectively.
+
+        Notes
+        -----
+        * Silhouette scores are computed for each K and used to select one optimum.
+        * Inertia (elbow) values are tracked for each K, except for a special-case
+          skip when ``max_clusters == 3 and k == 3`` to avoid degenerate elbow logic.
+        * Deterministic runs are ensured via ``random_state=0`` and ``init='random'``.
+        """
         data = data if data is not None else self.feature_matrix
         outfile_path = outfile_path if outfile_path is not None else os.getcwd()
         max_clusters = max_clusters if max_clusters is not None else 10
@@ -676,7 +739,6 @@ class systems_analysis:
 
         Parameters
         ----------
-
         feature_matrix:np.ndarray,shape=(sum(n_frames),n_residues*n_residues) where the sum of n_frames refers to the total number of frames.
             Each row of the new matrix represents a flattened adjacency matrix for each frame, and the frames are stacked
             in such a way that each of the original arrays follow each other sequentially.
@@ -686,21 +748,24 @@ class systems_analysis:
 
         Returns
         -------
-
-
-
+        X_pca : np.ndarray, shape = (n_samples, n)
+            Transformed coordinates in the principal-component space.
+        weights : np.ndarray, shape = (n, n_features)
+            PCA component loadings (rows = components, columns = original features).
+        explained_variances : np.ndarray, shape = (n,)
+            Fraction of variance explained by each selected component.
 
         Notes
         -----
-
-
-
+        This is a thin wrapper around ``sklearn.decomposition.PCA`` that fits on the
+        provided feature matrix and returns the transformed coordinates, component
+        loadings, and explained-variance ratios.
 
         Examples
         --------
-
-
-
+        >>> X_pca, W, evr = systems_analysis.run_PCA(self, feature_matrix, 2)  # doctest: +SKIP
+        >>> X_pca.shape                                                        # doctest: +SKIP
+        (feature_matrix.shape[0], 2)
         '''
 
         pca=PCA(n_components=n)
@@ -719,6 +784,3 @@ class systems_analysis:
 if __name__ == '__main__':
 
     print('testing testing 1 2 3')
-
-
-
