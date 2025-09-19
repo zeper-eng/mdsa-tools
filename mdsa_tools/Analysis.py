@@ -5,8 +5,6 @@ Generally you can follow our pipeline but,the individual steps are pretty modula
 You could for instance use the clustering on various number of n_dimensional datasets, or pull H-bond values using 
 systems_analysis.extract_hbond_values() and use thoose in replicate maps instead of k-means cluster assignments.
 
-Its a very small module so im not going to really include routine listings and such but, I will point to some relevant functions for the work
-being done by it.
 
 See Also
 --------
@@ -15,780 +13,951 @@ mdsa_tools.Data_gen_hbond.create_system_representations : Build residue–residu
 numpy.linalg.svd : Linear algebra used under the hood.
 
 '''
-from mdsa_tools.Data_gen_hbond import TrajectoryProcessor
-import numpy as np
-from sklearn.metrics import silhouette_score
-from sklearn.cluster import KMeans
-import numpy as np
-import os
-from sklearn.decomposition import PCA
-import pandas as pd
-import umap
-import os
 
-class systems_analysis:
-    '''
+import numpy as np
+import os
+import matplotlib.pyplot as plt
+import matplotlib.cm as cm
+import pycircos.pycircos as py
+import seaborn as sns
+from matplotlib.colors import BoundaryNorm
+import matplotlib.colors as mcolors
+from matplotlib.cm import ScalarMappable
+
+
+# Miscellaneous tools
+def add_continuous_colorbar(scatter, labels, cbar_label=None, ax=None, cmap=None,
+                            extend="neither", format=None):
+    """
+    Add a continuous colorbar to a scatter plot.
+
+    Works for numeric labels directly; for non-numeric labels, maps unique
+    values to an ordinal numeric sequence and normalizes over that range.
 
     Parameters
     ----------
+    scatter : matplotlib.collections.PathCollection
+        The scatter object returned by `Axes.scatter(...)`.
 
-    systems_representations : list, expected=list[array_1,...,array_n-1] where each array is an np.ndarray with shape=(n_frames,n_residues,n_residues)
-        Each array should have the shape as described above, where each frame has an adjacency matrix of pairwise
-        comparisons between all residues. The only axis that can differ between arrays is the number of frames (n_frames).
+    labels : array-like or None
+        Values to color by. If None, uses an index-based gradient.
 
-    frame_list : listlike, shape=(data,)
-        A list of integers representing the number of frames present in each replicate. This should be in the order
-        of which the various versions of the system, and replicates where concatenated.
+    cbar_label : str or None, default=None
+        Colorbar label.
 
-    Attributes
-    ----------
+    ax : matplotlib.axes.Axes or None, default=None
+        Target axes. Defaults to `plt.gca()`.
 
-    num_systems : int, default=len(systems_representations)
-        Since this was originally built around comparative systems analysis some of the methods work on this concept directly.
-        You can still input a single item as a tuple, similar to the way you do with np.array().
+    cmap : str or matplotlib.colors.Colormap or None, default=None
+        Colormap name or object. Defaults to `cm.inferno`.
 
-    systems_representations : arraylike,default=systems_representations
-        An attribute for conveniently manipulating the inputted list of arrays. 
+    extend : {'neither', 'both', 'min', 'max'}, default='neither'
+        Colorbar extension behavior.
 
-    indexes : arraylike,default=systems_representations[0][0,0,1:]
-        Derived from ``systems_representations[0][0,0,1:]``. The arrays include index data, which introduces one extra row
-        and column. This overhead is negligible for most use cases, unless operating on extremely large datasets. The
-        design is not intended for such massive-scale applications.
-    
-        
-    Notes
-    -----
-    * Automatically converts list of arrays into a feature matrix so it’s easy to build in.
-    * Expects systems of the same size for automation. For differently sized systems, you will likely need to
-      preprocess manually.
-    * Provides a general systems perspective on molecular dynamics, so it can serve as a base for other projects.
-
-    Examples
-    --------
-    >>> sa = systems_analysis([...])
-    >>> sa.num_systems
-    3
-    '''
-    
-    def __init__(self,systems_representations=None,replicate_distribution=None):
-        '''
-        
-        '''
-        
-        self.num_systems=len(systems_representations) #this is useful later on for when we are doing system_specific operations
-        self.systems_representations=systems_representations
-        self.indexes = systems_representations[0][0, 0, 1:] #bc list then 3d array
-        self.feature_matrix=None
-        if replicate_distribution is not None:
-            self.replicate_distribution=replicate_distribution
-            
-        if replicate_distribution is None:
-            self.replicate_distribution=np.arange(0,systems_representations[0].shape[0])
-        
-        return
-
-
-    #pre-processing
-    def replicates_to_featurematrix(self,arrays=None)->np.ndarray:
-        """returns an array formatted for kmeans clustering with scipy
-
-        Parameters
-        ----------
-        arrays:list, expected=list[array_1,...,array_n-1] where each array is an np.ndarray with shape=(n_frames,n_residues,n_residues)
-            Each array should have the shape as described above, where each frame has an adjacency matrix of pairwise
-            comparisons between all residues. The only axis that can differ between arrays is the number of frames (n_frames).
-
-            
-        Returns
-        -------
-        array:np.ndarray,shape=(sum(n_frames),n_residues*n_residues) where the sum of n_frames refers to the total number of frames.
-            Each row of the new matrix represents a flattened adjacency matrix for each frame, and the frames are stacked
-            in such a way that each of the original arrays follow each other sequentially.
-
-
-        Examples
-        --------
-        >>>CCU_GCU_fulltraj=np.load('/zfshomes/lperez/presentation_directory/CCU_GCU_Trajectory_array.npy',allow_pickle=True)
-        >>>CCU_CGU_fulltraj=np.load('/zfshomes/lperez/presentation_directory/CCU_CGU_Trajectory_array.npy',allow_pickle=True)
-        >>>arrays=[CCU_GCU_fulltraj,CCU_CGU_fulltraj]
-        >>>Kmeans_replicatearray=format_replicate_for_clust(arrays)
-            
-            
-        Notes
-        -----
-        First we concatenate all of our arrays into one large array. This does however rely on the premise that the only difference
-        between our arrays is the number of frames (n_frames). This holds true conceptually because if we have a different
-        number of pairwise residue comparisons we would not have comparable networks, or "systems".
-
-        The goal is to flatten each adjacency matrix into a 1 dimensional vector and then stack all frames.
-        This results in the expected formatting for scipy's kmeans clustering implementation where each .
-        
-        """
-        arrays = arrays if arrays is not None else self.systems_representations
-        
-        #Concatenate arrays and define list to hold reformatted arrays
-        try:
-            concatenated_array=np.concatenate((arrays))
-        except(ValueError, TypeError):
-            print("its really best if you input a list but the program will move on with the assumption you have given just a single arrray as input")
-            concatenated_array=np.asarray(arrays)
-
-        final_frames=[]
-        frame_num, n_residues, _ = concatenated_array.shape
-
-        # Get indices for upper triangle (excluding diagonal)
-        triu_idx = np.triu_indices(n_residues - 1, k=1)  # -1 due to [1:,1:] slice below
-
-
-        final_frames = []
-        for i in range(frame_num):
-            current_frame = np.copy(concatenated_array[i, 1:, 1:])
-            # Extract upper triangle only
-            flattened = current_frame[triu_idx]
-            final_frames.append(flattened)
-
-        final_frames = np.vstack(final_frames).astype(np.float32)
-        self.feature_matrix=final_frames#set global var as well
-
-        return final_frames
-
-    def extract_hbond_values(self,residues,systems_array=None,mode="sum"):
-        ''' returns a 1dimensional array of "average" values per entry in the array
-        
-        Parameters
-        ----------
-        systems_array:np.ndarray,shape(n_frames,n_residues,n_residues)
-            An averaged array (or individual frame of a trajectory) that is to be visualized.
-            Since a typical adjacency matrix is NxN observations we will not focus on the multiple
-            frames of the trajectory and will assume an averaged matrix has been provided. Alternatively
-            this function can take a single frame from anywhere in the trajectory if you wish to analyze it
-
-        residues:list,shape=(res_indexes,), where res_indexes==int
-            A list denoting all of the residue indexes that you would like to analyze pairwise interactions for.
-            This can be two residues meaning you just want to see the pairwise interactions between them or
-            more residues and then you would get *all possible pairwise combinations of theese residues interactions*
-        
-        mode:string,default="sum",
-            A string argument that decides the aggregation metric by which you would like to aggregate every frame. Mean of
-            the residues of the CAR interaction surface for example, would give you the average hydrogen bonding found between all
-            the residues of the car interaction surface and the +1 codon, sum would give you the total net hydrogen bond counts.
-            
-        Returns
-        ----------
-        avg_ta_labels:array,shape=(n_frames,):
-            An array of the same size as the frames of interest except it just contains an average
-            of all the possible pairwise hydrogen bonding interactions of the residues of interest for
-            each frame
-        
-        Notes
-        ----------
-        This is actually a more powerful function than it may appear at first because if you only,
-        say your pca found a few pairwise comparisons be incredibly important, well now we can isolate
-        for just thoose frames and see which is best.
-
-        '''
-        if systems_array is not None:
-            systems_array=systems_array
-        if systems_array is None:
-            systems_array=np.concatenate(self.systems_representations)
-
-
-        # making it a static function felt like too big a jump but this toy attribute feels neat
-        # grabbing filter function from datagen with a simplenamespace
-        from types import SimpleNamespace
-        fake_self = SimpleNamespace(
-            system_representation=systems_array,
-            create_system_representations=lambda: None,
-        )
-
-        filtered = TrajectoryProcessor.create_filtered_representations(
-            fake_self, residues_to_keep=residues, systems_representation=systems_array
-        )
-        
-
-        if mode == "average":
-            systems_array,residues
-            filtered_array=filtered[:,1:,1:]        
-            ta_labels = np.mean(np.triu(filtered_array, k=1), axis=(1, 2)) #accounting for symmetry
-        
-        if mode == "sum":      
-            systems_array,residues
-            filtered_array=filtered[:,1:,1:]
-            ta_labels = np.sum(np.triu(filtered_array, k=1), axis=(1, 2)) #accounting for symmetry
-        
-        return ta_labels
-
-    #Analyses
-    def cluster_system_level(self,outfile_path=None, max_clusters=None,data=None,k=None):
-        '''
-        Parameters
-        ----------
-        data:np.ndarray,shape=(n_sample,featuresures),
-            A feature matrix of any kind, hopefully one provided from the rest of the pipeline but in theory, this is 
-            just a scikit learn wrapper so you can plug anything you want really
-
-        max_clusters:int,default=10
-            The maximum number of initial centroids we are iterating through while optimizing sillohuette scores and elbow plots.
-        
-        outfile_path:str,default=os.getcwd()
-            The path to where we would like to save the outputted labels (frame assignments of K-means)
-        
-        data:arraylike,shape=(n_samples,featuresures)
-            Ideally this is the feature matrix provided as input at the top of the workflow but, its provided as a parameter incase
-            you'd like to use theese in your own way.
-        
-        k:int,default=None
-            If you have a happen to have a specific number of k you would like to keep its data for you can do this
-            as otherwise you end up defaulting to either sillohuette score or elbow (inertia) evlauated optimal K. It does
-            save every array inbetween for thoroughness.
-        
-        Returns
-        ----------
-        (optimal_k_silhouette_labels,optimal_k_elbow_labels,centers_sillohuette,centers_elbow):tuple,shape=(4)
-            A tuple holding all of the objects created by the clustering of our systems representations. In order from left to right
-            the labels from the optimal number of initial centroids as defined by sillohuette score analysis; then the labels from optimal
-            clustering as defined the the elbow plots, as well as the centroids found for the sillohuette centers and elbow centers.
-        
-            
-        Notes
-        -------
-        We do assume you have atleast 10 frames worth of data... clustering any less than that
-        is a little out of the scope of this simple euclidean distance K-means clustering implementation.
-        
-        Examples
-        ---------
-
-        
-        '''
-
-        max_clusters=max_clusters if max_clusters is not None else 10
-        data = data if data is not None else self.feature_matrix
-        outfile_path=outfile_path if outfile_path is not None else os.getcwd()
-        k=k if k is not None else None
-
-        if k is None:
-            optimal_k_silhouette_labels,optimal_k_elbow_labels,centers_sillohuette,centers_elbow=self.preform_clust_opt(outfile_path=outfile_path,data=data,max_clusters=max_clusters)
-        
-        if k is not None:
-            kmeans = KMeans(n_clusters=k, init='random', n_init=k, random_state=0)
-            kmeans.fit(data)
-            cluster_centers, inertia, cluster_labels = kmeans.cluster_centers_,kmeans.inertia_,kmeans.labels_
-            return cluster_labels,cluster_centers
-            
-
-        return optimal_k_silhouette_labels,optimal_k_elbow_labels,centers_sillohuette,centers_elbow
-    
-    def reduce_systems_representations(self,feature_matrix=None,
-                                        method=None,
-                                        n_components=None,
-                                        min_dist=None,
-                                        n_neighbors=None):
-        '''
-        Parameters
-        ----------
-        feature_matrix : np.ndarray,shape=(sum(n_frames),n_residues*n_residues) where the sum of n_frames refers to the total number of frames.
-            Each row of the new matrix represents a flattened adjacency matrix for each frame, and the frames are stacked
-            in such a way that each of the original arrays follow each other sequentially.
-        
-            
-        n_components : int,default=2
-            The number of principal components you would like to reduce your dataset down to
-        
-            
-        str : outfile_path, default=os.getcwd()
-            path to where you would like to save your visualization
-        
-        method :str, order:{'PCA','UMAP'}
-            Define which method you would like to use to perform dim-reduction. We provide two methods a linear
-            and non-linear method, Principal Components Analysis (PCA) and Uniform Manifold Approximation and Projection
-            (UMAP).
-
-        min_dist : float,default=0.5
-            This is a UMAP-specific parameter. It controls how tightly UMAP is allowed to pack points together. 
-            Lower values will preserve more of the local clusters in the data whereas higher values will push 
-            points further apart.
-
-        n_neighbors : int,default=900
-            Another UMAP-specific parameter. It determines the number of neighboring points used in 
-            local approximations of the manifold. Larger values result in more global structure being preserved.
- 
-
-            
-
-        
-        Returns
-        -------
-        X_pca,weights,explained_variance_ratio_
-
-        X_PCA:np.ndarray,shape=(n_samples,n_components)
-            An array returned by the PCA module in scikit-learns vs.cluster module. Essentially it is the x and y coordinates
-            of every sample from the original feature matrix now reduced into the principal component embedding space.
-            ---As in the output from scikit learns module PCA() from the cluster.vq() module check in later for link---
-
-            In theory it should be (n_sampels,2) since we are generally reducing to two principal components but, if you choose to 
-            use a different number of principal components this would be a different # thus, the signature is broad
-
-
-        weights:shape=(n_samples,n_components)
-            The loadings for each principal component. Theese can be thought of as eigenvector components and they are the raw values 
-            they have not been **2 for magnitude measurements yet. This is a seperate function in this module called create_PCA_ranked_weights.
-
-        explained_variance_ratio_:int,
-            The explained variance ratio of the principal components. This is just a fraction since we are using two principal components
-            but, if you choose to use more it would be slightly different. 
-            **Check back here**    
-        
-       
-
-
-        Notes
-        -----
-        You should include a pre-fix in your outfile path as the image will be saved with the ending
-        "PCA_reduction" so a good example input is
-
-        "/users/userone/desktop/project/output/test_"
-
-        Examples
-        --------
-
-        
-        '''
-        
-        if feature_matrix is not None:
-            feature_matrix = feature_matrix 
-        if self.feature_matrix is not None:
-            feature_matrix=self.feature_matrix
-        if self.feature_matrix is None:
-            self.replicates_to_featurematrix()
-            feature_matrix=self.feature_matrix
-
-        n_components=n_components if n_components is not None else 2
-        method = method if method is not None else 'PCA'
-        min_dist = min_dist if min_dist is not None else .5
-        n_neighbors= n_neighbors if n_neighbors is not None else 900
-
-        if method=='PCA':
-        
-            X_pca,weights,explained_variance_ratio_=self.run_PCA(feature_matrix,n_components)
-            return X_pca,weights,explained_variance_ratio_
-            
-        if method=='UMAP':
-
-            # Initialize UMAP
-            reducer = umap.UMAP(n_components=n_components,n_neighbors=n_neighbors,min_dist=.5)
-            embedding = reducer.fit_transform(feature_matrix)
-
-            return embedding
-            
-            
-        elif method != 'PCA' and method != 'UMAP':
-            print('No valid method supplied for dimensional reduction ')
-        
-    def cluster_embeddingspace(self, reduced_coordinates=None,outfile_path=None,num_systems=None,val_metric=None):
-        '''
-        Currently depreciated
-        '''
-        '''A function for looking at conformational states in embedding space
-
-        Parameters
-        ----------
-        outfilepath:str
-            path to save
-
-        reduced_coordinates:np.Ndarray,default=self.reduced_coordinates,shape=
-            A feature matrix to be used for analysis
-        
-        n:int,default=2
-            number of principal components to reduce to
-        
-        max_clusters:int,default=10
-            The defualt number
-
-        val_metric:str,default='sillohuete'
-            The validation metric you would like to use for picking an "ideal number of clusters'
-            
-
-
-        Returns
-        -------
-        candidate_states_per_system:list,shape=(n_systems,)
-            A list where each entry corresponds to a system. Each entry is a tuple of
-            (labels, centers) representing the cluster assignments for that system and
-            the cluster centers determined by the chosen validation metric.
-
-
-
-        Notes
-        -----
-        This function runs clustering for each system independently, based on the 
-        dimensionality-reduced feature space. Both elbow and sillohuete methods are 
-        computed internally, but only the method specified in val_metric is returned.
-        Returned states are meant for downstream analysis such as transition probability 
-        calculations, replicate maps, or visualization.
-
-
-
-        Examples
-        --------
-        >>> systems_clusters=self.cluster_embeddingspace(reduced_coordinates=X_pca,
-        ...                                               outfile_path='/results/',
-        ...                                               num_systems=2,
-        ...                                               val_metric='sillohuete')
-        >>> print(len(systems_clusters))
-        2
-
-        '''
-
-        outfile_path = outfile_path if outfile_path is not None else os.getcwd()
-        num_systems = num_systems if num_systems is not None else self.num_systems
-        val_metric=val_metric if val_metric is not None else 'sillohuette'
-        
-        if reduced_coordinates is None:
-            reduced_coordinates,_,_=self.reduce_systems_representations()
-
-        
-        #grab the number of rows we need and then iterate through X_pca run kmeans and visualize using our initial values
-        individual_systems=np.array_split(reduced_coordinates, num_systems,axis=0)
-        print(individual_systems[0].shape)
-        candidate_states_per_system=[]
-        for i in individual_systems:
-            optimal_k_silhouette_labels,optimal_k_elbow_labels,centers_sillohuette,centers_elbow=self.preform_clust_opt(outfile_path,data=i)
-            if val_metric=='sillohuette':
-                candidate_states_per_system.append((optimal_k_silhouette_labels,centers_sillohuette))
-            if val_metric=='elbow':
-                candidate_states_per_system.append((optimal_k_elbow_labels,centers_elbow))
-
-
-        return candidate_states_per_system
-
-    def create_pearsontest_for_kmeans_distributions(self,labels,coordinates,cluster_centers):
-
-        '''A function that is meant for the 
-
-        Parameters
-        ----------
-        labels:listlike
-            A list or array of labels that tell us which cluster each sample belongs to
-
-        coordinates:array,shape=(n_samples,featuresures)
-            An array which tells us the coordinates of each sample so we can form distributions from them and run statistical tests
-            (pearson corellation coefficient)
-        
-        cluster_centers:listlike,shape=k
-            A list of arrays which tell us the coordinates for each cluster center so that we can calculate distributions
-            to them
-
-
-        Returns
-        -------
-
-
-
-
-        Notes
-        -----
-
-
-
-        Examples
-        --------
-
-
-        
-        '''
-        distances = np.linalg.norm(coordinates - cluster_centers[labels], axis=1) #euclidean distances to centroid
-
-        #extracting everything by the group its a part of
-        dist_by_cluster = {}
-        for cluster_id in np.unique(labels):
-            dist_by_cluster[int(cluster_id)] = distances[labels == cluster_id]
-
-        #find minimum distance
-        lengths = [len(i) for i in dist_by_cluster.values()]
-        #print(lengths)
-        shortest_length = min(lengths)
-        #print(shortest_length)
-
-
-        #form final list
-        final_distributions=[]
-        for i in dist_by_cluster.values():
-            current_distribution=i[0:shortest_length,]
-            final_distributions.append(current_distribution)
-        
-        from scipy.stats import pearsonr
-        import pandas as pd
-        
-        correlations = []
-
-        for i in range(len(final_distributions)):
-            for j in range(i + 1,len(final_distributions)):
-                r_value, p_value = pearsonr(final_distributions[i], final_distributions[j])
-                correlations.append({
-                    "cluster_i": i,
-                    "cluster_j": j,
-                    "pearson_r": r_value,
-                    "p_value": p_value
-                })
-
-        correlation_df = pd.DataFrame(correlations)
-        
-
-        return correlation_df
-       
-    def create_PCA_ranked_weights(self,outfile_path=None, weights=None, indexes=None):
-        '''Create a ranked table of PCA feature weights for the first two principal components.
-
-    Parameters
-    ----------
-    outfile_path : str or pathlib.Path, optional
-        Directory where outputs may be written. If ``None``, uses the current working directory.
-    weights : np.ndarray, shape = (n_components, n_features), optional
-        PCA component loadings (rows = components, columns = features). If ``None``, this
-        function calls ``reduce_systems_representations()`` to compute PCA (default n=2)
-        and uses the returned ``weights``.
-    indexes : array-like of int, optional
-        Residue indices used to label pairwise comparisons. If ``None``, uses ``self.indexes``.
-        These indices define the order used to generate upper-triangle residue–residue
-        comparison labels (e.g., "12-47").
+    format : str or matplotlib.ticker.Formatter or None, default=None
+        Formatting for colorbar tick labels.
 
     Returns
     -------
-    dataframe: pandas.DataFrame,
-        A table mapping each feature (upper-triangle residue pair) to its PCA weights and
-        magnitudes.
-        
-        
-        Columns include:
+    matplotlib.colorbar.Colorbar
+        The created colorbar.
 
-        
-        * `Comparisons`    : str   — 'i-j' residue pair label
-        * `PC1_Weights`    : float — raw loading for PC1
-        * `PC2_Weights`    : float — raw loading for PC2
-        * `PC1_magnitude`  : float — (PC1_Weights)**2
-        * `PC2_magnitude`  : float — (PC2_Weights)**2
-        * `PC1_mag_norm`   : float — min–max normalized PC1_magnitude to [0, 1] (within PC1)
-        * `PC2_mag_norm`   : float — min–max normalized PC2_magnitude to [0, 1] (within PC2)
-
-        
     Notes
     -----
-    
+    This function also applies the computed `Normalize` and `Colormap` to the
+    provided scatter so the colorbar reflects the actual plotted data.
+    """
+    if ax is None:
+        ax = plt.gca()
 
-    - Only the upper triangle (excluding the diagonal) of the residue–residue matrix is used,
-    so each row corresponds to a unique residue pair.
-    - “Weights” are PCA component loadings (eigenvector entries). Squaring gives a magnitude
-    that is convenient for ranking feature importance within a component (sign is discarded).
-    - The min–max normalization is performed **within each component** to [0, 1] and is intended
-    for visualization/ranking. Do not compare these normalized values across different PCA
-    runs unless you control scaling consistently.
-    - This function assumes at least two components are available; it reports PC1 and PC2.
+    cmap_obj = plt.get_cmap(cmap or cm.inferno)
 
+    # Build numeric values
+    if labels is None:
+        n = scatter.get_offsets().shape[0]
+        vals = np.arange(n, dtype=float)
+    else:
+        vals = np.asarray(labels)
+
+    if not np.issubdtype(vals.dtype, np.number):
+        _, inv = np.unique(vals, return_inverse=True)
+        vals = inv.astype(float)
+
+    finite = np.isfinite(vals)
+    if not finite.any():
+        vmin, vmax = 0.0, 1.0
+    else:
+        vmin = float(np.nanmin(vals[finite]))
+        vmax = float(np.nanmax(vals[finite]))
+        if vmin == vmax:
+            pad = 0.5 if vmin == 0 else 0.01 * abs(vmin)
+            vmin, vmax = vmin - pad, vmax + pad
+
+    norm = mcolors.Normalize(vmin=vmin, vmax=vmax)
+
+    # Ensure scatter uses this norm/cmap/data
+    scatter.set_norm(norm)
+    scatter.set_cmap(cmap_obj)
+    scatter.set_array(vals)
+
+    mappable = ScalarMappable(norm=norm, cmap=cmap_obj)
+    mappable.set_array(vals)
+    cbar = plt.colorbar(mappable, ax=ax, extend=extend, format=format)
+    if cbar_label:
+        cbar.set_label(cbar_label, fontsize=10)
+    return cbar
+
+
+def add_custom_colorbar(scatter, labels, cbar_label=None, ax=None, cmap=None):
+    """
+    Add a discrete (categorical) colorbar to a scatter plot.
+
+    Maps the unique `labels` to integer IDs and shows a tick per category.
+    For large cardinality (N > 100) it sparsifies ticks every 10 to improve readability.
+
+    Parameters
+    ----------
+    scatter : matplotlib.collections.PathCollection
+        The scatter object returned by `Axes.scatter(...)`.
+
+    labels : array-like
+        Categorical labels per point. Converted to strings for tick labels.
+
+    cbar_label : str or None, default=None
+        Colorbar label.
+
+    ax : matplotlib.axes.Axes or None, default=None
+        Target axes. Defaults to `plt.gca()`.
+
+    cmap : str or matplotlib.colors.Colormap or None, default=None
+        Colormap name or object. Defaults to `cm.inferno`.
+
+    Returns
+    -------
+    matplotlib.colorbar.Colorbar
+        The created colorbar.
+
+    Notes
+    -----
+    Sets the scatter's `norm` to a `BoundaryNorm` over integer bins matching
+    the number of unique categories so colors align with discrete tick marks.
+    """
+    if ax is None:
+        ax = plt.gca()
+
+    labels = np.asarray(labels)
+    uniques, label_ids = np.unique(labels, return_inverse=True)
+    N = len(uniques)
+
+    cmap = cmap if cmap is not None else cm.inferno
+    bounds = np.arange(-0.5, N + 0.5, 1)
+    norm = BoundaryNorm(bounds, cmap.N)
+
+    scatter.set_cmap(cmap)
+    scatter.set_array(label_ids)
+    scatter.set_norm(norm)
+
+    cbar = plt.colorbar(scatter, ax=ax, boundaries=bounds,
+                        ticks=np.arange(N), pad=0.02, shrink=0.8)
+    cbar.set_label(cbar_label or 'Value', fontsize=10)
+
+    if N > 100:
+        tick_positions = np.arange(N)[::10]
+        tick_labels = [str(u) for u in uniques][::10]
+        cbar.set_ticks(tick_positions)
+        cbar.set_ticklabels(tick_labels)
+        return cbar
+
+    cbar.set_ticklabels([str(u) for u in uniques])
+    return cbar
+
+
+def set_ticks(ax=None):
+    """
+    Set x and y ticks for an axis depending on range.
+
+    If the axis span exceeds 100 units, ticks are placed every 10 units;
+    otherwise, Matplotlib's default tick locator is preserved.
+
+    Parameters
+    ----------
+    ax : matplotlib.axes.Axes or None, default=None
+        Axis to apply tick settings. Defaults to the current axis.
+
+    Returns
+    -------
+    None
+        Modifies the axis in place.
+    """
+    if ax is None:
+        ax = plt.gca()
+
+    xmin, xmax = ax.get_xlim()
+    if xmax - xmin > 100:
+        ax.set_xticks(np.arange(np.floor(xmin), np.ceil(xmax) + 1, 10))
+
+    ymin, ymax = ax.get_ylim()
+    if ymax - ymin > 100:
+        ax.set_yticks(np.arange(np.floor(ymin), np.ceil(ymax) + 1, 10))
+    return
+
+
+# Replicate maps
+def replicatemap_from_labels(labels, frame_list,
+                             savepath=None,
+                             title=None,
+                             xlabel=None, ylabel=None,
+                             cbar_label=None,
+                             cmap=None) -> None:
+    """
+    Plot a "replicate × frame" map of discrete labels and save to disk.
+
+    Parameters
+    ----------
+    labels : array-like of shape (n_total_frames,)
+        Label per frame (e.g., k-means cluster or any discrete annotation),
+        concatenated across replicates in the same order as `frame_list`.
+
+    frame_list : array-like of shape (n_replicates,)
+        Number of frames in each replicate, in the exact concatenation order
+        used to build `labels`.
+
+    savepath : str or None, default=None
+        Directory or path *prefix* where the plot is saved. If None, uses
+        `os.getcwd()`. The file name appended is ``'replicate_map.png'``
+        (i.e., saved at ``f"{savepath}replicate_map.png"``).
+
+    title : str or None, default=None
+        Figure title; if None, a default is used.
+
+    xlabel, ylabel : str or None, default=None
+        Axis labels. If omitted, defaults are used.
+
+    cbar_label : str or None, default=None
+        Label for the colorbar.
+
+    cmap : str or matplotlib.colors.Colormap or None, default=None
+        Colormap for the label values. Defaults to ``cm.magma_r``.
+
+    Returns
+    -------
+    None
+        The figure is saved to disk and closed. Nothing is returned.
+
+    Notes
+    -----
+    - Uses a small square marker per (replicate, frame) and a discrete colorbar
+      for low/medium cardinality labels; switches to a continuous colorbar when
+      unique label count is very large (>= 1000).
+    - Replicate index is placed on the y-axis (top row is replicate 0) and the
+      axis is inverted for a top-down visual.
 
     Examples
     --------
+    >>> labels = [0]*100 + [1]*120 + [2]*90
+    >>> frames = [100, 120, 90]
+    >>> replicatemap_from_labels(labels, frames, savepath="/tmp/")
+    """
+    cmap = cmap if cmap is not None else cm.magma_r
+    savepath = savepath if savepath is not None else os.getcwd()
+
+    iterator = 0
+    final_coordinates = []
+
+    for i in range(len(frame_list)):
+        current_frame_length = frame_list[i]
+        current_replicate_coordinates = np.full(shape=(current_frame_length,), fill_value=i)
+        frame_positions = np.arange(current_frame_length)
+        frame_values = labels[iterator:iterator + current_frame_length]
+        replicate_block = np.stack([current_replicate_coordinates, frame_positions, frame_values], axis=1)
+        final_coordinates.append(replicate_block)
+        iterator += current_frame_length
+
+    final_coordinates = np.vstack(final_coordinates)
+
+    y_spacing_factor = 1
+    x_spacing_factor = 1
+
+    scatter = plt.scatter(
+        x=final_coordinates[:, 1] * x_spacing_factor,
+        y=final_coordinates[:, 0] * y_spacing_factor,
+        c=final_coordinates[:, 2],
+        s=1,
+        marker='s',
+        cmap=cmap,
+        alpha=1)
+
+    # Choose colorbar style
+    if np.unique(final_coordinates).shape[0] >= 1000:
+        add_continuous_colorbar(scatter, final_coordinates[:, 2], cbar_label, plt.gca(), cmap=cmap)
+    else:
+        add_custom_colorbar(scatter, final_coordinates[:, 2], cbar_label, plt.gca(), cmap=cmap)
+
+    # Style
+    plt.grid(visible=False)
+    currentaax = plt.gca()
+    for spine in currentaax.spines.values():
+        spine.set_visible(False)
+
+    ax = plt.gca()
+    ax.invert_yaxis()
+    ax.set_title('Clusters per frame', fontsize=20, weight='bold', family='monospace', style='italic')
+
+    if title:
+        plt.title(title)
+    if xlabel:
+        plt.xlabel(xlabel)
+    if ylabel:
+        plt.ylabel(ylabel)
+
+    plt.tight_layout()
+    plt.savefig(f'{savepath}replicate_map.png', dpi=800)
+    plt.close()
+    return
 
 
-    >>> sa = systems_analysis([traj_array_sys1, traj_array_sys2])  # doctest: +SKIP
-    >>> df = sa.create_PCA_ranked_weights()                         # doctest: +SKIP
-    >>> df.head()                                                   # doctest: +SKIP
+# K-means Cross-validation metrics
+def plot_sillohette_scores(cluster_range, silhouette_scores, outfile_path="sillohette_method.png",
+                           title=None, xlabel=None, ylabel=None):
+    """
+    Plot silhouette scores over k, mark the maximum, and save.
 
-    
-    '''
+    Parameters
+    ----------
+    cluster_range : array-like
+        Candidate k values.
 
-        if weights is None:
-            _,weights,_ =self.reduce_systems_representations()
-        if weights is not None:
-            weights=weights
+    silhouette_scores : array-like
+        Silhouette score per k (same length/order as `cluster_range`).
 
-        outfile_path = outfile_path if outfile_path is not None else os.getcwd()
-        indexes=indexes if indexes is not None else self.indexes
+    outfile_path : str, default='sillohette_method.png'
+        Path prefix or filename to save the figure. The code appends the suffix
+        ``'sillohuette_plot'`` (note spelling) to this string.
 
-        # grab only upper triangle
-        triu_idx = np.triu_indices(len(indexes), k=1)
+    title, xlabel, ylabel : str or None
+        Optional figure/axis labels.
 
-        # Generate comparison labels (no array values needed)
-        comparisons = [f"{str(int(indexes[i]))}-{str(int(indexes[j]))}" for i, j in zip(*triu_idx)]
-        dataframe={
-            'Comparisons':comparisons,
-            'PC1_Weights':weights[0],
-            'PC2_Weights':weights[1],
-            'PC1_magnitude':weights[0]**2,
-            'PC2_magnitude':weights[1]**2,
-        
-        }
+    Returns
+    -------
+    int
+        k with maximum silhouette score.
 
-        dataframe=pd.DataFrame(dataframe).round(3)
-        
-        return dataframe
+    Notes
+    -----
+    The filename suffix used in saving is ``'sillohuette_plot'`` for historical reasons.
+    """
+    optimal_k_sil = cluster_range[np.argmax(silhouette_scores)]
+    plt.figure(figsize=(8, 5))
+    plt.plot(cluster_range, silhouette_scores, marker='o', linestyle='-')
+    plt.axvline(optimal_k_sil, color='red', linestyle='--', linewidth=2, label=f'Optimal k = {optimal_k_sil}')
 
-
-
-    #Algorithm wrappers 
-    def preform_clust_opt(self,outfile_path, max_clusters=None, data=None,k=None):
-        '''
-        Parameters
-        ----------
-        data : np.ndarray, shape = (n_samples, featuresures)
-            A feature matrix of any kind (ideally produced earlier in this pipeline).
-            This is just a scikit-learn wrapper, so you can plug anything you want really.
-            If None, defaults to `self.feature_matrix`.
-        
-        outfile_path : str, default = os.getcwd()
-            Path prefix where per-K label arrays will be saved via `np.save`.
-            A file is written for each tested K as
-            "<outfile_path>kluster_labels_{K}clust.npy".
-            (If you don’t pass a trailing separator, this will be concatenated verbatim.)
-
-        max_clusters : int, default = 10
-            When `k is None`, we grid-search KMeans for K in [2, ..., max_clusters]
-            to compute inertia (elbow) and sillohuette scores.
-
-        k : int or None, default = None
-            If provided, we skip optimization and run a single KMeans with exactly `k`
-            clusters (useful when you already know the K you want to keep).
-
-        Returns
-        ----------
-        If `k is not None`:
-            (cluster_labels, cluster_centers) : tuple
-                cluster_labels : np.ndarray, shape = (n_samples,)
-                    The assignment of each sample to its cluster.
-                cluster_centers : np.ndarray, shape = (k, featuresures)
-                    The KMeans centroids for the requested K.
-
-        If `k is None` (optimization path):
-            (optimal_k_silhouette_labels, optimal_k_elbow_labels, centers_sillohuette, centers_elbow) : tuple
-                optimal_k_silhouette_labels : np.ndarray, shape = (n_samples,)
-                    Labels for the K that maximizes sillohuette score over the tested range.
-                optimal_k_elbow_labels : np.ndarray, shape = (n_samples,)
-                    Labels for the K chosen by the elbow (inertia) heuristic.
-                centers_sillohuette : np.ndarray, shape = (K_sillohuette, featuresures)
-                    Centroids corresponding to the sillohuette-optimal labels.
-                centers_elbow : np.ndarray, shape = (K_elbow, featuresures)
-                    Centroids corresponding to the elbow-optimal labels.
-
-        Notes
-        ----------
-        - KMeans config here is `init='random'`, `n_init=k` (or `n_init=K` inside the loop),
-        and `random_state=0` for reproducibility—kept consistent with the rest of this code.
-        - Validation metrics:
-            * **Sillohuette** (via `sklearn.metrics.silhouette_score`) favors compact, well-separated clusters.
-            * **Elbow** uses raw inertia (within-cluster SSE) to pick a knee in the curve.
-        The helper functions `plot_sillohette_scores` and `plot_elbow_scores` (from `mdsa_tools.Viz`)
-        are called to optionally save plots and to return the selected K values.
-        - Side effects: for each tested K in `[2, max_clusters]`, this writes labels to disk using
-        `np.save(f"{outfile_path}kluster_labels_{K}clust", labels)`. Numpy will append the `.npy`
-        extension if not present.
-
-        Examples
-        ----------
-        >>> # 1) Let the function pick K by sillohuette and elbow
-        >>> opt_sil_labels, opt_elb_labels, sil_centers, elb_centers = \
-        ...     sa.preform_clust_opt(outfile_path='/results/', max_clusters=12, data=sa.feature_matrix)
-        >>>
-        >>> # 2) Run a fixed-K clustering (no optimization)
-        >>> labels_k5, centers_k5 = sa.preform_clust_opt(outfile_path='/results/', data=sa.feature_matrix, k=5)
-        '''
-        
-        data = data if data is not None else self.feature_matrix
-        outfile_path = outfile_path if outfile_path is not None else os.getcwd()
-        max_clusters = max_clusters if max_clusters is not None else 10
-        k=k if k is not None else None
-        
-        if k is not None:
-            kmeans = KMeans(n_clusters=k, init='random', n_init=k, random_state=0)
-            kmeans.fit(data)
-            cluster_centers, inertia, cluster_labels = kmeans.cluster_centers_,kmeans.inertia_,kmeans.labels_
-            return cluster_labels,cluster_centers
-        
-        if k is None:
-            #keeping track of our scores 
-            inertia_scores,silhouette_scores,all_labels,centers = [],[],[],[]
-            cluster_range = range(2, max_clusters+1)
-
-            for k in cluster_range:
-                kmeans = KMeans(n_clusters=k, init='random', n_init=k, random_state=0) #we set
-                kmeans.fit(data) #fit data and now we have everything transformed
-                cluster_centers, inertia, cluster_labels = kmeans.cluster_centers_,kmeans.inertia_,kmeans.labels_
-                sil_score = silhouette_score(data, cluster_labels)
-                
-                centers.append(cluster_centers)
-                inertia_scores.append(inertia)
-                silhouette_scores.append(sil_score)
-                all_labels.append(cluster_labels)
+    plt.xlabel(xlabel if xlabel is not None else 'Number of Clusters (k)')
+    plt.ylabel(ylabel if ylabel is not None else 'Silhouette Score')
+    plt.title(title if title is not None else 'Silhouette Score for optimal K')
+    plt.legend()
+    plt.grid(True)
+    plt.savefig(outfile_path + 'sillohuette_plot', dpi=300)
+    plt.close()
+    return optimal_k_sil
 
 
-                np.save(f"{outfile_path}kluster_labels_{k}clust",cluster_labels)
+def plot_elbow_scores(cluster_range, inertia_scores, outfile_path="elbow_method.png",
+                      title=None, xlabel=None, ylabel=None):
+    """
+    Plot inertia over k, estimate the elbow via the second derivative, and save.
 
-            
-            #so we save unless your calling this specific optimization
-            from mdsa_tools.Viz import plot_elbow_scores,plot_sillohette_scores
+    Parameters
+    ----------
+    cluster_range : array-like
+        Candidate k values.
 
-            
-            optimal_sillohuette=plot_sillohette_scores(cluster_range,silhouette_scores,outfile_path)
-            optimal_elbow=plot_elbow_scores(cluster_range,inertia_scores,outfile_path)
+    inertia_scores : array-like
+        KMeans inertia per k (same length/order as `cluster_range`).
 
-            #print(f"\nsize of labels:{len(all_labels)} ,optimal_elbow: {optimal_elbow}:optimal_sillohuette {optimal_sillohuette}")
+    outfile_path : str, default='elbow_method.png'
+        Path prefix or filename to save the figure. The code appends the suffix
+        ``'elbow_plot'`` to this string.
 
-            # Now you can return optimal k values
-            
-            optimal_k_silhouette_labels = all_labels[optimal_sillohuette-2] 
-            optimal_k_elbow_labels = all_labels[optimal_elbow-2]
-            centers_sillohuette = centers[optimal_sillohuette-2] 
-            centers_elbow = centers[optimal_elbow-2] 
+    title, xlabel, ylabel : str or None
+        Optional figure/axis labels.
 
-            
-            return optimal_k_silhouette_labels,optimal_k_elbow_labels,centers_sillohuette,centers_elbow
-    
-    def run_PCA(self,feature_matrix,n):
-        '''small function for running principal components analysis
+    Returns
+    -------
+    int
+        Estimated elbow k (argmin of the second difference + 1).
+    """
+    diff = np.diff(inertia_scores)
+    diff2 = np.diff(diff)
+    optimal_k = cluster_range[np.argmin(diff2) + 1]
 
-        Parameters
-        ----------
+    plt.figure(figsize=(8, 5))
+    plt.plot(cluster_range, inertia_scores, marker='o', linestyle='-')
+    plt.axvline(optimal_k, color='red', linestyle='--', linewidth=2, label=f'Optimal k = {optimal_k}')
 
-        feature_matrix:np.ndarray,shape=(sum(n_frames),n_residues*n_residues) where the sum of n_frames refers to the total number of frames.
-            Each row of the new matrix represents a flattened adjacency matrix for each frame, and the frames are stacked
-            in such a way that each of the original arrays follow each other sequentially.
-        
-        n:int,default=2
-            The number of principal components you would like to reduce your dataset down to
-
-        Returns
-        -------
-
-
-
-
-        Notes
-        -----
+    plt.xlabel(xlabel if xlabel is not None else 'Number of Clusters (k)')
+    plt.ylabel(ylabel if ylabel is not None else 'Inertia (Sum of Squared Distances)')
+    plt.title(title if title is not None else 'Elbow Method for Optimal k')
+    plt.legend()
+    plt.grid(True)
+    plt.savefig(outfile_path + 'elbow_plot', dpi=300)
+    plt.close()
+    return optimal_k
 
 
+# Circos plots
+def get_Circos_coordinates(residue, gcircle):
+    """
+    Create chord endpoints anchored at the middle of a residue arc.
+
+    Parameters
+    ----------
+    residue : str or int
+        Residue arc identifier present in `gcircle`. If int, it will be looked
+        up as a string (e.g., `'42'`).
+
+    gcircle : py.Gcircle
+        A PyCircos `Gcircle` object that already contains arcs.
+
+    Returns
+    -------
+    tuple
+        A 4-tuple `(arc_id, start_pos, end_pos, radial)` suitable for
+        `Gcircle.chord_plot(...)`, where start and end positions are the arc
+        midpoint and the radial anchor is 550.
+
+    Notes
+    -----
+    Assumes the arc exists in `gcircle._garc_dict`. This is a convenience
+    wrapper to place chords at arc midpoints for a tidy symmetric look.
+
+    Examples
+    --------
+    >>> arc = get_Circos_coordinates('45', circle)
+    >>> # later: circle.chord_plot(arc, other_arc, linewidth=1.5, facecolor='k')
+    """
+    arc = gcircle._garc_dict[str(residue)]
+    mid_position = arc.size * 0.5
+    raxis_position = 550
+    return (residue, mid_position, mid_position, raxis_position)
 
 
-        Examples
-        --------
+def make_MDCircos_object(residue_indexes):
+    """
+    Build a PyCircos `Gcircle` with arcs for the provided residues.
+
+    Arc sizing, label size, and figure size are coarsely adapted to the number
+    of residues to keep visuals legible for both small and large sets.
+
+    Parameters
+    ----------
+    residue_indexes : list of (str or int)
+        Residue identifiers to add as arcs. Stored as strings internally.
+
+    Returns
+    -------
+    py.Gcircle
+        A `Gcircle` with arcs added and `set_garcs()` already called.
+
+    Notes
+    -----
+    For small sets (<= 50 residues) a compact 6×6 figure is used; for larger
+    sets a 10×10 figure with narrower labels and bigger arc sizes is used.
+    """
+    if len(residue_indexes) <= 50:
+        circle = py.Gcircle(figsize=(6, 6))
+        plt.subplots_adjust(left=0.01, right=0.99, bottom=0.01, top=0.99)
+
+        for index in residue_indexes:
+            circle.add_garc(
+                py.Garc(
+                    arc_id=str(index),
+                    facecolor='#FFFFFF',
+                    edgecolor='#000000',
+                    label=str(index),
+                    label_visible=True,
+                    labelposition=40,
+                    labelsize=6,
+                    size=10,
+                    interspace=0,
+                    linewidth=.1
+                )
+            )
+        circle.set_garcs()
+
+    if len(residue_indexes) > 50:
+        circle = py.Gcircle(figsize=(10, 10))
+        plt.subplots_adjust(left=0.01, right=0.99, bottom=0.01, top=0.99)
+
+        for index in residue_indexes:
+            circle.add_garc(
+                py.Garc(
+                    arc_id=str(index),
+                    facecolor='#FFFFFF',
+                    edgecolor='#000000',
+                    label=str(index),
+                    label_visible=True,
+                    labelposition=30,
+                    labelsize=2,
+                    size=100,
+                    interspace=4,
+                    linewidth=.1
+                )
+            )
+
+    circle.set_garcs()
+    return circle
 
 
+def mdcircos_graph(empty_circle, residue_dict, savepath=os.getcwd()+'mdcircos_graph',
+                   scale_factor=5, colormap=cm.magma_r):
+    """
+    Draw chords on a PyCircos circle from pairwise weights and save images.
 
-        '''
+    Creates a chord diagram on `empty_circle` using `residue_dict` where keys
+    are residue pair strings ``'i-j'`` and values are magnitudes (signed allowed).
+    Saves the main diagram as ``savepath + '.png'`` and a separate colorbar image
+    as ``savepath + '_colorbar.png'``.
 
-        pca=PCA(n_components=n)
-        pca.fit(feature_matrix)
-        X_pca = pca.transform(feature_matrix)
-        weights = pca.components_
-        explained_variances = pca.explained_variance_ratio_
+    Parameters
+    ----------
+    empty_circle : py.Gcircle
+        A `Gcircle` that already has arcs for all residues referenced by keys
+        in `residue_dict`.
 
-        print("X_pca shape (new data):",X_pca.shape)
-        print(f"the total explained variance{np.sum(explained_variances)}")
-        print(f"the total explained variance of PC's is {explained_variances}")
-        print("weights shape:", weights.shape) 
-        
-        return X_pca,weights,explained_variances
+    residue_dict : dict[str, float]
+        Mapping from pair key ``'i-j'`` to a numeric magnitude (used for both
+        chord color and line width after normalization).
 
-if __name__ == '__main__':
+    savepath : str, default=os.getcwd()+'mdcircos_graph'
+        Output *prefix* for image files.
 
-    print('testing testing 1 2 3')
+    scale_factor : float, default=5
+        Multiplier for the normalized chord linewidths.
+
+    colormap : str or matplotlib.colors.Colormap, default=cm.magma_r
+        Colormap used for chord colors and the separate colorbar.
+
+    Returns
+    -------
+    None
+        Saves figure(s) to disk and closes the colorbar figure.
+
+    Notes
+    -----
+    - Colors are min-max normalized over the raw (signed) values; widths use
+      min-max over absolute values for aesthetics.
+    - Pair keys are split on the first '-' to look up per-residue arc anchors.
+
+    Examples
+    --------
+    >>> circle = make_MDCircos_object(['10','20','30'])
+    >>> weights = {'10-20': 0.4, '20-30': -0.2}
+    >>> mdcircos_graph(circle, weights, savepath='/tmp/example')
+    """
+    import matplotlib.pyplot as plt
+    from matplotlib import cm
+    from matplotlib.colors import Normalize
+    import numpy as np
+
+    # Normalize the colors based on the values provided
+    vals = list(residue_dict.values())
+    vmin, vmax = min(vals), max(vals)
+    color_norm = Normalize(vmin=vmin, vmax=vmax)
+    cmap = colormap if colormap is not None else cm.plasma
+    hex_color_map = {k: cmap(color_norm(v)) for k, v in residue_dict.items()}
+
+    # Width normalization on the absolute values via min–max
+    abs_vals = [abs(v) for v in vals if v != 0]
+    min_abs, max_abs = min(abs_vals), max(abs_vals)
+    denom = max_abs - min_abs if max_abs != min_abs else 1.0
+
+    width_norm = {k: (abs(v) - min_abs) / denom for k, v in residue_dict.items()}
+
+    # Draw chords
+    for key, value in residue_dict.items():
+        if value == 0:
+            continue
+        res1, res2 = key.split('-')
+        arc1 = get_Circos_coordinates(res1, empty_circle)
+        arc2 = get_Circos_coordinates(res2, empty_circle)
+        color = hex_color_map[key]
+        lw = width_norm[key] * scale_factor
+        empty_circle.chord_plot(arc1, arc2, linewidth=lw, facecolor=color, edgecolor=color)
+
+    empty_circle.figure.savefig(savepath + ".png", dpi=300, bbox_inches="tight")
+
+    # Separate colorbar
+    fig_cb, ax_cb = plt.subplots(figsize=(1.5, 4))
+    sm = cm.ScalarMappable(cmap=cmap, norm=color_norm)
+    sm.set_array([])
+    cbar = plt.colorbar(sm, cax=ax_cb)
+    ticks = np.linspace(vmin, vmax, num=6)
+    cbar.set_ticks(ticks)
+    cbar.set_ticklabels([f"{t:.2f}" for t in ticks])
+    cbar.set_label("Directional Difference")
+    fig_cb.savefig(savepath + "_colorbar.png", dpi=300, bbox_inches="tight")
+    plt.close(fig_cb)
 
 
+def extract_properties_from_weightsdf(pca_table):
+    """
+    Parse a Systems Analysis weights table into residue IDs and per-PC weight mappings.
 
+    Parameters
+    ----------
+    pca_table : pandas.DataFrame
+        Must contain at least:
+        - 'Comparisons' : str, residue pair keys like ``'i-j'``.
+        - 'PC1_magnitude' : float
+        - 'PC2_magnitude' : float
+
+    Returns
+    -------
+    residues : list of str
+        Unique residue IDs encountered in 'Comparisons', in first-appearance order.
+
+    PC1_weight_dict : dict[str, float]
+        Mapping ``'i-j'`` -> PC1 magnitude.
+
+    PC2_weight_dict : dict[str, float]
+        Mapping ``'i-j'`` -> PC2 magnitude.
+
+    Notes
+    -----
+    Keys are preserved exactly; inverse pairs (``'i-j'`` vs ``'j-i'``) are not merged.
+    """
+    comps = pca_table['Comparisons'].astype(str)
+    sides = comps.str.split('-', n=1, expand=True)
+    residues = (sides.stack().str.strip().dropna().unique())
+    residues = [str(x) for x in residues]
+    PC1_weight_dict = pca_table.set_index('Comparisons')['PC1_magnitude'].to_dict()
+    PC2_weight_dict = pca_table.set_index('Comparisons')['PC2_magnitude'].to_dict()
+    return residues, PC1_weight_dict, PC2_weight_dict
+
+
+def create_MDcircos_from_weightsdf(PCA_ranked_weights, outfilepath=None):
+    """
+    Create and save MD-circos diagrams for PC1 and PC2 magnitudes from a weights table.
+
+    Parameters
+    ----------
+    PCA_ranked_weights : pandas.DataFrame
+        Must include 'Comparisons', 'PC1_magnitude', and 'PC2_magnitude' columns.
+
+    outfilepath : str or None, default=None
+        Output *prefix* directory/path. If None, uses `os.getcwd()`. The function
+        appends the stems:
+            - 'PC1_magnitudeviz'
+            - 'PC2_magnitudeviz'
+        before adding file extensions.
+
+    Returns
+    -------
+    None
+        Saves the figures and colorbars to disk.
+
+    Notes
+    -----
+    Both PC1 and PC2 visualizations share the same arc layout constructed from
+    the residue IDs present in 'Comparisons'.
+    """
+    outfilepath = outfilepath if outfilepath is not None else os.getcwd()
+    res_indexes, PC1_magnitude_dict, PC2_magnitude_dict = extract_properties_from_weightsdf(PCA_ranked_weights)
+    pc1_circos_object = make_MDCircos_object(res_indexes)
+    pc2_circos_object = make_MDCircos_object(res_indexes)
+    mdcircos_graph(pc1_circos_object, PC1_magnitude_dict, outfilepath + 'PC1_magnitudeviz')
+    mdcircos_graph(pc2_circos_object, PC2_magnitude_dict, outfilepath + 'PC2_magnitudeviz')
+    return
+
+
+# Embedding-space visualizations
+def create_2d_color_mappings(labels=([80] * 20) + ([160] * 10),
+                             colors_list=('purple', 'orange', 'green', 'yellow', 'blue',
+                                          'red', 'pink', 'cyan', 'grey', 'brown'),
+                             clustering=True):
+    """
+    Produce a list of colors for 2-D scatter points given labels.
+
+    Parameters
+    ----------
+    labels : array-like of shape (n_samples,), default=([80]*20)+([160]*10)
+        Discrete labels per sample (e.g., cluster IDs).
+
+    colors_list : sequence of str, default=('purple','orange','green','yellow','blue','red','pink','cyan','grey','brown')
+        Palette to cycle through for unique labels.
+
+    clustering : bool, default=True
+        If True, assign discrete colors per unique label. If False, returns None
+        (use a continuous colormap downstream).
+
+    Returns
+    -------
+    list[str] or None
+        A color per sample if `clustering=True`; otherwise None.
+
+    Examples
+    --------
+    >>> labels = [0, 0, 1, 2, 2, 2]
+    >>> colors = create_2d_color_mappings(labels)
+    """
+    if clustering is True:
+        label_dict = {}
+        i = 0
+        for label in labels:
+            if label not in label_dict:
+                label_dict[label] = colors_list[i % len(colors_list)]
+                i += 1
+        sample_color_mappings = [label_dict[i] for i in labels]
+        return sample_color_mappings
+    # if clustering is False, intentionally return None so downstream uses a colormap
+    return None
+
+
+def visualize_reduction(embedding_coordinates,
+                        color_mappings=None,
+                        savepath=os.getcwd(),
+                        title=None,
+                        cmap=None,
+                        axis_one_label=None,
+                        axis_two_label=None,
+                        cbar_label=None,
+                        gridvisible=False):
+    """
+    Scatter plot of a 2-D embedding with optional color mapping and colorbar; saves the figure.
+
+    Parameters
+    ----------
+    embedding_coordinates : array-like of shape (n_samples, 2)
+        Two-column array of embedding coordinates (e.g., PCA/UMAP).
+
+    color_mappings : array-like of shape (n_samples,) or None, default=None
+        If provided and non-empty, treated as categorical and a discrete colorbar is drawn.
+        If None/empty, uses an index-based gradient with a continuous colorbar.
+
+    savepath : str, default=os.getcwd()
+        Full output path **including filename** (no extension added automatically).
+
+    title : str or None, default='Dimensional Reduction of Systems'
+        Figure title.
+
+    cmap : str or matplotlib.colors.Colormap or None, default=cm.magma_r
+        Colormap for points and colorbar.
+
+    axis_one_label : str or None, default='Embedding Space Axis 1'
+        X-axis label.
+
+    axis_two_label : str or None, default='Embedding Space Axis 2'
+        Y-axis label.
+
+    cbar_label : str or None, default='Value'
+        Colorbar label.
+
+    gridvisible : bool, default=False
+        Whether to show a background grid.
+
+    Returns
+    -------
+    None
+        Saves the plot to `savepath` and closes the figure.
+
+    Notes
+    -----
+    Axes spines are hidden; `set_ticks` is called to coarsen ticks on wide ranges.
+    """
+    axis_one_label = axis_one_label if axis_one_label is not None else 'Embedding Space Axis 1'
+    axis_two_label = axis_two_label if axis_two_label is not None else 'Embedding Space Axis 2'
+    title = title if title is not None else "Dimensional Reduction of Systems"
+    cbar_label = cbar_label if cbar_label is not None else "Value"
+    cmap = cmap if cmap is not None else cm.magma_r
+
+    labels_font_dict = {
+        'family': 'monospace',
+        'size': 20,
+        'weight': 'bold',
+        'style': 'italic',
+        'color': 'black',
+    }
+
+    fig = plt.figure(figsize=(16, 12), dpi=300)
+    ax = plt.gca()
+
+    if color_mappings is not None and len(color_mappings) > 0:
+        scatter = ax.scatter(embedding_coordinates[:, 0], embedding_coordinates[:, 1],
+                             c=color_mappings, cmap=cmap, alpha=0.6)
+        add_custom_colorbar(scatter, color_mappings, cbar_label, plt.gca(), cmap=cmap)
+    else:
+        values = np.arange(embedding_coordinates.shape[0])
+        scatter = ax.scatter(embedding_coordinates[:, 0], embedding_coordinates[:, 1],
+                             c=values, cmap=cmap, alpha=0.6)
+        add_continuous_colorbar(scatter, values, cbar_label, plt.gca(), cmap=cmap)
+
+    for spine in ax.spines.values():
+        spine.set_visible(False)
+
+    ax.grid(visible=gridvisible)
+    set_ticks(ax=plt.gca())
+    ax.set_title(title, fontdict=labels_font_dict)
+    ax.set_xlabel(axis_one_label, fontdict=labels_font_dict)
+    ax.set_ylabel(axis_two_label, fontdict=labels_font_dict)
+    ax.tick_params(axis='x', colors='black')
+    ax.tick_params(axis='y', colors='black')
+
+    plt.tight_layout()
+    plt.savefig(savepath, dpi=500)
+    plt.close()
+    return
+
+
+# RMSD lineplots
+def rmsd_lineplots(pandasdf=None, title='RMSD plot',
+                   xgroupvar='window',
+                   ygroupvar='rmsd',
+                   xlab="window",
+                   ylab="rmsd",
+                   groupingvar='cluster',
+                   cmap=cm.inferno_r,
+                   legendtitle='Cluster',
+                   outfilepath=os.getcwd()):
+    """
+    Create a grouped line plot of RMSD (or similar metric) over a window variable.
+
+    Parameters
+    ----------
+    pandasdf : pandas.DataFrame or None, default=None
+        Data with at least the columns specified by `xgroupvar`, `ygroupvar`, and `groupingvar`.
+
+    title : str, default='RMSD plot'
+        Plot title.
+
+    xgroupvar : str, default='window'
+        Column used for the x-axis.
+
+    ygroupvar : str, default='rmsd'
+        Column used for the y-axis.
+
+    xlab : str, default='window'
+        X-axis label.
+
+    ylab : str, default='rmsd'
+        Y-axis label.
+
+    groupingvar : str, default='cluster'
+        Column used to form separate lines (and legend entries).
+
+    cmap : str or matplotlib.colors.Colormap, default=cm.inferno_r
+        Palette/colormap passed to seaborn for coloring by `groupingvar`.
+
+    legendtitle : str, default='Cluster'
+        Legend title.
+
+    outfilepath : str, default=os.getcwd()
+        Output *prefix* for the saved figure. The function appends ``'_rmsdlineplot'``.
+
+    Returns
+    -------
+    None
+        Saves the line plot and closes the figure.
+
+    Notes
+    -----
+    Thin wrapper around `seaborn.lineplot` with minimal styling.
+    """
+    plt.figure(figsize=(10, 8))
+    sns.lineplot(
+        data=pandasdf,
+        x=xgroupvar,
+        y=ygroupvar,
+        hue=groupingvar,
+        palette=cmap
+    )
+    ax = plt.gca()
+    for spine in ax.spines.values():
+        spine.set_visible(False)
+
+    plt.legend(title=legendtitle, bbox_to_anchor=(1.0, 1), loc="upper left")
+    plt.xlabel(xlab)
+    plt.ylabel(ylab)
+    plt.title(title)
+    plt.savefig(outfilepath + '_rmsdlineplot', dpi=800)
+    plt.close()
+    return
+
+
+# Contour plots
+def contour_embedding_space(outfile_path, embeddingspace_coordinates, levels=10, thresh=0, bw_adjust=.5,
+                            title=None, xlabel=None, ylabel=None, gridvisible=False):
+    """
+    Plot a density contour map over 2-D embedding coordinates and save to disk.
+
+    Parameters
+    ----------
+    outfile_path : str or None
+        Output path (file name). If None, uses current working directory.
+
+    embeddingspace_coordinates : array-like of shape (n_samples, 2)
+        The 2-D embedding coordinates (e.g., PCA/UMAP).
+
+    levels : int, default=10
+        Number of contour levels.
+
+    thresh : float, default=0
+        Only draw contours where estimated density is greater than this threshold.
+
+    bw_adjust : float, default=0.5
+        Bandwidth adjustment factor for KDE.
+
+    title : str or None, default=None
+        Plot title.
+
+    xlabel, ylabel : str or None, default=None
+        Axis labels.
+
+    gridvisible : bool, default=False
+        Whether to show the background grid.
+
+    Returns
+    -------
+    None
+        Saves the contour plot and closes the figure.
+
+    Notes
+    -----
+    Convenience wrapper over `sns.kdeplot` with filled contours and colorbar.
+    """
+    outfile_path = outfile_path if outfile_path is not None else os.getcwd()
+    gridvisible = gridvisible if gridvisible is not None else False
+
+    sns.kdeplot(
+        x=embeddingspace_coordinates[:, 0],
+        y=embeddingspace_coordinates[:, 1],
+        fill=True,
+        cmap="cividis",
+        levels=levels,
+        thresh=thresh,
+        bw_adjust=bw_adjust,
+        cbar=True
+    )
+
+    ax = plt.gca()
+    for spine in ax.spines.values():
+        spine.set_visible(False)
+
+    if title:
+        plt.title(title)
+    if xlabel:
+        plt.xlabel(xlabel)
+    if ylabel:
+        plt.ylabel(ylabel)
+
+    plt.grid(visible=gridvisible)
+    plt.savefig(outfile_path, dpi=800)
+    plt.close()
+    return
+
+
+if __name__ == "__main__":
+    frame_list = ((([80] * 20) + ([160] * 10)) * 2)
+    print('running just the visualization module')
+    fake_labels = [1] * 3200 + [2] * 3200
+    print(fake_labels)
+    replicatemap_from_labels(fake_labels, frame_list)
