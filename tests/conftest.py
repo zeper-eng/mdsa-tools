@@ -134,3 +134,11 @@ def rankedweights_df(analyzer):
     PCA_ranked_weights = analyzer.create_PCA_ranked_weights()
     return PCA_ranked_weights
 
+@pytest.fixture(scope="session")
+def rmsd_df():
+    import pandas as pd
+    return pd.DataFrame({
+        "window": [1, 2, 1, 2],
+        "rmsd": [0.5, 0.6, 0.7, 0.8],
+        "cluster": ["A", "A", "B", "B"]
+    })

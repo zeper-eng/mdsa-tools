@@ -807,6 +807,8 @@ def rmsd_lineplots(pandasdf=None, title='RMSD plot',
                    ylab="rmsd",
                    groupingvar='cluster',
                    cmap=cm.inferno_r,
+                   cmap_is_colormap=True,
+                   cmap_is_string=False,
                    legendtitle='Cluster',
                    outfilepath=os.getcwd()):
     """
@@ -836,7 +838,13 @@ def rmsd_lineplots(pandasdf=None, title='RMSD plot',
         Column used to form separate lines (and legend entries).
 
     cmap : str or matplotlib.colors.Colormap, default=cm.inferno_r
-        Palette/colormap passed to seaborn for coloring by `groupingvar`.
+        Palette/colormap to use.
+
+    cmap_is_colormap : bool, default=True
+        If True, interpret `cmap` as a Matplotlib colormap.
+
+    cmap_is_string : bool, default=False
+        If True, interpret `cmap` as a Seaborn/Matplotlib palette string.
 
     legendtitle : str, default='Cluster'
         Legend title.
@@ -848,11 +856,14 @@ def rmsd_lineplots(pandasdf=None, title='RMSD plot',
     -------
     None
         Saves the line plot and closes the figure.
-
-    Notes
-    -----
-    Thin wrapper around `seaborn.lineplot` with minimal styling.
     """
+    if cmap_is_colormap:
+        n_colors = pandasdf[groupingvar].nunique()
+        cmap = [cmap(i) for i in np.linspace(0, 1, n_colors)]
+
+    # if cmap_is_string, just pass it through (Seaborn handles it)
+    # if both False, cmap will be used as-is
+
     plt.figure(figsize=(10, 8))
     sns.lineplot(
         data=pandasdf,

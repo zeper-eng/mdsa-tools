@@ -157,7 +157,7 @@ def test_extract_properties_from_weightsdf(rankedweights_df):
 import matplotlib.pyplot as plt
 
 
-def test_add_continuous_colorbar_runs(emptyplotting_space,tmp_path):
+def test_add_continuous_colorbar_runs(emptyplotting_space):
     fig, ax = emptyplotting_space
     scatter = ax.scatter([0, 1, 2], [0, 1, 2], c=[0.1, 0.2, 0.3])
     cbar = vz.add_continuous_colorbar(scatter, labels=[0.1, 0.2, 0.3], cbar_label="val", ax=ax)
@@ -165,7 +165,7 @@ def test_add_continuous_colorbar_runs(emptyplotting_space,tmp_path):
     plt.close(fig)
 
 
-def test_add_discrete_colorbar_runs(emptyplotting_space,tmp_path):
+def test_add_discrete_colorbar_runs(emptyplotting_space):
     fig, ax = emptyplotting_space
     labels = ["A", "B", "A"]
     scatter = ax.scatter([0, 1, 2], [0, 1, 2], c=[0, 1, 0])
@@ -184,27 +184,19 @@ def test_set_ticks_runs(emptyplotting_space):
 
 def test_create_2d_color_mappings_returns_colors():
     labels = [0, 0, 1, 2]
-    colors = vz.create_2d_color_mappings(labels, clustering=True)
+    colors = vz.create_2d_color_mappings(labels)
     assert len(colors) == len(labels)
-    # when clustering=False, should return None
-    assert vz.create_2d_color_mappings(labels, clustering=False) is None
 
 
-def test_rmsd_lineplots(tmp_path):
-    df = pd.DataFrame({
-        "window": [1, 2, 1, 2],
-        "rmsd": [0.5, 0.6, 0.7, 0.8],
-        "cluster": ["A", "A", "B", "B"]
-    })
+def test_rmsd_lineplots(tmp_path,rmsd_df):
     out = tmp_path / "rmsd"
-    vz.rmsd_lineplots(df, outfilepath=str(out))
+    vz.rmsd_lineplots(rmsd_df, outfilepath=str(out))
     assert (tmp_path / "rmsd_rmsdlineplot").exists()
 
 
-def test_contour_embedding_space(tmp_path):
-    coords = np.random.rand(50, 2)
+def test_contour_embedding_space(tmp_path,small_embedding):
     out = tmp_path / "contour.png"
-    vz.contour_embedding_space(str(out), coords, levels=5)
+    vz.contour_embedding_space(str(out), small_embedding, levels=5)
     assert out.exists()
 
 
@@ -226,16 +218,12 @@ def test_get_Circos_coordinates_and_mdcircos_graph(tmp_path):
     assert (tmp_path / "circos_colorbar.png").exists()
 
 
-def test_extract_properties_and_create_MDcircos(tmp_path):
-    df = pd.DataFrame({
-        "Comparisons": ["1-2", "2-3"],
-        "PC1_magnitude": [0.1, 0.2],
-        "PC2_magnitude": [0.3, 0.4],
-    })
-    residues, d1, d2 = vz.extract_properties_from_weightsdf(df)
+def test_extract_properties_and_create_MDcircos(tmp_path,rankedweights_df):
+
+    residues, d1, d2 = vz.extract_properties_from_weightsdf(rankedweights_df)
     assert "1" in residues and "2" in residues
     outprefix = str(tmp_path / "weights")
-    vz.create_MDcircos_from_weightsdf(df, outfilepath=outprefix)
+    vz.create_MDcircos_from_weightsdf(rankedweights_df, outfilepath=outprefix)
     assert (tmp_path / "weightsPC1_magnitudeviz.png").exists()
     assert (tmp_path / "weightsPC2_magnitudeviz.png").exists()
 
