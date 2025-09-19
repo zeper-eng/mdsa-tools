@@ -1,37 +1,75 @@
 '''
-Mostly functions as a big wrapper for conveniently storing a lot of our analysis methods. 
+The Visualization module stores all of the different operations for the various graphs we create.
 
-Generally you can follow our pipeline but,the individual steps are pretty modular if your comfortable doing simple numpy transmutations etc.
-You could for instance use the clustering on various number of n_dimensions to reduce to, or pull H-bond values using 
-systems_analysis.extract_hbond_values() and use thoose in replicate maps instead of k-means results.
+It is not a larger object but a series of complimentary functions including helpers that make different color bars
+depending on values etc.
 
-Its a very small module so im not going to really include routine listings and such but, I will point to some relevant functions for the work
-being done by it.
+For the most part we expect a max of around 256 bins but, if you have more bins in any labelling (colorcoding)of your graphs it auto switches
+to a continous colorbar and goes based on sample index.
+
+
 
 See Also
 --------
-mdsa_tools.Viz.visualize_reduction : Plot PCA/UMAP embeddings.
+mdsa_tools.Viz.Analysis : A lot of the results you will probably visualize
 mdsa_tools.Data_gen_hbond.create_system_representations : Build residue–residue H-bond adjacency matrices.
 numpy.linalg.svd : Linear algebra used under the hood.
 
 '''
 
+
 import numpy as np
 import os
 import matplotlib.pyplot as plt
 import matplotlib.cm as cm
-import pycircos.pycircos as py 
+import pycircos.pycircos as py
 import seaborn as sns
 from matplotlib.colors import BoundaryNorm
 import matplotlib.colors as mcolors
 from matplotlib.cm import ScalarMappable
 
-#Miscellaneous tools
+
+# Miscellaneous tools
 def add_continuous_colorbar(scatter, labels, cbar_label=None, ax=None, cmap=None,
                             extend="neither", format=None):
     """
-    Continuous colorbar alternative to `add_custom_colorbar`.
-    Works with numeric and non-numeric labels.
+    Add a continuous colorbar to a scatter plot.
+
+    Works for numeric labels directly; for non-numeric labels, maps unique
+    values to an ordinal numeric sequence and normalizes over that range.
+
+    Parameters
+    ----------
+    scatter : matplotlib.collections.PathCollection
+        The scatter object returned by `Axes.scatter(...)`.
+
+    labels : array-like or None
+        Values to color by. If None, uses an index-based gradient.
+
+    cbar_label : str or None, default=None
+        Colorbar label.
+
+    ax : matplotlib.axes.Axes or None, default=None
+        Target axes. Defaults to `plt.gca()`.
+
+    cmap : str or matplotlib.colors.Colormap or None, default=None
+        Colormap name or object. Defaults to `cm.inferno`.
+
+    extend : {'neither', 'both', 'min', 'max'}, default='neither'
+        Colorbar extension behavior.
+
+    format : str or matplotlib.ticker.Formatter or None, default=None
+        Formatting for colorbar tick labels.
+
+    Returns
+    -------
+    matplotlib.colorbar.Colorbar
+        The created colorbar.
+
+    Notes
+    -----
+    This function also applies the computed `Normalize` and `Colormap` to the
+    provided scatter so the colorbar reflects the actual plotted data.
     """
     if ax is None:
         ax = plt.gca()
@@ -61,7 +99,7 @@ def add_continuous_colorbar(scatter, labels, cbar_label=None, ax=None, cmap=None
 
     norm = mcolors.Normalize(vmin=vmin, vmax=vmax)
 
-    # Make sure the scatter is actually using this data/norm/cmap
+    # Ensure scatter uses this norm/cmap/data
     scatter.set_norm(norm)
     scatter.set_cmap(cmap_obj)
     scatter.set_array(vals)
@@ -73,7 +111,41 @@ def add_continuous_colorbar(scatter, labels, cbar_label=None, ax=None, cmap=None
         cbar.set_label(cbar_label, fontsize=10)
     return cbar
 
+
 def add_custom_colorbar(scatter, labels, cbar_label=None, ax=None, cmap=None):
+    """
+    Add a discrete (categorical) colorbar to a scatter plot.
+
+    Maps the unique `labels` to integer IDs and shows a tick per category.
+    For large cardinality (N > 100) it sparsifies ticks every 10 to improve readability.
+
+    Parameters
+    ----------
+    scatter : matplotlib.collections.PathCollection
+        The scatter object returned by `Axes.scatter(...)`.
+
+    labels : array-like
+        Categorical labels per point. Converted to strings for tick labels.
+
+    cbar_label : str or None, default=None
+        Colorbar label.
+
+    ax : matplotlib.axes.Axes or None, default=None
+        Target axes. Defaults to `plt.gca()`.
+
+    cmap : str or matplotlib.colors.Colormap or None, default=None
+        Colormap name or object. Defaults to `cm.inferno`.
+
+    Returns
+    -------
+    matplotlib.colorbar.Colorbar
+        The created colorbar.
+
+    Notes
+    -----
+    Sets the scatter's `norm` to a `BoundaryNorm` over integer bins matching
+    the number of unique categories so colors align with discrete tick marks.
+    """
     if ax is None:
         ax = plt.gca()
 
@@ -82,7 +154,7 @@ def add_custom_colorbar(scatter, labels, cbar_label=None, ax=None, cmap=None):
     N = len(uniques)
 
     cmap = cmap if cmap is not None else cm.inferno
-    bounds = np.arange(-0.5, N + 0.5, 1)  # [-0.5, 0.5], [0.5, 1.5]
+    bounds = np.arange(-0.5, N + 0.5, 1)
     norm = BoundaryNorm(bounds, cmap.N)
 
     scatter.set_cmap(cmap)
@@ -93,27 +165,28 @@ def add_custom_colorbar(scatter, labels, cbar_label=None, ax=None, cmap=None):
                         ticks=np.arange(N), pad=0.02, shrink=0.8)
     cbar.set_label(cbar_label or 'Value', fontsize=10)
 
-    if N>100:
-        tick_positions = np.arange(N)[::10]         # every 10th tick
-        tick_labels   = [str(u) for u in uniques][::10]
+    if N > 100:
+        tick_positions = np.arange(N)[::10]
+        tick_labels = [str(u) for u in uniques][::10]
         cbar.set_ticks(tick_positions)
         cbar.set_ticklabels(tick_labels)
         return cbar
 
     cbar.set_ticklabels([str(u) for u in uniques])
-
     return cbar
+
 
 def set_ticks(ax=None):
     """
-    Set x and y ticks for an axis. If the axis range is greater than 100,
-    ticks are placed every 10 units. Otherwise, the default tick locator
-    from Matplotlib is preserved.
+    Set x and y ticks for an axis depending on range.
+
+    If the axis span exceeds 100 units, ticks are placed every 10 units;
+    otherwise, Matplotlib's default tick locator is preserved.
 
     Parameters
     ----------
-    ax : matplotlib.axes.Axes, default=None
-        Axis to apply tick settings. Defaults to current axis.
+    ax : matplotlib.axes.Axes or None, default=None
+        Axis to apply tick settings. Defaults to the current axis.
 
     Returns
     -------
@@ -130,114 +203,110 @@ def set_ticks(ax=None):
     ymin, ymax = ax.get_ylim()
     if ymax - ymin > 100:
         ax.set_yticks(np.arange(np.floor(ymin), np.ceil(ymax) + 1, 10))
-
     return
 
-#Replicate maps
-def replicatemap_from_labels(labels,frame_list,
-                            savepath=None,
-                            title=None,
-                            xlabel=None, ylabel=None,
-                            cbar_label=None,
-                            cmap=None,
-                             ) -> np.ndarray:
-    '''returns an array consisting of a re-formatted list of labels through which to view a set.
+
+# Replicate maps
+def replicatemap_from_labels(labels, frame_list,
+                             savepath=None,
+                             title=None,
+                             xlabel=None, ylabel=None,
+                             cbar_label=None,
+                             cmap=None) -> None:
+    """
+    Plot a "replicate × frame" map of discrete labels and save to disk.
 
     Parameters
     ----------
-    labels: listlike,shape=(data,)
-        A list of labels representing all of the labels from either a Kmeans or other analysis that we would like to
-        use for our analysis.
+    labels : array-like of shape (n_total_frames,)
+        Label per frame (e.g., k-means cluster or any discrete annotation),
+        concatenated across replicates in the same order as `frame_list`.
 
-    frame_list: listlike,shape=(data,)
-        A list of integers representing the number of frames present in each replicate. This should be in the order
-        of which the various versions of the system, and replicates where concatenated. 
+    frame_list : array-like of shape (n_replicates,)
+        Number of frames in each replicate, in the exact concatenation order
+        used to build `labels`.
 
-    savepath:str,default=os.getcwd()
-        Path to where you would like to save your plot; generally dpi=800 and default is the directory you are running from
+    savepath : str or None, default=None
+        Directory or path *prefix* where the plot is saved. If None, uses
+        `os.getcwd()`. The file name appended is ``'replicate_map.png'``
+        (i.e., saved at ``f"{savepath}replicate_map.png"``).
 
-    title : str, default = None
-        Optional title for the plot.
+    title : str or None, default=None
+        Figure title; if None, a default is used.
 
-    xlabel : str, default = None
-        Optional label for the x-axis.
+    xlabel, ylabel : str or None, default=None
+        Axis labels. If omitted, defaults are used.
 
-    ylabel : str, default = None
-        Optional label for the y-axis.
+    cbar_label : str or None, default=None
+        Label for the colorbar.
+
+    cmap : str or matplotlib.colors.Colormap or None, default=None
+        Colormap for the label values. Defaults to ``cm.magma_r``.
 
     Returns
     -------
-    reformatted_labels:numpy.ndarray,shape=(n_replicates,n_frames)
-        A final array is returned where each row corresponds to one of our replicates in simulations.
-        Each column corresponds to that particular frame in the replicate. If there are replicates of varying lengths
-        we pad all to the longest trajectorys length with masked nans.
-
-        
-    Examples
-    -------- 
-    
+    None
+        The figure is saved to disk and closed. Nothing is returned.
 
     Notes
     -----
-    
+    - Uses a small square marker per (replicate, frame) and a discrete colorbar
+      for low/medium cardinality labels; switches to a continuous colorbar when
+      unique label count is very large (>= 1000).
+    - Replicate index is placed on the y-axis (top row is replicate 0) and the
+      axis is inverted for a top-down visual.
 
-    '''
+    Examples
+    --------
+    >>> labels = [0]*100 + [1]*120 + [2]*90
+    >>> frames = [100, 120, 90]
+    >>> replicatemap_from_labels(labels, frames, savepath="/tmp/")
+    """
+    cmap = cmap if cmap is not None else cm.magma_r
+    savepath = savepath if savepath is not None else os.getcwd()
 
-    cmap=cmap if cmap is not None else cm.magma_r
-
-    savepath=savepath if savepath is not None else os.getcwd()
-
-
-    iterator=0
-    final_coordinates=[]
-
-
+    iterator = 0
+    final_coordinates = []
 
     for i in range(len(frame_list)):
-
-        current_frame_length=frame_list[i]
-
-        current_replicate_coordinates=np.full(shape=(current_frame_length,),fill_value=i) #make list of 11111 then 22222 for each rep
-        frame_positions=np.arange(current_frame_length)
-        frame_values=labels[iterator:iterator+current_frame_length]
-        (frame_values.shape)
+        current_frame_length = frame_list[i]
+        current_replicate_coordinates = np.full(shape=(current_frame_length,), fill_value=i)
+        frame_positions = np.arange(current_frame_length)
+        frame_values = labels[iterator:iterator + current_frame_length]
         replicate_block = np.stack([current_replicate_coordinates, frame_positions, frame_values], axis=1)
         final_coordinates.append(replicate_block)
-        iterator+=current_frame_length
-    
+        iterator += current_frame_length
+
     final_coordinates = np.vstack(final_coordinates)
-    
+
     y_spacing_factor = 1
     x_spacing_factor = 1
-    
-    
-    scatter=plt.scatter(
-                x=final_coordinates[:,1] * x_spacing_factor,
-                y=final_coordinates[:,0] * y_spacing_factor,
-                c=final_coordinates[:,2],
-                s=1,
-                marker='s',
-                cmap=cmap,
-                alpha=1)
-    
-    #cbar and cbar ticks
-    if np.unique(final_coordinates).shape[0]>=1000:
-        add_continuous_colorbar(scatter,final_coordinates[:,2],cbar_label,plt.gca(),cmap=cmap)
-    if np.unique(final_coordinates).shape[0]<1000:
-        add_custom_colorbar(scatter,final_coordinates[:,2],cbar_label,plt.gca(),cmap=cmap)
 
-    #personal preferences
+    scatter = plt.scatter(
+        x=final_coordinates[:, 1] * x_spacing_factor,
+        y=final_coordinates[:, 0] * y_spacing_factor,
+        c=final_coordinates[:, 2],
+        s=1,
+        marker='s',
+        cmap=cmap,
+        alpha=1)
+
+    # Choose colorbar style
+    if np.unique(final_coordinates).shape[0] >= 1000:
+        add_continuous_colorbar(scatter, final_coordinates[:, 2], cbar_label, plt.gca(), cmap=cmap)
+    else:
+        add_custom_colorbar(scatter, final_coordinates[:, 2], cbar_label, plt.gca(), cmap=cmap)
+
+    # Style
     plt.grid(visible=False)
-    currentaax=plt.gca()
+    currentaax = plt.gca()
     for spine in currentaax.spines.values():
         spine.set_visible(False)
 
-    ax=plt.gca()
+    ax = plt.gca()
     ax.invert_yaxis()
     ax.set_title('Clusters per frame', fontsize=20, weight='bold', family='monospace', style='italic')
-    n_reps = int(final_coordinates[:, 0].max())
-    n_frames = int(final_coordinates[:, 1].max())
-    
+
     if title:
         plt.title(title)
     if xlabel:
@@ -245,41 +314,43 @@ def replicatemap_from_labels(labels,frame_list,
     if ylabel:
         plt.ylabel(ylabel)
 
-
-
     plt.tight_layout()
     plt.savefig(f'{savepath}replicate_map.png', dpi=800)
     plt.close()
+    return
 
-    return 
 
-#K-means Cross-validation metrics
+# K-means Cross-validation metrics
 def plot_sillohette_scores(cluster_range, silhouette_scores, outfile_path="sillohette_method.png",
                            title=None, xlabel=None, ylabel=None):
     """
-    Plot silhouette scores over k and mark the maximum.
+    Plot silhouette scores over k, mark the maximum, and save.
 
     Parameters
     ----------
     cluster_range : array-like
-        k values evaluated.
+        Candidate k values.
 
     silhouette_scores : array-like
-        Silhouette score per k.
+        Silhouette score per k (same length/order as `cluster_range`).
 
-    outfile_path : str, default="sillohette_method.png"
-        Path prefix where figure is saved (suffix 'sillohuette_plot' is appended).
+    outfile_path : str, default='sillohette_method.png'
+        Path prefix or filename to save the figure. The code appends the suffix
+        ``'sillohuette_plot'`` (note spelling) to this string.
 
     title, xlabel, ylabel : str or None
-        Optional title/axis labels.
+        Optional figure/axis labels.
 
     Returns
     -------
-    optimal_k_sil : int
-        k with max silhouette score.
+    int
+        k with maximum silhouette score.
+
+    Notes
+    -----
+    The filename suffix used in saving is ``'sillohuette_plot'`` for historical reasons.
     """
-    optimal_k_sil = cluster_range[np.argmax(silhouette_scores)]#return index 
-    # Plot Silhouette Scores
+    optimal_k_sil = cluster_range[np.argmax(silhouette_scores)]
     plt.figure(figsize=(8, 5))
     plt.plot(cluster_range, silhouette_scores, marker='o', linestyle='-')
     plt.axvline(optimal_k_sil, color='red', linestyle='--', linewidth=2, label=f'Optimal k = {optimal_k_sil}')
@@ -293,29 +364,31 @@ def plot_sillohette_scores(cluster_range, silhouette_scores, outfile_path="sillo
     plt.close()
     return optimal_k_sil
 
+
 def plot_elbow_scores(cluster_range, inertia_scores, outfile_path="elbow_method.png",
                       title=None, xlabel=None, ylabel=None):
     """
-    Plot inertia over k and mark elbow via second derivative.
+    Plot inertia over k, estimate the elbow via the second derivative, and save.
 
     Parameters
     ----------
     cluster_range : array-like
-        k values evaluated.
+        Candidate k values.
 
     inertia_scores : array-like
-        KMeans inertia per k.
+        KMeans inertia per k (same length/order as `cluster_range`).
 
-    outfile_path : str, default="elbow_method.png"
-        Path prefix where figure is saved (suffix 'elbow_plot' is appended).
+    outfile_path : str, default='elbow_method.png'
+        Path prefix or filename to save the figure. The code appends the suffix
+        ``'elbow_plot'`` to this string.
 
     title, xlabel, ylabel : str or None
-        Optional title/axis labels.
+        Optional figure/axis labels.
 
     Returns
     -------
-    optimal_k : int
-        Estimated elbow k.
+    int
+        Estimated elbow k (argmin of the second difference + 1).
     """
     diff = np.diff(inertia_scores)
     diff2 = np.diff(diff)
@@ -332,433 +405,359 @@ def plot_elbow_scores(cluster_range, inertia_scores, outfile_path="elbow_method.
     plt.grid(True)
     plt.savefig(outfile_path + 'elbow_plot', dpi=300)
     plt.close()
-
     return optimal_k
 
-#Circos plots
+
+# Circos plots
 def get_Circos_coordinates(residue, gcircle):
-    """helper function for creating coordinates for arc sizes in Circos graph
+    """
+    Create chord endpoints anchored at the middle of a residue arc.
 
     Parameters
     ----------
-    residue:int,default=None
-        A residue index from which to create the current arc (in general you will be iterating
-        through residue indexes when using this method)
+    residue : str or int
+        Residue arc identifier present in `gcircle`. If int, it will be looked
+        up as a string (e.g., `'42'`).
 
-    gcirlce:py.Gcircle,default=py.Gcircle(figsize=(6,6))
-        A Pycircos Gcricle object. By default we use one with a figsize of (6,6).
-
-    
-
-    Return a 4-element tuple telling PyCircos chord_plot()
-    to start in the middle of the arc with a radial anchor of 550.
-
-
+    gcircle : py.Gcircle
+        A PyCircos `Gcircle` object that already contains arcs.
 
     Returns
     -------
-    tuple:coordinates:defualt=(residue, mid_position, mid_position, raxis_position)
-        A four member tuple consisting of the positioning needed to create an arc.
-
-
+    tuple
+        A 4-tuple `(arc_id, start_pos, end_pos, radial)` suitable for
+        `Gcircle.chord_plot(...)`, where start and end positions are the arc
+        midpoint and the radial anchor is 550.
 
     Notes
     -----
-
-
-
+    Assumes the arc exists in `gcircle._garc_dict`. This is a convenience
+    wrapper to place chords at arc midpoints for a tidy symmetric look.
 
     Examples
     --------
-
-
-    
+    >>> arc = get_Circos_coordinates('45', circle)
+    >>> # later: circle.chord_plot(arc, other_arc, linewidth=1.5, facecolor='k')
     """
-    arc = gcircle._garc_dict[residue]
-    # The "size" is the arc length in PyCircos coordinates
-    mid_position = arc.size * 0.5  # center of the arc
-    # We'll anchor all chords at radial = 550
-    # (this can be changed if your arcs are drawn in a different radial band)
+    arc = gcircle._garc_dict[str(residue)]
+    mid_position = arc.size * 0.5
     raxis_position = 550
     return (residue, mid_position, mid_position, raxis_position)
 
-def make_MDCircos_object(residue_indexes):
-    """Returns a PyCircos Gcircle scaled arcs
 
-    Returns a PyCircos Gcircle object whose arcs are automatically scaled
-    based on how many arcs (residues) there are. Also scales line widths,
-    so that very few arcs don't produce huge lines and many arcs don't
-    produce lines too thin to see.
+def make_MDCircos_object(residue_indexes):
+    """
+    Build a PyCircos `Gcircle` with arcs for the provided residues.
+
+    Arc sizing, label size, and figure size are coarsely adapted to the number
+    of residues to keep visuals legible for both small and large sets.
 
     Parameters
     ----------
-    residue_indexes : list
-        List of residue indices you want as arcs.
+    residue_indexes : list of (str or int)
+        Residue identifiers to add as arcs. Stored as strings internally.
 
     Returns
     -------
-    circle : py.Gcircle
-        A PyCircos object containing arcs scaled by the number of residues.
-    """
+    py.Gcircle
+        A `Gcircle` with arcs added and `set_garcs()` already called.
 
+    Notes
+    -----
+    For small sets (<= 50 residues) a compact 6×6 figure is used; for larger
+    sets a 10×10 figure with narrower labels and bigger arc sizes is used.
+    """
     if len(residue_indexes) <= 50:
         circle = py.Gcircle(figsize=(6, 6))
         plt.subplots_adjust(left=0.01, right=0.99, bottom=0.01, top=0.99)
 
-        # Add each arc
         for index in residue_indexes:
             circle.add_garc(
                 py.Garc(
                     arc_id=str(index),
-                    facecolor='#FFFFFF',   
-                    edgecolor='#000000',   
+                    facecolor='#FFFFFF',
+                    edgecolor='#000000',
                     label=str(index),
                     label_visible=True,
                     labelposition=40,
                     labelsize=6,
-                    size=10,        
-                    interspace=0,          
-                    linewidth=.1          
+                    size=10,
+                    interspace=0,
+                    linewidth=.1
                 )
             )
-
         circle.set_garcs()
 
-
-    if len(residue_indexes) >50:
+    if len(residue_indexes) > 50:
         circle = py.Gcircle(figsize=(10, 10))
         plt.subplots_adjust(left=0.01, right=0.99, bottom=0.01, top=0.99)
 
-        # Add each arc
         for index in residue_indexes:
             circle.add_garc(
                 py.Garc(
                     arc_id=str(index),
-                    facecolor='#FFFFFF',   # White arcs
-                    edgecolor='#000000',   # Black outline
+                    facecolor='#FFFFFF',
+                    edgecolor='#000000',
                     label=str(index),
                     label_visible=True,
                     labelposition=30,
                     labelsize=2,
-                    size=100,         # scaled by number of arcs
-                    interspace=4,          # small gap
-                    linewidth=.1           # scaled line thickness
+                    size=100,
+                    interspace=4,
+                    linewidth=.1
                 )
             )
 
     circle.set_garcs()
     return circle
 
-def mdcircos_graph(empty_circle, residue_dict, savepath=os.getcwd()+'mdcircos_graph', scale_factor=5,colormap=cm.magma_r):
-    ''' creates and saves a mdcircos graph to a desired output directory
+
+def mdcircos_graph(empty_circle, residue_dict, savepath=os.getcwd()+'mdcircos_graph',
+                   scale_factor=5, colormap=cm.magma_r):
+    """
+    Draw chords on a PyCircos circle from pairwise weights and save images.
+
+    Creates a chord diagram on `empty_circle` using `residue_dict` where keys
+    are residue pair strings ``'i-j'`` and values are magnitudes (signed allowed).
+    Saves the main diagram as ``savepath + '.png'`` and a separate colorbar image
+    as ``savepath + '_colorbar.png'``.
 
     Parameters
     ----------
-    Residue_indexes:list, shape=(n_residues)
-        A list of residue indexes pertaining to the residues you would like to use as parts of the circle
+    empty_circle : py.Gcircle
+        A `Gcircle` that already has arcs for all residues referenced by keys
+        in `residue_dict`.
 
-    Residue_dict:dict,format:dict['residue']=float(value)
-        A dictionary where keys are residue indexes (as strings) and values are floats representing the corresponding 
-        edge weights in the adjacency matrix (or another method) used for mapping.
+    residue_dict : dict[str, float]
+        Mapping from pair key ``'i-j'`` to a numeric magnitude (used for both
+        chord color and line width after normalization).
 
-    savepath:str(),default=os.getcwd()+'mdcircos_graph'
-        Absolute path to the location and name of the file you would like to save the file. Default is mdcircos_graph in the 
-        working directory
+    savepath : str, default=os.getcwd()+'mdcircos_graph'
+        Output *prefix* for image files.
 
-    Residue_dict:dict,dict['residue']=float(value)
-        A dictionary containing mappings from specific residue indexes *as strings* to their respective edge weights in whatever adjacency matrix
-        (or other method) is being used as the basis for mapping.
-    
-    scale_values:bool,default=False
-        A boolean argument meant to give the user the option of using a gradient color map in order to visualize stronger interactions
+    scale_factor : float, default=5
+        Multiplier for the normalized chord linewidths.
+
+    colormap : str or matplotlib.colors.Colormap, default=cm.magma_r
+        Colormap used for chord colors and the separate colorbar.
 
     Returns
     -------
     None
-        Strictly a graphing function the methods can be called individually if youd like to tamper with the
-        Circos object further
-
+        Saves figure(s) to disk and closes the colorbar figure.
 
     Notes
     -----
-    This is built as basically a wrapper for another python package so it is a little finicky in its implementation. In theory it should work fine
-    with the other two functions and really only needs to be specific in the way that its taking the inputs for.
-    
-    An important note is that the scale is saved as a seperate colorbar and the values are normalized by min max because it takes
-    generally as input the weightings which happen to be too small to really visualize well typically.
+    - Colors are min-max normalized over the raw (signed) values; widths use
+      min-max over absolute values for aesthetics.
+    - Pair keys are split on the first '-' to look up per-residue arc anchors.
 
-    
     Examples
     --------
-
-    '''
-   
+    >>> circle = make_MDCircos_object(['10','20','30'])
+    >>> weights = {'10-20': 0.4, '20-30': -0.2}
+    >>> mdcircos_graph(circle, weights, savepath='/tmp/example')
+    """
     import matplotlib.pyplot as plt
     from matplotlib import cm
     from matplotlib.colors import Normalize
     import numpy as np
 
-
-    # Normalize the colors based on the values provided 
+    # Normalize the colors based on the values provided
     vals = list(residue_dict.values())
     vmin, vmax = min(vals), max(vals)
     color_norm = Normalize(vmin=vmin, vmax=vmax)
     cmap = colormap if colormap is not None else cm.plasma
     hex_color_map = {k: cmap(color_norm(v)) for k, v in residue_dict.items()}
 
-    # Width normalization on the absolute values via min–max (makes plot aesthetically closer to raw
-    # values it is still suggested to use outputted tables for any actual raw analysis of values)
+    # Width normalization on the absolute values via min–max
     abs_vals = [abs(v) for v in vals if v != 0]
     min_abs, max_abs = min(abs_vals), max(abs_vals)
-
-    # avoid division by zero if all values are the same magnitude
     denom = max_abs - min_abs if max_abs != min_abs else 1.0
 
-    width_norm = {
-        k: (abs(v) - min_abs) / denom
-        for k, v in residue_dict.items()
-    }
+    width_norm = {k: (abs(v) - min_abs) / denom for k, v in residue_dict.items()}
 
-    # 3) Plot chords
+    # Draw chords
     for key, value in residue_dict.items():
         if value == 0:
             continue
-        
         res1, res2 = key.split('-')
         arc1 = get_Circos_coordinates(res1, empty_circle)
         arc2 = get_Circos_coordinates(res2, empty_circle)
         color = hex_color_map[key]
-
         lw = width_norm[key] * scale_factor
-        empty_circle.chord_plot(arc1, arc2,
-                                linewidth=lw,
-                                facecolor=color,
-                                edgecolor=color)
+        empty_circle.chord_plot(arc1, arc2, linewidth=lw, facecolor=color, edgecolor=color)
 
-    empty_circle.figure.savefig(savepath + ".png",
-                                dpi=300, bbox_inches="tight")
+    empty_circle.figure.savefig(savepath + ".png", dpi=300, bbox_inches="tight")
 
-    # 4) Separate colorbar (using the original signed range)
+    # Separate colorbar
     fig_cb, ax_cb = plt.subplots(figsize=(1.5, 4))
     sm = cm.ScalarMappable(cmap=cmap, norm=color_norm)
     sm.set_array([])
-
     cbar = plt.colorbar(sm, cax=ax_cb)
     ticks = np.linspace(vmin, vmax, num=6)
     cbar.set_ticks(ticks)
     cbar.set_ticklabels([f"{t:.2f}" for t in ticks])
     cbar.set_label("Directional Difference")
-
-    fig_cb.savefig(savepath + "_colorbar.png",
-                dpi=300, bbox_inches="tight")
-    
+    fig_cb.savefig(savepath + "_colorbar.png", dpi=300, bbox_inches="tight")
     plt.close(fig_cb)
 
+
 def extract_properties_from_weightsdf(pca_table):
-    '''
+    """
     Parse a Systems Analysis weights table into residue IDs and per-PC weight mappings.
 
     Parameters
     ----------
     pca_table : pandas.DataFrame
-        Table containing, at minimum, the following columns:
-          - 'Comparisons' : str
-                Pairwise residue identifiers in the form "i-j" (e.g., "12-57").
-                Whitespace around tokens is allowed and will be stripped.
-          - 'PC1_magnitude' : float
-                Magnitude (e.g., absolute eigenvector coefficient/weight) for PC1
-                associated with each residue pair in 'Comparisons'.
-          - 'PC2_magnitude' : float
-                Magnitude for PC2 associated with each residue pair.
+        Must contain at least:
+        - 'Comparisons' : str, residue pair keys like ``'i-j'``.
+        - 'PC1_magnitude' : float
+        - 'PC2_magnitude' : float
 
     Returns
     -------
     residues : list of str
-        Unique residue indices extracted from 'Comparisons', returned as strings.
-        Order follows first appearance in the table (not sorted), which is suitable
-        for constructing PyCircos arcs via `make_MDCircos_object`.
+        Unique residue IDs encountered in 'Comparisons', in first-appearance order.
 
     PC1_weight_dict : dict[str, float]
-        Mapping from the original pair key in 'Comparisons' (e.g., "12-57") to its
-        PC1 magnitude.
+        Mapping ``'i-j'`` -> PC1 magnitude.
 
     PC2_weight_dict : dict[str, float]
-        Mapping from the original pair key in 'Comparisons' to its PC2 magnitude.
+        Mapping ``'i-j'`` -> PC2 magnitude.
 
     Notes
     -----
-    - Residue tokens are obtained by splitting each 'Comparisons' entry on the first
-      '-' and stacking the two sides; extra whitespace is stripped and NaNs dropped.
-    - Residue IDs are coerced to strings to match PyCircos arc IDs.
-    - Any non-numeric or missing magnitudes in the input will propagate as-is
-      (e.g., NaN) in the returned dictionaries.
-    - This function does not enforce symmetry or de-duplicate inverse keys
-      (e.g., "12-57" vs "57-12"); it preserves the keys exactly as provided.
-
-    Examples
-    --------
-   
-    '''
+    Keys are preserved exactly; inverse pairs (``'i-j'`` vs ``'j-i'``) are not merged.
+    """
     comps = pca_table['Comparisons'].astype(str)
-
-    # split stack and clean
     sides = comps.str.split('-', n=1, expand=True)
-    residues = (sides.stack()
-                      .str.strip()
-                      .dropna()
-                      .unique())
-
-    # arc ids are strings
+    residues = (sides.stack().str.strip().dropna().unique())
     residues = [str(x) for x in residues]
-
     PC1_weight_dict = pca_table.set_index('Comparisons')['PC1_magnitude'].to_dict()
     PC2_weight_dict = pca_table.set_index('Comparisons')['PC2_magnitude'].to_dict()
     return residues, PC1_weight_dict, PC2_weight_dict
 
+
 def create_MDcircos_from_weightsdf(PCA_ranked_weights, outfilepath=None):
-    '''
-    Processes a weights table to create MDcircos plots visualizing eigenvector
-    coefficient magnitudes for PC1 and PC2.
+    """
+    Create and save MD-circos diagrams for PC1 and PC2 magnitudes from a weights table.
 
     Parameters
     ----------
-    PCA_ranked_weights : pandas.DataFrame, default=None
-        Table produced by the Systems Analysis pipeline containing at least the
-        following columns:
-          - 'Comparisons' : str
-                Pairwise residue identifiers in the form "i-j" (e.g., "12-57").
-                Each row represents a chord between residues i and j.
-          - 'PC1_magnitude' : float
-                Magnitude (e.g., absolute eigenvector coefficient or weight)
-                associated with the pair for principal component 1.
-          - 'PC2_magnitude' : float
-                Magnitude associated with the pair for principal component 2.
-        Additional columns are ignored.
+    PCA_ranked_weights : pandas.DataFrame
+        Must include 'Comparisons', 'PC1_magnitude', and 'PC2_magnitude' columns.
 
     outfilepath : str or None, default=None
-        Path *prefix* for output files. If `None`, defaults to `os.getcwd()`.
-        The function appends the following stems (no separator is inserted):
-            - 'PC1_magnitudeviz'  (main figure and separate colorbar)
-            - 'PC2_magnitudeviz'  (main figure and separate colorbar)
-        For example, `outfilepath='/tmp/'` yields:
-            '/tmp/PC1_magnitudeviz.png', '/tmp/PC1_magnitudeviz_colorbar.png',
-            '/tmp/PC2_magnitudeviz.png', '/tmp/PC2_magnitudeviz_colorbar.png'.
+        Output *prefix* directory/path. If None, uses `os.getcwd()`. The function
+        appends the stems:
+            - 'PC1_magnitudeviz'
+            - 'PC2_magnitudeviz'
+        before adding file extensions.
 
     Returns
     -------
     None
-        Saves MDcircos figures (and their colorbars) to disk; no value returned.
+        Saves the figures and colorbars to disk.
 
     Notes
     -----
-    - Residue indices are extracted from 'Comparisons' and used to build a
-      PyCircos `Gcircle` via `make_MDCircos_object`.
-    - Chords are drawn for each residue pair; line width and color intensity are
-      scaled by the corresponding magnitudes. Normalization and colorbar export
-      are handled in `mdcircos_graph`.
-    - Two independent visualizations are generated: one for PC1 magnitudes and
-      one for PC2 magnitudes, sharing the same residue arc layout.
+    Both PC1 and PC2 visualizations share the same arc layout constructed from
+    the residue IDs present in 'Comparisons'.
+    """
+    outfilepath = outfilepath if outfilepath is not None else os.getcwd()
+    res_indexes, PC1_magnitude_dict, PC2_magnitude_dict = extract_properties_from_weightsdf(PCA_ranked_weights)
+    pc1_circos_object = make_MDCircos_object(res_indexes)
+    pc2_circos_object = make_MDCircos_object(res_indexes)
+    mdcircos_graph(pc1_circos_object, PC1_magnitude_dict, outfilepath + 'PC1_magnitudeviz')
+    mdcircos_graph(pc2_circos_object, PC2_magnitude_dict, outfilepath + 'PC2_magnitudeviz')
+    return
+
+
+# Embedding-space visualizations
+def create_2d_color_mappings(labels=([80] * 20) + ([160] * 10),
+                             colors_list=('purple', 'orange', 'green', 'yellow', 'blue',
+                                          'red', 'pink', 'cyan', 'grey', 'brown'),
+                             clustering=True):
+    """
+    Produce a list of colors for 2-D scatter points given labels.
+
+    Parameters
+    ----------
+    labels : array-like of shape (n_samples,), default=([80]*20)+([160]*10)
+        Discrete labels per sample (e.g., cluster IDs).
+
+    colors_list : sequence of str, default=('purple','orange','green','yellow','blue','red','pink','cyan','grey','brown')
+        Palette to cycle through for unique labels.
+
+    clustering : bool, default=True
+        If True, assign discrete colors per unique label. If False, returns None
+        (use a continuous colormap downstream).
+
+    Returns
+    -------
+    list[str] or None
+        A color per sample if `clustering=True`; otherwise None.
 
     Examples
     --------
-    >>> # Minimal schema expected by the function:
-    >>> import pandas as pd
-    >>> df = pd.DataFrame({
-    ...     'Comparisons': ['10-25', '25-40', '10-40'],
-    ...     'PC1_magnitude': [0.12, 0.35, 0.08],
-    ...     'PC2_magnitude': [0.05, 0.22, 0.31],
-    ... })
-    >>> create_MDcircos_from_weightsdf(df, outfilepath='/tmp/')
-    >>> # Files written:
-    >>> # /tmp/PC1_magnitudeviz.png
-    >>> # /tmp/PC1_magnitudeviz_colorbar.png
-    >>> # /tmp/PC2_magnitudeviz.png
-    >>> # /tmp/PC2_magnitudeviz_colorbar.png
-    '''
-
-    outfilepath = outfilepath if outfilepath is not None else os.getcwd()
-
-    res_indexes,PC1_magnitude_dict,PC2_magnitude_dict = extract_properties_from_weightsdf(PCA_ranked_weights)
-    pc1_circos_object=make_MDCircos_object(res_indexes)
-    pc2_circos_object=make_MDCircos_object(res_indexes)
-    mdcircos_graph(pc1_circos_object,PC1_magnitude_dict,outfilepath+'PC1_magnitudeviz')
-    mdcircos_graph(pc2_circos_object,PC2_magnitude_dict,outfilepath+'PC2_magnitudeviz') 
-
-    return
-
-#Embeddingspace visualizations
-def create_2d_color_mappings(labels=([80]*20)+([160]*10), 
-                             colors_list=['purple', 'orange', 'green', 'yellow', 'blue', 'red', 'pink', 'cyan', 'grey', 'brown'], 
-                             clustering=True):
-    ''' 
-    Parameters
-    ----------
-    labels: list, shape (n_samples), default=([80]*20)+([160]*10)
-        A list of integers that help describe how you want to label each sample once they have been reduced to 2 dimensions.
-
-    colors_list: list-like, default=['purple', 'orange', 'green', 'yellow', 'blue', 'red', 'pink', 'cyan', 'grey', 'brown']
-        A list of colors that we can use to visualize all of our clusters.
-
-    clustering: bool, default=True
-        Whether to assign discrete colors for clusters (True) or use a heatmap-based visualization (False).
-    '''
-
-    if clustering == True:
-        # Create a dictionary mapping each label to a color
+    >>> labels = [0, 0, 1, 2, 2, 2]
+    >>> colors = create_2d_color_mappings(labels)
+    """
+    if clustering is True:
         label_dict = {}
         i = 0
         for label in labels:
             if label not in label_dict:
-                label_dict[label] = colors_list[i % len(colors_list)]  # Ensure cycling through colors if necessary
+                label_dict[label] = colors_list[i % len(colors_list)]
                 i += 1
         sample_color_mappings = [label_dict[i] for i in labels]
         return sample_color_mappings
+    # if clustering is False, intentionally return None so downstream uses a colormap
+    return None
 
-def visualize_reduction(embedding_coordinates, 
-                        color_mappings=None, 
-                        savepath=os.getcwd(), 
-                        title=None, 
+
+def visualize_reduction(embedding_coordinates,
+                        color_mappings=None,
+                        savepath=os.getcwd(),
+                        title=None,
                         cmap=None,
                         axis_one_label=None,
                         axis_two_label=None,
                         cbar_label=None,
                         gridvisible=False):
-    '''
-    Scatter plot of a 2-D embedding with optional color mapping and colorbar; saves the figure to disk.
+    """
+    Scatter plot of a 2-D embedding with optional color mapping and colorbar; saves the figure.
 
     Parameters
     ----------
-    embedding_coordinates : array-like, shape (n_samples, 2)
-        Two-column array of embedding coordinates (e.g., from PCA/UMAP). The first column is plotted
-        on the x-axis and the second on the y-axis.
+    embedding_coordinates : array-like of shape (n_samples, 2)
+        Two-column array of embedding coordinates (e.g., PCA/UMAP).
 
     color_mappings : array-like of shape (n_samples,) or None, default=None
-        Optional per-sample values used to color points. Can be categorical (e.g., cluster labels) or
-        numeric. **Behavior:** if provided and non-empty, a discrete colorbar is drawn via
-        `add_custom_colorbar`; if omitted or empty, the function defaults to a sample-index gradient
-        and draws a continuous colorbar via `add_continuous_colorbar`.
+        If provided and non-empty, treated as categorical and a discrete colorbar is drawn.
+        If None/empty, uses an index-based gradient with a continuous colorbar.
 
     savepath : str, default=os.getcwd()
-        Path **including filename** where the figure will be written, e.g. `'/tmp/embedding.png'`.
-        The function calls `plt.savefig(savepath, dpi=500)` directly and does not append an extension.
+        Full output path **including filename** (no extension added automatically).
 
-    title : str or None, default="Dimensional Reduction of Systems"
-        Figure title. If `None`, the default title above is used.
+    title : str or None, default='Dimensional Reduction of Systems'
+        Figure title.
 
-    cmap : matplotlib colormap or str, default=cm.magma_r
-        Colormap applied to the scatter points and colorbar.
+    cmap : str or matplotlib.colors.Colormap or None, default=cm.magma_r
+        Colormap for points and colorbar.
 
     axis_one_label : str or None, default='Embedding Space Axis 1'
-        Label for the x-axis.
+        X-axis label.
 
     axis_two_label : str or None, default='Embedding Space Axis 2'
-        Label for the y-axis.
+        Y-axis label.
 
     cbar_label : str or None, default='Value'
-        Label for the colorbar.
+        Colorbar label.
 
     gridvisible : bool, default=False
-        If True, shows a background grid on the axes.
+        Whether to show a background grid.
 
     Returns
     -------
@@ -767,39 +766,12 @@ def visualize_reduction(embedding_coordinates,
 
     Notes
     -----
-    - Axes spines are hidden and ticks are adjusted via `set_ticks` for wide ranges.
-    - Points are drawn with `alpha=0.6`. Figure size is 16x12 inches (dpi=300 for the canvas,
-      saved at dpi=500).
-    - When `color_mappings` is provided, the colorbar is treated as categorical (discrete bins).
-      If you prefer a continuous mapping of your own numeric values, either omit `color_mappings`
-      to use the default gradient or adapt the function to call `add_continuous_colorbar` on your
-      numeric array.
-
-    Examples
-    --------
-    # 1) Categorical coloring (e.g., cluster labels)
-    >>> X_2d = umap_result  # shape (n_samples, 2)
-    >>> labels = kmeans.labels_
-    >>> visualize_reduction(
-    ...     embedding_coordinates=X_2d,
-    ...     color_mappings=labels,
-    ...     savepath="embedding_clusters.png",
-    ...     title="UMAP by Cluster",
-    ...     cbar_label="Cluster",
-    ... )
-
-    # 2) Default continuous gradient (no labels provided)
-    >>> visualize_reduction(
-    ...     embedding_coordinates=X_2d,
-    ...     savepath="embedding_default_gradient.png",
-    ...     title="UMAP (Default Gradient)"
-    ... )
-    '''
-
-    axis_one_label=None if axis_one_label is not None else 'Embedding Space Axis 1'
-    axis_two_label=None if axis_two_label is not None else 'Embedding Space Axis 2'
-    title=title if title is not None else "Dimensional Reduction of Systems"
-    cbar_label=cbar_label if cbar_label is not None else "Value"
+    Axes spines are hidden; `set_ticks` is called to coarsen ticks on wide ranges.
+    """
+    axis_one_label = axis_one_label if axis_one_label is not None else 'Embedding Space Axis 1'
+    axis_two_label = axis_two_label if axis_two_label is not None else 'Embedding Space Axis 2'
+    title = title if title is not None else "Dimensional Reduction of Systems"
+    cbar_label = cbar_label if cbar_label is not None else "Value"
     cmap = cmap if cmap is not None else cm.magma_r
 
     labels_font_dict = {
@@ -813,21 +785,16 @@ def visualize_reduction(embedding_coordinates,
     fig = plt.figure(figsize=(16, 12), dpi=300)
     ax = plt.gca()
 
-
     if color_mappings is not None and len(color_mappings) > 0:
-        scatter=ax.scatter(embedding_coordinates[:, 0], embedding_coordinates[:, 1],
-                            c=color_mappings, cmap=cmap, alpha=0.6)
+        scatter = ax.scatter(embedding_coordinates[:, 0], embedding_coordinates[:, 1],
+                             c=color_mappings, cmap=cmap, alpha=0.6)
         add_custom_colorbar(scatter, color_mappings, cbar_label, plt.gca(), cmap=cmap)
- 
-    if color_mappings is None or len(color_mappings) == 0:
-        color_mappings = np.arange(embedding_coordinates.shape[0])
-        print("No color_mappings provided — defaulting to sample index gradient.")
-        scatter=ax.scatter(embedding_coordinates[:, 0], embedding_coordinates[:, 1],
-                            c=color_mappings, cmap=cmap, alpha=0.6)
-        add_continuous_colorbar(scatter, color_mappings, cbar_label, plt.gca(), cmap=cmap)
+    else:
+        values = np.arange(embedding_coordinates.shape[0])
+        scatter = ax.scatter(embedding_coordinates[:, 0], embedding_coordinates[:, 1],
+                             c=values, cmap=cmap, alpha=0.6)
+        add_continuous_colorbar(scatter, values, cbar_label, plt.gca(), cmap=cmap)
 
-
-    # Final touches
     for spine in ax.spines.values():
         spine.set_visible(False)
 
@@ -836,149 +803,131 @@ def visualize_reduction(embedding_coordinates,
     ax.set_title(title, fontdict=labels_font_dict)
     ax.set_xlabel(axis_one_label, fontdict=labels_font_dict)
     ax.set_ylabel(axis_two_label, fontdict=labels_font_dict)
-    ax.tick_params(axis='x', colors='black')  
+    ax.tick_params(axis='x', colors='black')
     ax.tick_params(axis='y', colors='black')
 
     plt.tight_layout()
     plt.savefig(savepath, dpi=500)
     plt.close()
-
     return
 
-#RMSD lineplots
-def rmsd_lineplots(pandasdf=None,title='RMSD plot',
-                xgroupvar='window',
-                ygroupvar='rmsd',
-                xlab="window",
-                ylab="rmsd",
-                groupingvar='cluster',
-                cmap=cm.inferno_r,
-                legendtitle='Cluster',
-                outfilepath=os.getcwd()):
-    '''
-    Creates a line plot of RMSD values across a specified grouping variable.
+
+# RMSD lineplots
+def rmsd_lineplots(pandasdf=None, title='RMSD plot',
+                   xgroupvar='window',
+                   ygroupvar='rmsd',
+                   xlab="window",
+                   ylab="rmsd",
+                   groupingvar='cluster',
+                   cmap=cm.inferno_r,
+                   legendtitle='Cluster',
+                   outfilepath=os.getcwd()):
+    """
+    Create a grouped line plot of RMSD (or similar metric) over a window variable.
 
     Parameters
     ----------
-    pandasdf : pandas.DataFrame, default=None
-        A DataFrame containing the values to be plotted. It should contain at least 
-        the columns specified by `xgroupvar`, `ygroupvar`, and `groupingvar`.
+    pandasdf : pandas.DataFrame or None, default=None
+        Data with at least the columns specified by `xgroupvar`, `ygroupvar`, and `groupingvar`.
 
     title : str, default='RMSD plot'
-        Title for the plot.
+        Plot title.
 
     xgroupvar : str, default='window'
-        Column name in `pandasdf` to be used as the x-axis variable.
+        Column used for the x-axis.
 
     ygroupvar : str, default='rmsd'
-        Column name in `pandasdf` to be used as the y-axis variable.
+        Column used for the y-axis.
 
     xlab : str, default='window'
-        Label for the x-axis.
+        X-axis label.
 
     ylab : str, default='rmsd'
-        Label for the y-axis.
+        Y-axis label.
 
     groupingvar : str, default='cluster'
-        Column name in `pandasdf` used to group lines (e.g., clusters or categories) and
-        Column name used by seaborn to color lines by category.
+        Column used to form separate lines (and legend entries).
 
-    palette : colormap or palette, default=cm.magma_r
-        Color mapping for different groups. Accepts matplotlib colormap or seaborn palette.
+    cmap : str or matplotlib.colors.Colormap, default=cm.inferno_r
+        Palette/colormap passed to seaborn for coloring by `groupingvar`.
 
     legendtitle : str, default='Cluster'
-        Title for the legend.
+        Legend title.
 
     outfilepath : str, default=os.getcwd()
-        Path prefix where the figure will be saved. The function appends '_rmsdlineplot' to this path.
+        Output *prefix* for the saved figure. The function appends ``'_rmsdlineplot'``.
 
     Returns
     -------
     None
-        Saves the line plot to disk and displays it.
+        Saves the line plot and closes the figure.
 
     Notes
     -----
-    This function uses seaborn's lineplot for grouped visualization of RMSD trajectories 
-    or similar metrics. It assumes the input DataFrame has one row per observation.
-
-    Examples
-    --------
-    '''
-
+    Thin wrapper around `seaborn.lineplot` with minimal styling.
+    """
     plt.figure(figsize=(10, 8))
     sns.lineplot(
         data=pandasdf,
         x=xgroupvar,
         y=ygroupvar,
-        hue=groupingvar,   # automatically treats as categorical
-        palette=cmap  # choose color palette
+        hue=groupingvar,
+        palette=cmap
     )
-    ax=plt.gca()
-
+    ax = plt.gca()
     for spine in ax.spines.values():
         spine.set_visible(False)
 
-    plt.legend(title=legendtitle, bbox_to_anchor=(1.0, 1), loc="upper left")    
+    plt.legend(title=legendtitle, bbox_to_anchor=(1.0, 1), loc="upper left")
     plt.xlabel(xlab)
     plt.ylabel(ylab)
-    plt.savefig(outfilepath+'_rmsdlineplot',dpi=800)
-    
+    plt.title(title)
+    plt.savefig(outfilepath + '_rmsdlineplot', dpi=800)
     plt.close()
     return
 
 
-#Contour plots 
+# Contour plots
 def contour_embedding_space(outfile_path, embeddingspace_coordinates, levels=10, thresh=0, bw_adjust=.5,
-                             title=None, xlabel=None, ylabel=None,gridvisible=False):
-    '''Plots a contour map of embedding space coordinates.
+                            title=None, xlabel=None, ylabel=None, gridvisible=False):
+    """
+    Plot a density contour map over 2-D embedding coordinates and save to disk.
 
     Parameters
     ----------
     outfile_path : str or None
-        Path to save the output plot. If None, defaults to the current working directory.
+        Output path (file name). If None, uses current working directory.
 
-    embeddingspace_coordinates : array-like, shape = (n_samples, 2)
-        The coordinates of your samples in the embedding space created by either UMAP or PCA.
-        This function assumes a two-dimensional representation for visualization purposes.
-        A Gaussian KDE (via Seaborn) is used to estimate the density.
+    embeddingspace_coordinates : array-like of shape (n_samples, 2)
+        The 2-D embedding coordinates (e.g., PCA/UMAP).
 
-    levels : int, default = 10
-        Number of contour levels to draw.
+    levels : int, default=10
+        Number of contour levels.
 
-    thresh : float, default = 0
-        Only plot density regions where the estimated value is greater than this threshold.
+    thresh : float, default=0
+        Only draw contours where estimated density is greater than this threshold.
 
-    bw_adjust : float, default = 0.5
-        Bandwidth adjustment factor for the KDE. Lower values give finer detail, higher values
-        give smoother estimates.
+    bw_adjust : float, default=0.5
+        Bandwidth adjustment factor for KDE.
 
-    title : str, default = None
-        Optional title for the plot.
+    title : str or None, default=None
+        Plot title.
 
-    xlabel : str, default = None
-        Optional label for the x-axis.
+    xlabel, ylabel : str or None, default=None
+        Axis labels.
 
-    ylabel : str, default = None
-        Optional label for the y-axis.
+    gridvisible : bool, default=False
+        Whether to show the background grid.
 
     Returns
     -------
     None
-        Saves the contour plot to the specified path.
+        Saves the contour plot and closes the figure.
 
     Notes
     -----
-    This function wraps `sns.kdeplot` for quick integration into analysis workflows.
-    For more customized control over contour appearance, call `sns.kdeplot` directly
-    on the reduced coordinates.
-
-    Examples
-    --------
-    contour_embedding_space("embedding_contour.png", X_pca, title="Embedding Space",
-                            xlabel="PC1", ylabel="PC2")
-    '''
-
+    Convenience wrapper over `sns.kdeplot` with filled contours and colorbar.
+    """
     outfile_path = outfile_path if outfile_path is not None else os.getcwd()
     gridvisible = gridvisible if gridvisible is not None else False
 
@@ -994,7 +943,6 @@ def contour_embedding_space(outfile_path, embeddingspace_coordinates, levels=10,
     )
 
     ax = plt.gca()
-    
     for spine in ax.spines.values():
         spine.set_visible(False)
 
@@ -1008,13 +956,5 @@ def contour_embedding_space(outfile_path, embeddingspace_coordinates, levels=10,
     plt.grid(visible=gridvisible)
     plt.savefig(outfile_path, dpi=800)
     plt.close()
-
     return
 
-
-if __name__ == "__main__":
-    frame_list=((([80] * 20) + ([160] * 10)) * 2)
-    print('running just the visualization module')
-    fake_labels=[1]*3200+[2]*3200
-    print(fake_labels)
-    replicatemap_from_labels(fake_labels,frame_list)

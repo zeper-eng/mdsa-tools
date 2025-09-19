@@ -18,7 +18,7 @@ analysis of molecular dynamics data.
       **Clustering and Dim-Red Examples**
 
       ^^^
-      .. image:: /resources/analysis_pipeline.png
+      .. image:: ../resources/analysis_pipeline.png
          :alt: Example of clustering analysis
          :width: 100%
          :align: center
@@ -32,7 +32,7 @@ analysis of molecular dynamics data.
       **Circos Example**
 
       ^^^
-      .. image:: /resources/circos_example_Medium.png
+      .. image:: ../resources/Circos_example_Medium.jpeg
          :alt: Circos example visualization
          :width: 100%
          :align: center
@@ -46,7 +46,7 @@ analysis of molecular dynamics data.
       **Data Generation Example**
 
       ^^^
-      .. image:: /resources/datagen.png
+      .. image:: ../resources/datagen.png
          :alt: Data generation workflow
          :width: 100%
          :align: center
@@ -60,7 +60,7 @@ analysis of molecular dynamics data.
       **Importer Example**
 
       ^^^
-      .. image:: /resources/Amberlogo.png
+      .. image:: ../resources/Amberlogo.png
          :alt: Import from cpptraj
          :width: 100%
          :align: center
@@ -74,7 +74,7 @@ analysis of molecular dynamics data.
       **Visualizing KMeans**
 
       ^^^
-      .. image:: /resources/kmeans_example.png
+      .. image:: ../resources/kmeans_example.png
          :alt: KMeans visualization
          :width: 100%
          :align: center
@@ -88,7 +88,7 @@ analysis of molecular dynamics data.
       **Example Systems**
 
       ^^^
-      .. image:: /resources/example_systems.png
+      .. image:: ../resources/example_systems.png
          :alt: Example systems
          :width: 100%
          :align: center
@@ -100,7 +100,7 @@ analysis of molecular dynamics data.
       **Filler 7**
 
       ^^^
-      .. image:: /resources/placeholder.png
+      .. image:: ../resources/placeholder.png
          :alt: Filler card 7
          :width: 100%
          :align: center
@@ -112,7 +112,7 @@ analysis of molecular dynamics data.
       **Filler 8**
 
       ^^^
-      .. image:: /resources/placeholder.png
+      .. image:: ../resources/placeholder.png
          :alt: Filler card 8
          :width: 100%
          :align: center
@@ -124,7 +124,7 @@ analysis of molecular dynamics data.
       **Filler 9**
 
       ^^^
-      .. image:: /resources/placeholder.png
+      .. image:: ../resources/placeholder.png
          :alt: Filler card 9
          :width: 100%
          :align: center
@@ -136,7 +136,7 @@ analysis of molecular dynamics data.
       **Filler 10**
 
       ^^^
-      .. image:: /resources/placeholder.png
+      .. image:: ../resources/placeholder.png
          :alt: Filler card 10
          :width: 100%
          :align: center
@@ -151,3 +151,4 @@ analysis of molecular dynamics data.
    examples/import_from_cpptraj
    examples/kmeans_visualization
    examples/example_systems
+   examples/hbond_replicate_maps

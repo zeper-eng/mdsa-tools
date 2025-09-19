@@ -103,15 +103,14 @@
              
   <section id="module-mdsa_tools.Viz">
 <span id="mdsa-tools-viz"></span><h1>mdsa_tools.Viz<a class="headerlink" href="#module-mdsa_tools.Viz" title="Link to this heading"></a></h1>
-<p>Mostly functions as a big wrapper for conveniently storing a lot of our analysis methods.</p>
-<p>Generally you can follow our pipeline but,the individual steps are pretty modular if your comfortable doing simple numpy transmutations etc.
-You could for instance use the clustering on various number of n_dimensions to reduce to, or pull H-bond values using 
-systems_analysis.extract_hbond_values() and use thoose in replicate maps instead of k-means results.</p>
-<p>Its a very small module so im not going to really include routine listings and such but, I will point to some relevant functions for the work
-being done by it.</p>
+<p>The Visualization module stores all of the different operations for the various graphs we create.</p>
+<p>It is not a larger object but a series of complimentary functions including helpers that make different color bars
+depending on values etc.</p>
+<p>For the most part we expect a max of around 256 bins but, if you have more bins in any labelling (colorcoding)of your graphs it auto switches
+to a continous colorbar and goes based on sample index.</p>
 <section id="see-also">
 <h2>See Also<a class="headerlink" href="#see-also" title="Link to this heading"></a></h2>
-<p>mdsa_tools.Viz.visualize_reduction : Plot PCA/UMAP embeddings.
+<p>mdsa_tools.Viz.Analysis : A lot of the results you will probably visualize
 mdsa_tools.Data_gen_hbond.create_system_representations : Build residue–residue H-bond adjacency matrices.
 numpy.linalg.svd : Linear algebra used under the hood.</p>
 </section>
@@ -119,209 +118,219 @@ numpy.linalg.svd : Linear algebra used under the hood.</p>
 <table class="autosummary longtable docutils align-default">
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="#mdsa_tools.Viz.add_continuous_colorbar" title="mdsa_tools.Viz.add_continuous_colorbar"><code class="xref py py-obj docutils literal notranslate"><span class="pre">add_continuous_colorbar</span></code></a>(scatter, labels[, ...])</p></td>
-<td><p>Continuous colorbar alternative to <cite>add_custom_colorbar</cite>.</p></td>
+<td><p>Add a continuous colorbar to a scatter plot.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#mdsa_tools.Viz.add_custom_colorbar" title="mdsa_tools.Viz.add_custom_colorbar"><code class="xref py py-obj docutils literal notranslate"><span class="pre">add_custom_colorbar</span></code></a>(scatter, labels[, ...])</p></td>
-<td><p></p></td>
+<td><p>Add a discrete (categorical) colorbar to a scatter plot.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#mdsa_tools.Viz.contour_embedding_space" title="mdsa_tools.Viz.contour_embedding_space"><code class="xref py py-obj docutils literal notranslate"><span class="pre">contour_embedding_space</span></code></a>(outfile_path, ...[, ...])</p></td>
-<td><p>Plots a contour map of embedding space coordinates.</p></td>
+<td><p>Plot a density contour map over 2-D embedding coordinates and save to disk.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#mdsa_tools.Viz.create_2d_color_mappings" title="mdsa_tools.Viz.create_2d_color_mappings"><code class="xref py py-obj docutils literal notranslate"><span class="pre">create_2d_color_mappings</span></code></a>([labels, ...])</p></td>
-<td><p></p></td>
+<td><p>Produce a list of colors for 2-D scatter points given labels.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#mdsa_tools.Viz.create_MDcircos_from_weightsdf" title="mdsa_tools.Viz.create_MDcircos_from_weightsdf"><code class="xref py py-obj docutils literal notranslate"><span class="pre">create_MDcircos_from_weightsdf</span></code></a>(...[, ...])</p></td>
-<td><p>Processes a weights table to create MDcircos plots visualizing eigenvector coefficient magnitudes for PC1 and PC2.</p></td>
+<td><p>Create and save MD-circos diagrams for PC1 and PC2 magnitudes from a weights table.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#mdsa_tools.Viz.extract_properties_from_weightsdf" title="mdsa_tools.Viz.extract_properties_from_weightsdf"><code class="xref py py-obj docutils literal notranslate"><span class="pre">extract_properties_from_weightsdf</span></code></a>(pca_table)</p></td>
 <td><p>Parse a Systems Analysis weights table into residue IDs and per-PC weight mappings.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#mdsa_tools.Viz.get_Circos_coordinates" title="mdsa_tools.Viz.get_Circos_coordinates"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_Circos_coordinates</span></code></a>(residue, gcircle)</p></td>
-<td><p>helper function for creating coordinates for arc sizes in Circos graph</p></td>
+<td><p>Create chord endpoints anchored at the middle of a residue arc.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#mdsa_tools.Viz.make_MDCircos_object" title="mdsa_tools.Viz.make_MDCircos_object"><code class="xref py py-obj docutils literal notranslate"><span class="pre">make_MDCircos_object</span></code></a>(residue_indexes)</p></td>
-<td><p>Returns a PyCircos Gcircle scaled arcs</p></td>
+<td><p>Build a PyCircos <cite>Gcircle</cite> with arcs for the provided residues.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#mdsa_tools.Viz.mdcircos_graph" title="mdsa_tools.Viz.mdcircos_graph"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mdcircos_graph</span></code></a>(empty_circle, residue_dict[, ...])</p></td>
-<td><p>creates and saves a mdcircos graph to a desired output directory</p></td>
+<td><p>Draw chords on a PyCircos circle from pairwise weights and save images.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#mdsa_tools.Viz.plot_elbow_scores" title="mdsa_tools.Viz.plot_elbow_scores"><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot_elbow_scores</span></code></a>(cluster_range, inertia_scores)</p></td>
-<td><p>Plot inertia over k and mark elbow via second derivative.</p></td>
+<td><p>Plot inertia over k, estimate the elbow via the second derivative, and save.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#mdsa_tools.Viz.plot_sillohette_scores" title="mdsa_tools.Viz.plot_sillohette_scores"><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot_sillohette_scores</span></code></a>(cluster_range, ...[, ...])</p></td>
-<td><p>Plot silhouette scores over k and mark the maximum.</p></td>
+<td><p>Plot silhouette scores over k, mark the maximum, and save.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#mdsa_tools.Viz.replicatemap_from_labels" title="mdsa_tools.Viz.replicatemap_from_labels"><code class="xref py py-obj docutils literal notranslate"><span class="pre">replicatemap_from_labels</span></code></a>(labels, frame_list)</p></td>
-<td><p>returns an array consisting of a re-formatted list of labels through which to view a set.</p></td>
+<td><p>Plot a &quot;replicate × frame&quot; map of discrete labels and save to disk.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#mdsa_tools.Viz.rmsd_lineplots" title="mdsa_tools.Viz.rmsd_lineplots"><code class="xref py py-obj docutils literal notranslate"><span class="pre">rmsd_lineplots</span></code></a>([pandasdf, title, xgroupvar, ...])</p></td>
-<td><p>Creates a line plot of RMSD values across a specified grouping variable.</p></td>
+<td><p>Create a grouped line plot of RMSD (or similar metric) over a window variable.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#mdsa_tools.Viz.set_ticks" title="mdsa_tools.Viz.set_ticks"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_ticks</span></code></a>([ax])</p></td>
-<td><p>Set x and y ticks for an axis.</p></td>
+<td><p>Set x and y ticks for an axis depending on range.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#mdsa_tools.Viz.visualize_reduction" title="mdsa_tools.Viz.visualize_reduction"><code class="xref py py-obj docutils literal notranslate"><span class="pre">visualize_reduction</span></code></a>(embedding_coordinates[, ...])</p></td>
-<td><p>Scatter plot of a 2-D embedding with optional color mapping and colorbar; saves the figure to disk.</p></td>
+<td><p>Scatter plot of a 2-D embedding with optional color mapping and colorbar; saves the figure.</p></td>
 </tr>
 </tbody>
 </table>
 <dl class="py function">
 <dt class="sig sig-object py" id="mdsa_tools.Viz.add_continuous_colorbar">
 <span class="sig-prename descclassname"><span class="pre">mdsa_tools.Viz.</span></span><span class="sig-name descname"><span class="pre">add_continuous_colorbar</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">scatter</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">labels</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cbar_label</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cmap</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">extend</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'neither'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">format</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mdsa_tools.Viz.add_continuous_colorbar" title="Link to this definition"></a></dt>
-<dd><p>Continuous colorbar alternative to <cite>add_custom_colorbar</cite>.
-Works with numeric and non-numeric labels.</p>
+<dd><p>Add a continuous colorbar to a scatter plot.</p>
+<p>Works for numeric labels directly; for non-numeric labels, maps unique
+values to an ordinal numeric sequence and normalizes over that range.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>scatter</strong><span class="classifier">matplotlib.collections.PathCollection</span></dt><dd><p>The scatter object returned by <cite>Axes.scatter(…)</cite>.</p>
+</dd>
+<dt><strong>labels</strong><span class="classifier">array-like or None</span></dt><dd><p>Values to color by. If None, uses an index-based gradient.</p>
+</dd>
+<dt><strong>cbar_label</strong><span class="classifier">str or None, default=None</span></dt><dd><p>Colorbar label.</p>
+</dd>
+<dt><strong>ax</strong><span class="classifier">matplotlib.axes.Axes or None, default=None</span></dt><dd><p>Target axes. Defaults to <cite>plt.gca()</cite>.</p>
+</dd>
+<dt><strong>cmap</strong><span class="classifier">str or matplotlib.colors.Colormap or None, default=None</span></dt><dd><p>Colormap name or object. Defaults to <cite>cm.inferno</cite>.</p>
+</dd>
+<dt><strong>extend</strong><span class="classifier">{‘neither’, ‘both’, ‘min’, ‘max’}, default=’neither’</span></dt><dd><p>Colorbar extension behavior.</p>
+</dd>
+<dt><strong>format</strong><span class="classifier">str or matplotlib.ticker.Formatter or None, default=None</span></dt><dd><p>Formatting for colorbar tick labels.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt>matplotlib.colorbar.Colorbar</dt><dd><p>The created colorbar.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<p>This function also applies the computed <cite>Normalize</cite> and <cite>Colormap</cite> to the
+provided scatter so the colorbar reflects the actual plotted data.</p>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="mdsa_tools.Viz.add_custom_colorbar">
 <span class="sig-prename descclassname"><span class="pre">mdsa_tools.Viz.</span></span><span class="sig-name descname"><span class="pre">add_custom_colorbar</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">scatter</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">labels</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cbar_label</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cmap</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mdsa_tools.Viz.add_custom_colorbar" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="mdsa_tools.Viz.contour_embedding_space">
-<span class="sig-prename descclassname"><span class="pre">mdsa_tools.Viz.</span></span><span class="sig-name descname"><span class="pre">contour_embedding_space</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">outfile_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">embeddingspace_coordinates</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">levels</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">thresh</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bw_adjust</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">title</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xlabel</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ylabel</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gridvisible</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mdsa_tools.Viz.contour_embedding_space" title="Link to this definition"></a></dt>
-<dd><p>Plots a contour map of embedding space coordinates.</p>
+<dd><p>Add a discrete (categorical) colorbar to a scatter plot.</p>
+<p>Maps the unique <cite>labels</cite> to integer IDs and shows a tick per category.
+For large cardinality (N &gt; 100) it sparsifies ticks every 10 to improve readability.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl class="simple">
-<dt><strong>outfile_path</strong><span class="classifier">str or None</span></dt><dd><p>Path to save the output plot. If None, defaults to the current working directory.</p>
+<dt><strong>scatter</strong><span class="classifier">matplotlib.collections.PathCollection</span></dt><dd><p>The scatter object returned by <cite>Axes.scatter(…)</cite>.</p>
 </dd>
-<dt><strong>embeddingspace_coordinates</strong><span class="classifier">array-like, shape = (n_samples, 2)</span></dt><dd><p>The coordinates of your samples in the embedding space created by either UMAP or PCA.
-This function assumes a two-dimensional representation for visualization purposes.
-A Gaussian KDE (via Seaborn) is used to estimate the density.</p>
+<dt><strong>labels</strong><span class="classifier">array-like</span></dt><dd><p>Categorical labels per point. Converted to strings for tick labels.</p>
 </dd>
-<dt><strong>levels</strong><span class="classifier">int, default = 10</span></dt><dd><p>Number of contour levels to draw.</p>
+<dt><strong>cbar_label</strong><span class="classifier">str or None, default=None</span></dt><dd><p>Colorbar label.</p>
 </dd>
-<dt><strong>thresh</strong><span class="classifier">float, default = 0</span></dt><dd><p>Only plot density regions where the estimated value is greater than this threshold.</p>
+<dt><strong>ax</strong><span class="classifier">matplotlib.axes.Axes or None, default=None</span></dt><dd><p>Target axes. Defaults to <cite>plt.gca()</cite>.</p>
 </dd>
-<dt><strong>bw_adjust</strong><span class="classifier">float, default = 0.5</span></dt><dd><p>Bandwidth adjustment factor for the KDE. Lower values give finer detail, higher values
-give smoother estimates.</p>
-</dd>
-<dt><strong>title</strong><span class="classifier">str, default = None</span></dt><dd><p>Optional title for the plot.</p>
-</dd>
-<dt><strong>xlabel</strong><span class="classifier">str, default = None</span></dt><dd><p>Optional label for the x-axis.</p>
-</dd>
-<dt><strong>ylabel</strong><span class="classifier">str, default = None</span></dt><dd><p>Optional label for the y-axis.</p>
+<dt><strong>cmap</strong><span class="classifier">str or matplotlib.colors.Colormap or None, default=None</span></dt><dd><p>Colormap name or object. Defaults to <cite>cm.inferno</cite>.</p>
 </dd>
 </dl>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><dl class="simple">
-<dt>None</dt><dd><p>Saves the contour plot to the specified path.</p>
+<dt>matplotlib.colorbar.Colorbar</dt><dd><p>The created colorbar.</p>
 </dd>
 </dl>
 </dd>
 </dl>
 <p class="rubric">Notes</p>
-<p>This function wraps <cite>sns.kdeplot</cite> for quick integration into analysis workflows.
-For more customized control over contour appearance, call <cite>sns.kdeplot</cite> directly
-on the reduced coordinates.</p>
-<p class="rubric">Examples</p>
-<dl class="simple">
-<dt>contour_embedding_space(“embedding_contour.png”, X_pca, title=”Embedding Space”,</dt><dd><p>xlabel=”PC1”, ylabel=”PC2”)</p>
+<p>Sets the scatter’s <cite>norm</cite> to a <cite>BoundaryNorm</cite> over integer bins matching
+the number of unique categories so colors align with discrete tick marks.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="mdsa_tools.Viz.contour_embedding_space">
+<span class="sig-prename descclassname"><span class="pre">mdsa_tools.Viz.</span></span><span class="sig-name descname"><span class="pre">contour_embedding_space</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">outfile_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">embeddingspace_coordinates</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">levels</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">thresh</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bw_adjust</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">title</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xlabel</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ylabel</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gridvisible</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mdsa_tools.Viz.contour_embedding_space" title="Link to this definition"></a></dt>
+<dd><p>Plot a density contour map over 2-D embedding coordinates and save to disk.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>outfile_path</strong><span class="classifier">str or None</span></dt><dd><p>Output path (file name). If None, uses current working directory.</p>
+</dd>
+<dt><strong>embeddingspace_coordinates</strong><span class="classifier">array-like of shape (n_samples, 2)</span></dt><dd><p>The 2-D embedding coordinates (e.g., PCA/UMAP).</p>
+</dd>
+<dt><strong>levels</strong><span class="classifier">int, default=10</span></dt><dd><p>Number of contour levels.</p>
+</dd>
+<dt><strong>thresh</strong><span class="classifier">float, default=0</span></dt><dd><p>Only draw contours where estimated density is greater than this threshold.</p>
+</dd>
+<dt><strong>bw_adjust</strong><span class="classifier">float, default=0.5</span></dt><dd><p>Bandwidth adjustment factor for KDE.</p>
+</dd>
+<dt><strong>title</strong><span class="classifier">str or None, default=None</span></dt><dd><p>Plot title.</p>
+</dd>
+<dt><strong>xlabel, ylabel</strong><span class="classifier">str or None, default=None</span></dt><dd><p>Axis labels.</p>
+</dd>
+<dt><strong>gridvisible</strong><span class="classifier">bool, default=False</span></dt><dd><p>Whether to show the background grid.</p>
 </dd>
 </dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt>None</dt><dd><p>Saves the contour plot and closes the figure.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<p>Convenience wrapper over <cite>sns.kdeplot</cite> with filled contours and colorbar.</p>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="mdsa_tools.Viz.create_2d_color_mappings">
-<span class="sig-prename descclassname"><span class="pre">mdsa_tools.Viz.</span></span><span class="sig-name descname"><span class="pre">create_2d_color_mappings</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">labels</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[80,</span> <span class="pre">80,</span> <span class="pre">80,</span> <span class="pre">80,</span> <span class="pre">80,</span> <span class="pre">80,</span> <span class="pre">80,</span> <span class="pre">80,</span> <span class="pre">80,</span> <span class="pre">80,</span> <span class="pre">80,</span> <span class="pre">80,</span> <span class="pre">80,</span> <span class="pre">80,</span> <span class="pre">80,</span> <span class="pre">80,</span> <span class="pre">80,</span> <span class="pre">80,</span> <span class="pre">80,</span> <span class="pre">80,</span> <span class="pre">160,</span> <span class="pre">160,</span> <span class="pre">160,</span> <span class="pre">160,</span> <span class="pre">160,</span> <span class="pre">160,</span> <span class="pre">160,</span> <span class="pre">160,</span> <span class="pre">160,</span> <span class="pre">160]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">colors_list</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">['purple',</span> <span class="pre">'orange',</span> <span class="pre">'green',</span> <span class="pre">'yellow',</span> <span class="pre">'blue',</span> <span class="pre">'red',</span> <span class="pre">'pink',</span> <span class="pre">'cyan',</span> <span class="pre">'grey',</span> <span class="pre">'brown']</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">clustering</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mdsa_tools.Viz.create_2d_color_mappings" title="Link to this definition"></a></dt>
-<dd><dl class="field-list simple">
+<span class="sig-prename descclassname"><span class="pre">mdsa_tools.Viz.</span></span><span class="sig-name descname"><span class="pre">create_2d_color_mappings</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">labels</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[80,</span> <span class="pre">80,</span> <span class="pre">80,</span> <span class="pre">80,</span> <span class="pre">80,</span> <span class="pre">80,</span> <span class="pre">80,</span> <span class="pre">80,</span> <span class="pre">80,</span> <span class="pre">80,</span> <span class="pre">80,</span> <span class="pre">80,</span> <span class="pre">80,</span> <span class="pre">80,</span> <span class="pre">80,</span> <span class="pre">80,</span> <span class="pre">80,</span> <span class="pre">80,</span> <span class="pre">80,</span> <span class="pre">80,</span> <span class="pre">160,</span> <span class="pre">160,</span> <span class="pre">160,</span> <span class="pre">160,</span> <span class="pre">160,</span> <span class="pre">160,</span> <span class="pre">160,</span> <span class="pre">160,</span> <span class="pre">160,</span> <span class="pre">160]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">colors_list</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">('purple',</span> <span class="pre">'orange',</span> <span class="pre">'green',</span> <span class="pre">'yellow',</span> <span class="pre">'blue',</span> <span class="pre">'red',</span> <span class="pre">'pink',</span> <span class="pre">'cyan',</span> <span class="pre">'grey',</span> <span class="pre">'brown')</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">clustering</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mdsa_tools.Viz.create_2d_color_mappings" title="Link to this definition"></a></dt>
+<dd><p>Produce a list of colors for 2-D scatter points given labels.</p>
+<dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl class="simple">
-<dt><strong>labels: list, shape (n_samples), default=([80]*20)+([160]*10)</strong></dt><dd><p>A list of integers that help describe how you want to label each sample once they have been reduced to 2 dimensions.</p>
+<dt><strong>labels</strong><span class="classifier">array-like of shape (n_samples,), default=([80]*20)+([160]*10)</span></dt><dd><p>Discrete labels per sample (e.g., cluster IDs).</p>
 </dd>
-<dt><strong>colors_list: list-like, default=[‘purple’, ‘orange’, ‘green’, ‘yellow’, ‘blue’, ‘red’, ‘pink’, ‘cyan’, ‘grey’, ‘brown’]</strong></dt><dd><p>A list of colors that we can use to visualize all of our clusters.</p>
+<dt><strong>colors_list</strong><span class="classifier">sequence of str, default=(‘purple’,’orange’,’green’,’yellow’,’blue’,’red’,’pink’,’cyan’,’grey’,’brown’)</span></dt><dd><p>Palette to cycle through for unique labels.</p>
 </dd>
-<dt><strong>clustering: bool, default=True</strong></dt><dd><p>Whether to assign discrete colors for clusters (True) or use a heatmap-based visualization (False).</p>
+<dt><strong>clustering</strong><span class="classifier">bool, default=True</span></dt><dd><p>If True, assign discrete colors per unique label. If False, returns None
+(use a continuous colormap downstream).</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt>list[str] or None</dt><dd><p>A color per sample if <cite>clustering=True</cite>; otherwise None.</p>
 </dd>
 </dl>
 </dd>
 </dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">labels</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">colors</span> <span class="o">=</span> <span class="n">create_2d_color_mappings</span><span class="p">(</span><span class="n">labels</span><span class="p">)</span>
+</pre></div>
+</div>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="mdsa_tools.Viz.create_MDcircos_from_weightsdf">
 <span class="sig-prename descclassname"><span class="pre">mdsa_tools.Viz.</span></span><span class="sig-name descname"><span class="pre">create_MDcircos_from_weightsdf</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">PCA_ranked_weights</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">outfilepath</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mdsa_tools.Viz.create_MDcircos_from_weightsdf" title="Link to this definition"></a></dt>
-<dd><p>Processes a weights table to create MDcircos plots visualizing eigenvector
-coefficient magnitudes for PC1 and PC2.</p>
+<dd><p>Create and save MD-circos diagrams for PC1 and PC2 magnitudes from a weights table.</p>
 <dl class="field-list">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl>
-<dt><strong>PCA_ranked_weights</strong><span class="classifier">pandas.DataFrame, default=None</span></dt><dd><p>Table produced by the Systems Analysis pipeline containing at least the
-following columns:</p>
+<dt><strong>PCA_ranked_weights</strong><span class="classifier">pandas.DataFrame</span></dt><dd><p>Must include ‘Comparisons’, ‘PC1_magnitude’, and ‘PC2_magnitude’ columns.</p>
+</dd>
+<dt><strong>outfilepath</strong><span class="classifier">str or None, default=None</span></dt><dd><p>Output <em>prefix</em> directory/path. If None, uses <cite>os.getcwd()</cite>. The function
+appends the stems:</p>
 <blockquote>
 <div><ul class="simple">
-<li><dl class="simple">
-<dt>‘Comparisons’<span class="classifier">str</span></dt><dd><p>Pairwise residue identifiers in the form “i-j” (e.g., “12-57”).
-Each row represents a chord between residues i and j.</p>
-</dd>
-</dl>
-</li>
-<li><dl class="simple">
-<dt>‘PC1_magnitude’<span class="classifier">float</span></dt><dd><p>Magnitude (e.g., absolute eigenvector coefficient or weight)
-associated with the pair for principal component 1.</p>
-</dd>
-</dl>
-</li>
-<li><dl class="simple">
-<dt>‘PC2_magnitude’<span class="classifier">float</span></dt><dd><p>Magnitude associated with the pair for principal component 2.</p>
-</dd>
-</dl>
-</li>
+<li><p>‘PC1_magnitudeviz’</p></li>
+<li><p>‘PC2_magnitudeviz’</p></li>
 </ul>
 </div></blockquote>
-<p>Additional columns are ignored.</p>
-</dd>
-<dt><strong>outfilepath</strong><span class="classifier">str or None, default=None</span></dt><dd><p>Path <em>prefix</em> for output files. If <cite>None</cite>, defaults to <cite>os.getcwd()</cite>.
-The function appends the following stems (no separator is inserted):</p>
-<blockquote>
-<div><ul class="simple">
-<li><p>‘PC1_magnitudeviz’  (main figure and separate colorbar)</p></li>
-<li><p>‘PC2_magnitudeviz’  (main figure and separate colorbar)</p></li>
-</ul>
-</div></blockquote>
-<dl class="simple">
-<dt>For example, <cite>outfilepath=’/tmp/’</cite> yields:</dt><dd><p>‘/tmp/PC1_magnitudeviz.png’, ‘/tmp/PC1_magnitudeviz_colorbar.png’,
-‘/tmp/PC2_magnitudeviz.png’, ‘/tmp/PC2_magnitudeviz_colorbar.png’.</p>
-</dd>
-</dl>
+<p>before adding file extensions.</p>
 </dd>
 </dl>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><dl class="simple">
-<dt>None</dt><dd><p>Saves MDcircos figures (and their colorbars) to disk; no value returned.</p>
+<dt>None</dt><dd><p>Saves the figures and colorbars to disk.</p>
 </dd>
 </dl>
 </dd>
 </dl>
 <p class="rubric">Notes</p>
-<ul class="simple">
-<li><p>Residue indices are extracted from ‘Comparisons’ and used to build a
-PyCircos <cite>Gcircle</cite> via <cite>make_MDCircos_object</cite>.</p></li>
-<li><p>Chords are drawn for each residue pair; line width and color intensity are
-scaled by the corresponding magnitudes. Normalization and colorbar export
-are handled in <cite>mdcircos_graph</cite>.</p></li>
-<li><p>Two independent visualizations are generated: one for PC1 magnitudes and
-one for PC2 magnitudes, sharing the same residue arc layout.</p></li>
-</ul>
-<p class="rubric">Examples</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Minimal schema expected by the function:</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span>
-<span class="gp">... </span>    <span class="s1">&#39;Comparisons&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;10-25&#39;</span><span class="p">,</span> <span class="s1">&#39;25-40&#39;</span><span class="p">,</span> <span class="s1">&#39;10-40&#39;</span><span class="p">],</span>
-<span class="gp">... </span>    <span class="s1">&#39;PC1_magnitude&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mf">0.12</span><span class="p">,</span> <span class="mf">0.35</span><span class="p">,</span> <span class="mf">0.08</span><span class="p">],</span>
-<span class="gp">... </span>    <span class="s1">&#39;PC2_magnitude&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mf">0.05</span><span class="p">,</span> <span class="mf">0.22</span><span class="p">,</span> <span class="mf">0.31</span><span class="p">],</span>
-<span class="gp">... </span><span class="p">})</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">create_MDcircos_from_weightsdf</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">outfilepath</span><span class="o">=</span><span class="s1">&#39;/tmp/&#39;</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Files written:</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="c1"># /tmp/PC1_magnitudeviz.png</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="c1"># /tmp/PC1_magnitudeviz_colorbar.png</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="c1"># /tmp/PC2_magnitudeviz.png</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="c1"># /tmp/PC2_magnitudeviz_colorbar.png</span>
-</pre></div>
-</div>
+<p>Both PC1 and PC2 visualizations share the same arc layout constructed from
+the residue IDs present in ‘Comparisons’.</p>
 </dd></dl>
 
 <dl class="py function">
@@ -331,163 +340,153 @@ one for PC2 magnitudes, sharing the same residue arc layout.</p></li>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl class="simple">
-<dt><strong>pca_table</strong><span class="classifier">pandas.DataFrame</span></dt><dd><dl class="simple">
-<dt>Table containing, at minimum, the following columns:</dt><dd><ul class="simple">
-<li><dl class="simple">
-<dt>‘Comparisons’<span class="classifier">str</span></dt><dd><p>Pairwise residue identifiers in the form “i-j” (e.g., “12-57”).
-Whitespace around tokens is allowed and will be stripped.</p>
-</dd>
-</dl>
-</li>
-<li><dl class="simple">
-<dt>‘PC1_magnitude’<span class="classifier">float</span></dt><dd><p>Magnitude (e.g., absolute eigenvector coefficient/weight) for PC1
-associated with each residue pair in ‘Comparisons’.</p>
-</dd>
-</dl>
-</li>
-<li><dl class="simple">
-<dt>‘PC2_magnitude’<span class="classifier">float</span></dt><dd><p>Magnitude for PC2 associated with each residue pair.</p>
-</dd>
-</dl>
-</li>
-</ul>
-</dd>
-</dl>
+<dt><strong>pca_table</strong><span class="classifier">pandas.DataFrame</span></dt><dd><p>Must contain at least:
+- ‘Comparisons’ : str, residue pair keys like <code class="docutils literal notranslate"><span class="pre">'i-j'</span></code>.
+- ‘PC1_magnitude’ : float
+- ‘PC2_magnitude’ : float</p>
 </dd>
 </dl>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><dl class="simple">
-<dt><strong>residues</strong><span class="classifier">list of str</span></dt><dd><p>Unique residue indices extracted from ‘Comparisons’, returned as strings.
-Order follows first appearance in the table (not sorted), which is suitable
-for constructing PyCircos arcs via <cite>make_MDCircos_object</cite>.</p>
+<dt><strong>residues</strong><span class="classifier">list of str</span></dt><dd><p>Unique residue IDs encountered in ‘Comparisons’, in first-appearance order.</p>
 </dd>
-<dt><strong>PC1_weight_dict</strong><span class="classifier">dict[str, float]</span></dt><dd><p>Mapping from the original pair key in ‘Comparisons’ (e.g., “12-57”) to its
-PC1 magnitude.</p>
+<dt><strong>PC1_weight_dict</strong><span class="classifier">dict[str, float]</span></dt><dd><p>Mapping <code class="docutils literal notranslate"><span class="pre">'i-j'</span></code> -&gt; PC1 magnitude.</p>
 </dd>
-<dt><strong>PC2_weight_dict</strong><span class="classifier">dict[str, float]</span></dt><dd><p>Mapping from the original pair key in ‘Comparisons’ to its PC2 magnitude.</p>
+<dt><strong>PC2_weight_dict</strong><span class="classifier">dict[str, float]</span></dt><dd><p>Mapping <code class="docutils literal notranslate"><span class="pre">'i-j'</span></code> -&gt; PC2 magnitude.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<p>Keys are preserved exactly; inverse pairs (<code class="docutils literal notranslate"><span class="pre">'i-j'</span></code> vs <code class="docutils literal notranslate"><span class="pre">'j-i'</span></code>) are not merged.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="mdsa_tools.Viz.get_Circos_coordinates">
+<span class="sig-prename descclassname"><span class="pre">mdsa_tools.Viz.</span></span><span class="sig-name descname"><span class="pre">get_Circos_coordinates</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">residue</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gcircle</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mdsa_tools.Viz.get_Circos_coordinates" title="Link to this definition"></a></dt>
+<dd><p>Create chord endpoints anchored at the middle of a residue arc.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>residue</strong><span class="classifier">str or int</span></dt><dd><p>Residue arc identifier present in <cite>gcircle</cite>. If int, it will be looked
+up as a string (e.g., <cite>‘42’</cite>).</p>
+</dd>
+<dt><strong>gcircle</strong><span class="classifier">py.Gcircle</span></dt><dd><p>A PyCircos <cite>Gcircle</cite> object that already contains arcs.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt>tuple</dt><dd><p>A 4-tuple <cite>(arc_id, start_pos, end_pos, radial)</cite> suitable for
+<cite>Gcircle.chord_plot(…)</cite>, where start and end positions are the arc
+midpoint and the radial anchor is 550.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<p>Assumes the arc exists in <cite>gcircle._garc_dict</cite>. This is a convenience
+wrapper to place chords at arc midpoints for a tidy symmetric look.</p>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">arc</span> <span class="o">=</span> <span class="n">get_Circos_coordinates</span><span class="p">(</span><span class="s1">&#39;45&#39;</span><span class="p">,</span> <span class="n">circle</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># later: circle.chord_plot(arc, other_arc, linewidth=1.5, facecolor=&#39;k&#39;)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="mdsa_tools.Viz.make_MDCircos_object">
+<span class="sig-prename descclassname"><span class="pre">mdsa_tools.Viz.</span></span><span class="sig-name descname"><span class="pre">make_MDCircos_object</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">residue_indexes</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mdsa_tools.Viz.make_MDCircos_object" title="Link to this definition"></a></dt>
+<dd><p>Build a PyCircos <cite>Gcircle</cite> with arcs for the provided residues.</p>
+<p>Arc sizing, label size, and figure size are coarsely adapted to the number
+of residues to keep visuals legible for both small and large sets.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>residue_indexes</strong><span class="classifier">list of (str or int)</span></dt><dd><p>Residue identifiers to add as arcs. Stored as strings internally.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt>py.Gcircle</dt><dd><p>A <cite>Gcircle</cite> with arcs added and <cite>set_garcs()</cite> already called.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<p>For small sets (&lt;= 50 residues) a compact 6×6 figure is used; for larger
+sets a 10×10 figure with narrower labels and bigger arc sizes is used.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="mdsa_tools.Viz.mdcircos_graph">
+<span class="sig-prename descclassname"><span class="pre">mdsa_tools.Viz.</span></span><span class="sig-name descname"><span class="pre">mdcircos_graph</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">empty_circle</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">residue_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">savepath</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'/Users/luis/Desktop/workspacetwomdcircos_graph'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scale_factor</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">colormap</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">matplotlib.cm.magma_r</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mdsa_tools.Viz.mdcircos_graph" title="Link to this definition"></a></dt>
+<dd><p>Draw chords on a PyCircos circle from pairwise weights and save images.</p>
+<p>Creates a chord diagram on <cite>empty_circle</cite> using <cite>residue_dict</cite> where keys
+are residue pair strings <code class="docutils literal notranslate"><span class="pre">'i-j'</span></code> and values are magnitudes (signed allowed).
+Saves the main diagram as <code class="docutils literal notranslate"><span class="pre">savepath</span> <span class="pre">+</span> <span class="pre">'.png'</span></code> and a separate colorbar image
+as <code class="docutils literal notranslate"><span class="pre">savepath</span> <span class="pre">+</span> <span class="pre">'_colorbar.png'</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>empty_circle</strong><span class="classifier">py.Gcircle</span></dt><dd><p>A <cite>Gcircle</cite> that already has arcs for all residues referenced by keys
+in <cite>residue_dict</cite>.</p>
+</dd>
+<dt><strong>residue_dict</strong><span class="classifier">dict[str, float]</span></dt><dd><p>Mapping from pair key <code class="docutils literal notranslate"><span class="pre">'i-j'</span></code> to a numeric magnitude (used for both
+chord color and line width after normalization).</p>
+</dd>
+<dt><strong>savepath</strong><span class="classifier">str, default=os.getcwd()+’mdcircos_graph’</span></dt><dd><p>Output <em>prefix</em> for image files.</p>
+</dd>
+<dt><strong>scale_factor</strong><span class="classifier">float, default=5</span></dt><dd><p>Multiplier for the normalized chord linewidths.</p>
+</dd>
+<dt><strong>colormap</strong><span class="classifier">str or matplotlib.colors.Colormap, default=cm.magma_r</span></dt><dd><p>Colormap used for chord colors and the separate colorbar.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt>None</dt><dd><p>Saves figure(s) to disk and closes the colorbar figure.</p>
 </dd>
 </dl>
 </dd>
 </dl>
 <p class="rubric">Notes</p>
 <ul class="simple">
-<li><p>Residue tokens are obtained by splitting each ‘Comparisons’ entry on the first
-‘-’ and stacking the two sides; extra whitespace is stripped and NaNs dropped.</p></li>
-<li><p>Residue IDs are coerced to strings to match PyCircos arc IDs.</p></li>
-<li><p>Any non-numeric or missing magnitudes in the input will propagate as-is
-(e.g., NaN) in the returned dictionaries.</p></li>
-<li><p>This function does not enforce symmetry or de-duplicate inverse keys
-(e.g., “12-57” vs “57-12”); it preserves the keys exactly as provided.</p></li>
+<li><p>Colors are min-max normalized over the raw (signed) values; widths use
+min-max over absolute values for aesthetics.</p></li>
+<li><p>Pair keys are split on the first ‘-’ to look up per-residue arc anchors.</p></li>
 </ul>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="mdsa_tools.Viz.get_Circos_coordinates">
-<span class="sig-prename descclassname"><span class="pre">mdsa_tools.Viz.</span></span><span class="sig-name descname"><span class="pre">get_Circos_coordinates</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">residue</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gcircle</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mdsa_tools.Viz.get_Circos_coordinates" title="Link to this definition"></a></dt>
-<dd><p>helper function for creating coordinates for arc sizes in Circos graph</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><dl class="simple">
-<dt><strong>residue:int,default=None</strong></dt><dd><p>A residue index from which to create the current arc (in general you will be iterating
-through residue indexes when using this method)</p>
-</dd>
-<dt><strong>gcirlce:py.Gcircle,default=py.Gcircle(figsize=(6,6))</strong></dt><dd><p>A Pycircos Gcricle object. By default we use one with a figsize of (6,6).</p>
-</dd>
-<dt><strong>Return a 4-element tuple telling PyCircos chord_plot()</strong></dt><dd></dd>
-<dt><strong>to start in the middle of the arc with a radial anchor of 550.</strong></dt><dd></dd>
-</dl>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><dl class="simple">
-<dt>tuple:coordinates:defualt=(residue, mid_position, mid_position, raxis_position)</dt><dd><p>A four member tuple consisting of the positioning needed to create an arc.</p>
-</dd>
-</dl>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="mdsa_tools.Viz.make_MDCircos_object">
-<span class="sig-prename descclassname"><span class="pre">mdsa_tools.Viz.</span></span><span class="sig-name descname"><span class="pre">make_MDCircos_object</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">residue_indexes</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mdsa_tools.Viz.make_MDCircos_object" title="Link to this definition"></a></dt>
-<dd><p>Returns a PyCircos Gcircle scaled arcs</p>
-<p>Returns a PyCircos Gcircle object whose arcs are automatically scaled
-based on how many arcs (residues) there are. Also scales line widths,
-so that very few arcs don’t produce huge lines and many arcs don’t
-produce lines too thin to see.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><dl class="simple">
-<dt><strong>residue_indexes</strong><span class="classifier">list</span></dt><dd><p>List of residue indices you want as arcs.</p>
-</dd>
-</dl>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><dl class="simple">
-<dt><strong>circle</strong><span class="classifier">py.Gcircle</span></dt><dd><p>A PyCircos object containing arcs scaled by the number of residues.</p>
-</dd>
-</dl>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="mdsa_tools.Viz.mdcircos_graph">
-<span class="sig-prename descclassname"><span class="pre">mdsa_tools.Viz.</span></span><span class="sig-name descname"><span class="pre">mdcircos_graph</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">empty_circle</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">residue_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">savepath</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'/Users/luis/Desktop/workspacetwomdcircos_graph'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scale_factor</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">colormap</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">matplotlib.cm.magma_r</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mdsa_tools.Viz.mdcircos_graph" title="Link to this definition"></a></dt>
-<dd><p>creates and saves a mdcircos graph to a desired output directory</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><dl class="simple">
-<dt><strong>Residue_indexes:list, shape=(n_residues)</strong></dt><dd><p>A list of residue indexes pertaining to the residues you would like to use as parts of the circle</p>
-</dd>
-<dt><strong>Residue_dict:dict,format:dict[‘residue’]=float(value)</strong></dt><dd><p>A dictionary where keys are residue indexes (as strings) and values are floats representing the corresponding 
-edge weights in the adjacency matrix (or another method) used for mapping.</p>
-</dd>
-<dt><strong>savepath:str(),default=os.getcwd()+’mdcircos_graph’</strong></dt><dd><p>Absolute path to the location and name of the file you would like to save the file. Default is mdcircos_graph in the 
-working directory</p>
-</dd>
-<dt><strong>Residue_dict:dict,dict[‘residue’]=float(value)</strong></dt><dd><p>A dictionary containing mappings from specific residue indexes <em>as strings</em> to their respective edge weights in whatever adjacency matrix
-(or other method) is being used as the basis for mapping.</p>
-</dd>
-<dt><strong>scale_values:bool,default=False</strong></dt><dd><p>A boolean argument meant to give the user the option of using a gradient color map in order to visualize stronger interactions</p>
-</dd>
-</dl>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><dl class="simple">
-<dt>None</dt><dd><p>Strictly a graphing function the methods can be called individually if youd like to tamper with the
-Circos object further</p>
-</dd>
-</dl>
-</dd>
-</dl>
-<p class="rubric">Notes</p>
-<p>This is built as basically a wrapper for another python package so it is a little finicky in its implementation. In theory it should work fine
-with the other two functions and really only needs to be specific in the way that its taking the inputs for.</p>
-<p>An important note is that the scale is saved as a seperate colorbar and the values are normalized by min max because it takes
-generally as input the weightings which happen to be too small to really visualize well typically.</p>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">circle</span> <span class="o">=</span> <span class="n">make_MDCircos_object</span><span class="p">([</span><span class="s1">&#39;10&#39;</span><span class="p">,</span><span class="s1">&#39;20&#39;</span><span class="p">,</span><span class="s1">&#39;30&#39;</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">weights</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;10-20&#39;</span><span class="p">:</span> <span class="mf">0.4</span><span class="p">,</span> <span class="s1">&#39;20-30&#39;</span><span class="p">:</span> <span class="o">-</span><span class="mf">0.2</span><span class="p">}</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">mdcircos_graph</span><span class="p">(</span><span class="n">circle</span><span class="p">,</span> <span class="n">weights</span><span class="p">,</span> <span class="n">savepath</span><span class="o">=</span><span class="s1">&#39;/tmp/example&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="mdsa_tools.Viz.plot_elbow_scores">
 <span class="sig-prename descclassname"><span class="pre">mdsa_tools.Viz.</span></span><span class="sig-name descname"><span class="pre">plot_elbow_scores</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cluster_range</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inertia_scores</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">outfile_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'elbow_method.png'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">title</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xlabel</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ylabel</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mdsa_tools.Viz.plot_elbow_scores" title="Link to this definition"></a></dt>
-<dd><p>Plot inertia over k and mark elbow via second derivative.</p>
+<dd><p>Plot inertia over k, estimate the elbow via the second derivative, and save.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl class="simple">
-<dt><strong>cluster_range</strong><span class="classifier">array-like</span></dt><dd><p>k values evaluated.</p>
+<dt><strong>cluster_range</strong><span class="classifier">array-like</span></dt><dd><p>Candidate k values.</p>
 </dd>
-<dt><strong>inertia_scores</strong><span class="classifier">array-like</span></dt><dd><p>KMeans inertia per k.</p>
+<dt><strong>inertia_scores</strong><span class="classifier">array-like</span></dt><dd><p>KMeans inertia per k (same length/order as <cite>cluster_range</cite>).</p>
 </dd>
-<dt><strong>outfile_path</strong><span class="classifier">str, default=”elbow_method.png”</span></dt><dd><p>Path prefix where figure is saved (suffix ‘elbow_plot’ is appended).</p>
+<dt><strong>outfile_path</strong><span class="classifier">str, default=’elbow_method.png’</span></dt><dd><p>Path prefix or filename to save the figure. The code appends the suffix
+<code class="docutils literal notranslate"><span class="pre">'elbow_plot'</span></code> to this string.</p>
 </dd>
-<dt><strong>title, xlabel, ylabel</strong><span class="classifier">str or None</span></dt><dd><p>Optional title/axis labels.</p>
+<dt><strong>title, xlabel, ylabel</strong><span class="classifier">str or None</span></dt><dd><p>Optional figure/axis labels.</p>
 </dd>
 </dl>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><dl class="simple">
-<dt><strong>optimal_k</strong><span class="classifier">int</span></dt><dd><p>Estimated elbow k.</p>
+<dt>int</dt><dd><p>Estimated elbow k (argmin of the second difference + 1).</p>
 </dd>
 </dl>
 </dd>
@@ -497,116 +496,132 @@ generally as input the weightings which happen to be too small to really visuali
 <dl class="py function">
 <dt class="sig sig-object py" id="mdsa_tools.Viz.plot_sillohette_scores">
 <span class="sig-prename descclassname"><span class="pre">mdsa_tools.Viz.</span></span><span class="sig-name descname"><span class="pre">plot_sillohette_scores</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cluster_range</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">silhouette_scores</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">outfile_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'sillohette_method.png'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">title</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xlabel</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ylabel</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mdsa_tools.Viz.plot_sillohette_scores" title="Link to this definition"></a></dt>
-<dd><p>Plot silhouette scores over k and mark the maximum.</p>
+<dd><p>Plot silhouette scores over k, mark the maximum, and save.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl class="simple">
-<dt><strong>cluster_range</strong><span class="classifier">array-like</span></dt><dd><p>k values evaluated.</p>
+<dt><strong>cluster_range</strong><span class="classifier">array-like</span></dt><dd><p>Candidate k values.</p>
 </dd>
-<dt><strong>silhouette_scores</strong><span class="classifier">array-like</span></dt><dd><p>Silhouette score per k.</p>
+<dt><strong>silhouette_scores</strong><span class="classifier">array-like</span></dt><dd><p>Silhouette score per k (same length/order as <cite>cluster_range</cite>).</p>
 </dd>
-<dt><strong>outfile_path</strong><span class="classifier">str, default=”sillohette_method.png”</span></dt><dd><p>Path prefix where figure is saved (suffix ‘sillohuette_plot’ is appended).</p>
+<dt><strong>outfile_path</strong><span class="classifier">str, default=’sillohette_method.png’</span></dt><dd><p>Path prefix or filename to save the figure. The code appends the suffix
+<code class="docutils literal notranslate"><span class="pre">'sillohuette_plot'</span></code> (note spelling) to this string.</p>
 </dd>
-<dt><strong>title, xlabel, ylabel</strong><span class="classifier">str or None</span></dt><dd><p>Optional title/axis labels.</p>
+<dt><strong>title, xlabel, ylabel</strong><span class="classifier">str or None</span></dt><dd><p>Optional figure/axis labels.</p>
 </dd>
 </dl>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><dl class="simple">
-<dt><strong>optimal_k_sil</strong><span class="classifier">int</span></dt><dd><p>k with max silhouette score.</p>
-</dd>
-</dl>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="mdsa_tools.Viz.replicatemap_from_labels">
-<span class="sig-prename descclassname"><span class="pre">mdsa_tools.Viz.</span></span><span class="sig-name descname"><span class="pre">replicatemap_from_labels</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">labels</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">frame_list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">savepath</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">title</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xlabel</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ylabel</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cbar_label</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cmap</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span></span></span><a class="headerlink" href="#mdsa_tools.Viz.replicatemap_from_labels" title="Link to this definition"></a></dt>
-<dd><p>returns an array consisting of a re-formatted list of labels through which to view a set.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><dl class="simple">
-<dt><strong>labels: listlike,shape=(data,)</strong></dt><dd><p>A list of labels representing all of the labels from either a Kmeans or other analysis that we would like to
-use for our analysis.</p>
-</dd>
-<dt><strong>frame_list: listlike,shape=(data,)</strong></dt><dd><p>A list of integers representing the number of frames present in each replicate. This should be in the order
-of which the various versions of the system, and replicates where concatenated.</p>
-</dd>
-<dt><strong>savepath:str,default=os.getcwd()</strong></dt><dd><p>Path to where you would like to save your plot; generally dpi=800 and default is the directory you are running from</p>
-</dd>
-<dt><strong>title</strong><span class="classifier">str, default = None</span></dt><dd><p>Optional title for the plot.</p>
-</dd>
-<dt><strong>xlabel</strong><span class="classifier">str, default = None</span></dt><dd><p>Optional label for the x-axis.</p>
-</dd>
-<dt><strong>ylabel</strong><span class="classifier">str, default = None</span></dt><dd><p>Optional label for the y-axis.</p>
-</dd>
-</dl>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><dl class="simple">
-<dt>reformatted_labels:numpy.ndarray,shape=(n_replicates,n_frames)</dt><dd><p>A final array is returned where each row corresponds to one of our replicates in simulations.
-Each column corresponds to that particular frame in the replicate. If there are replicates of varying lengths
-we pad all to the longest trajectorys length with masked nans.</p>
-</dd>
-</dl>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="mdsa_tools.Viz.rmsd_lineplots">
-<span class="sig-prename descclassname"><span class="pre">mdsa_tools.Viz.</span></span><span class="sig-name descname"><span class="pre">rmsd_lineplots</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pandasdf</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">title</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'RMSD</span> <span class="pre">plot'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xgroupvar</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'window'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ygroupvar</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'rmsd'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xlab</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'window'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ylab</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'rmsd'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">groupingvar</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'cluster'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cmap</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">matplotlib.cm.inferno_r</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">legendtitle</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Cluster'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">outfilepath</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'/Users/luis/Desktop/workspacetwo'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mdsa_tools.Viz.rmsd_lineplots" title="Link to this definition"></a></dt>
-<dd><p>Creates a line plot of RMSD values across a specified grouping variable.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><dl class="simple">
-<dt><strong>pandasdf</strong><span class="classifier">pandas.DataFrame, default=None</span></dt><dd><p>A DataFrame containing the values to be plotted. It should contain at least 
-the columns specified by <cite>xgroupvar</cite>, <cite>ygroupvar</cite>, and <cite>groupingvar</cite>.</p>
-</dd>
-<dt><strong>title</strong><span class="classifier">str, default=’RMSD plot’</span></dt><dd><p>Title for the plot.</p>
-</dd>
-<dt><strong>xgroupvar</strong><span class="classifier">str, default=’window’</span></dt><dd><p>Column name in <cite>pandasdf</cite> to be used as the x-axis variable.</p>
-</dd>
-<dt><strong>ygroupvar</strong><span class="classifier">str, default=’rmsd’</span></dt><dd><p>Column name in <cite>pandasdf</cite> to be used as the y-axis variable.</p>
-</dd>
-<dt><strong>xlab</strong><span class="classifier">str, default=’window’</span></dt><dd><p>Label for the x-axis.</p>
-</dd>
-<dt><strong>ylab</strong><span class="classifier">str, default=’rmsd’</span></dt><dd><p>Label for the y-axis.</p>
-</dd>
-<dt><strong>groupingvar</strong><span class="classifier">str, default=’cluster’</span></dt><dd><p>Column name in <cite>pandasdf</cite> used to group lines (e.g., clusters or categories) and
-Column name used by seaborn to color lines by category.</p>
-</dd>
-<dt><strong>palette</strong><span class="classifier">colormap or palette, default=cm.magma_r</span></dt><dd><p>Color mapping for different groups. Accepts matplotlib colormap or seaborn palette.</p>
-</dd>
-<dt><strong>legendtitle</strong><span class="classifier">str, default=’Cluster’</span></dt><dd><p>Title for the legend.</p>
-</dd>
-<dt><strong>outfilepath</strong><span class="classifier">str, default=os.getcwd()</span></dt><dd><p>Path prefix where the figure will be saved. The function appends ‘_rmsdlineplot’ to this path.</p>
-</dd>
-</dl>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><dl class="simple">
-<dt>None</dt><dd><p>Saves the line plot to disk and displays it.</p>
+<dt>int</dt><dd><p>k with maximum silhouette score.</p>
 </dd>
 </dl>
 </dd>
 </dl>
 <p class="rubric">Notes</p>
-<p>This function uses seaborn’s lineplot for grouped visualization of RMSD trajectories 
-or similar metrics. It assumes the input DataFrame has one row per observation.</p>
+<p>The filename suffix used in saving is <code class="docutils literal notranslate"><span class="pre">'sillohuette_plot'</span></code> for historical reasons.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="mdsa_tools.Viz.replicatemap_from_labels">
+<span class="sig-prename descclassname"><span class="pre">mdsa_tools.Viz.</span></span><span class="sig-name descname"><span class="pre">replicatemap_from_labels</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">labels</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">frame_list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">savepath</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">title</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xlabel</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ylabel</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cbar_label</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cmap</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#mdsa_tools.Viz.replicatemap_from_labels" title="Link to this definition"></a></dt>
+<dd><p>Plot a “replicate × frame” map of discrete labels and save to disk.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>labels</strong><span class="classifier">array-like of shape (n_total_frames,)</span></dt><dd><p>Label per frame (e.g., k-means cluster or any discrete annotation),
+concatenated across replicates in the same order as <cite>frame_list</cite>.</p>
+</dd>
+<dt><strong>frame_list</strong><span class="classifier">array-like of shape (n_replicates,)</span></dt><dd><p>Number of frames in each replicate, in the exact concatenation order
+used to build <cite>labels</cite>.</p>
+</dd>
+<dt><strong>savepath</strong><span class="classifier">str or None, default=None</span></dt><dd><p>Directory or path <em>prefix</em> where the plot is saved. If None, uses
+<cite>os.getcwd()</cite>. The file name appended is <code class="docutils literal notranslate"><span class="pre">'replicate_map.png'</span></code>
+(i.e., saved at <code class="docutils literal notranslate"><span class="pre">f&quot;{savepath}replicate_map.png&quot;</span></code>).</p>
+</dd>
+<dt><strong>title</strong><span class="classifier">str or None, default=None</span></dt><dd><p>Figure title; if None, a default is used.</p>
+</dd>
+<dt><strong>xlabel, ylabel</strong><span class="classifier">str or None, default=None</span></dt><dd><p>Axis labels. If omitted, defaults are used.</p>
+</dd>
+<dt><strong>cbar_label</strong><span class="classifier">str or None, default=None</span></dt><dd><p>Label for the colorbar.</p>
+</dd>
+<dt><strong>cmap</strong><span class="classifier">str or matplotlib.colors.Colormap or None, default=None</span></dt><dd><p>Colormap for the label values. Defaults to <code class="docutils literal notranslate"><span class="pre">cm.magma_r</span></code>.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt>None</dt><dd><p>The figure is saved to disk and closed. Nothing is returned.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<ul class="simple">
+<li><p>Uses a small square marker per (replicate, frame) and a discrete colorbar
+for low/medium cardinality labels; switches to a continuous colorbar when
+unique label count is very large (&gt;= 1000).</p></li>
+<li><p>Replicate index is placed on the y-axis (top row is replicate 0) and the
+axis is inverted for a top-down visual.</p></li>
+</ul>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">labels</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="mi">100</span> <span class="o">+</span> <span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="mi">120</span> <span class="o">+</span> <span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">*</span><span class="mi">90</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">frames</span> <span class="o">=</span> <span class="p">[</span><span class="mi">100</span><span class="p">,</span> <span class="mi">120</span><span class="p">,</span> <span class="mi">90</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">replicatemap_from_labels</span><span class="p">(</span><span class="n">labels</span><span class="p">,</span> <span class="n">frames</span><span class="p">,</span> <span class="n">savepath</span><span class="o">=</span><span class="s2">&quot;/tmp/&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="mdsa_tools.Viz.rmsd_lineplots">
+<span class="sig-prename descclassname"><span class="pre">mdsa_tools.Viz.</span></span><span class="sig-name descname"><span class="pre">rmsd_lineplots</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pandasdf</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">title</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'RMSD</span> <span class="pre">plot'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xgroupvar</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'window'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ygroupvar</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'rmsd'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xlab</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'window'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ylab</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'rmsd'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">groupingvar</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'cluster'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cmap</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">matplotlib.cm.inferno_r</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">legendtitle</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Cluster'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">outfilepath</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'/Users/luis/Desktop/workspacetwo'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mdsa_tools.Viz.rmsd_lineplots" title="Link to this definition"></a></dt>
+<dd><p>Create a grouped line plot of RMSD (or similar metric) over a window variable.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>pandasdf</strong><span class="classifier">pandas.DataFrame or None, default=None</span></dt><dd><p>Data with at least the columns specified by <cite>xgroupvar</cite>, <cite>ygroupvar</cite>, and <cite>groupingvar</cite>.</p>
+</dd>
+<dt><strong>title</strong><span class="classifier">str, default=’RMSD plot’</span></dt><dd><p>Plot title.</p>
+</dd>
+<dt><strong>xgroupvar</strong><span class="classifier">str, default=’window’</span></dt><dd><p>Column used for the x-axis.</p>
+</dd>
+<dt><strong>ygroupvar</strong><span class="classifier">str, default=’rmsd’</span></dt><dd><p>Column used for the y-axis.</p>
+</dd>
+<dt><strong>xlab</strong><span class="classifier">str, default=’window’</span></dt><dd><p>X-axis label.</p>
+</dd>
+<dt><strong>ylab</strong><span class="classifier">str, default=’rmsd’</span></dt><dd><p>Y-axis label.</p>
+</dd>
+<dt><strong>groupingvar</strong><span class="classifier">str, default=’cluster’</span></dt><dd><p>Column used to form separate lines (and legend entries).</p>
+</dd>
+<dt><strong>cmap</strong><span class="classifier">str or matplotlib.colors.Colormap, default=cm.inferno_r</span></dt><dd><p>Palette/colormap passed to seaborn for coloring by <cite>groupingvar</cite>.</p>
+</dd>
+<dt><strong>legendtitle</strong><span class="classifier">str, default=’Cluster’</span></dt><dd><p>Legend title.</p>
+</dd>
+<dt><strong>outfilepath</strong><span class="classifier">str, default=os.getcwd()</span></dt><dd><p>Output <em>prefix</em> for the saved figure. The function appends <code class="docutils literal notranslate"><span class="pre">'_rmsdlineplot'</span></code>.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt>None</dt><dd><p>Saves the line plot and closes the figure.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<p>Thin wrapper around <cite>seaborn.lineplot</cite> with minimal styling.</p>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="mdsa_tools.Viz.set_ticks">
 <span class="sig-prename descclassname"><span class="pre">mdsa_tools.Viz.</span></span><span class="sig-name descname"><span class="pre">set_ticks</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mdsa_tools.Viz.set_ticks" title="Link to this definition"></a></dt>
-<dd><p>Set x and y ticks for an axis. If the axis range is greater than 100,
-ticks are placed every 10 units. Otherwise, the default tick locator
-from Matplotlib is preserved.</p>
+<dd><p>Set x and y ticks for an axis depending on range.</p>
+<p>If the axis span exceeds 100 units, ticks are placed every 10 units;
+otherwise, Matplotlib’s default tick locator is preserved.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl class="simple">
-<dt><strong>ax</strong><span class="classifier">matplotlib.axes.Axes, default=None</span></dt><dd><p>Axis to apply tick settings. Defaults to current axis.</p>
+<dt><strong>ax</strong><span class="classifier">matplotlib.axes.Axes or None, default=None</span></dt><dd><p>Axis to apply tick settings. Defaults to the current axis.</p>
 </dd>
 </dl>
 </dd>
@@ -622,32 +637,28 @@ from Matplotlib is preserved.</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="mdsa_tools.Viz.visualize_reduction">
 <span class="sig-prename descclassname"><span class="pre">mdsa_tools.Viz.</span></span><span class="sig-name descname"><span class="pre">visualize_reduction</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">embedding_coordinates</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">color_mappings</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">savepath</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'/Users/luis/Desktop/workspacetwo'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">title</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cmap</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">axis_one_label</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">axis_two_label</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cbar_label</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gridvisible</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mdsa_tools.Viz.visualize_reduction" title="Link to this definition"></a></dt>
-<dd><p>Scatter plot of a 2-D embedding with optional color mapping and colorbar; saves the figure to disk.</p>
+<dd><p>Scatter plot of a 2-D embedding with optional color mapping and colorbar; saves the figure.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl class="simple">
-<dt><strong>embedding_coordinates</strong><span class="classifier">array-like, shape (n_samples, 2)</span></dt><dd><p>Two-column array of embedding coordinates (e.g., from PCA/UMAP). The first column is plotted
-on the x-axis and the second on the y-axis.</p>
+<dt><strong>embedding_coordinates</strong><span class="classifier">array-like of shape (n_samples, 2)</span></dt><dd><p>Two-column array of embedding coordinates (e.g., PCA/UMAP).</p>
 </dd>
-<dt><strong>color_mappings</strong><span class="classifier">array-like of shape (n_samples,) or None, default=None</span></dt><dd><p>Optional per-sample values used to color points. Can be categorical (e.g., cluster labels) or
-numeric. <strong>Behavior:</strong> if provided and non-empty, a discrete colorbar is drawn via
-<cite>add_custom_colorbar</cite>; if omitted or empty, the function defaults to a sample-index gradient
-and draws a continuous colorbar via <cite>add_continuous_colorbar</cite>.</p>
+<dt><strong>color_mappings</strong><span class="classifier">array-like of shape (n_samples,) or None, default=None</span></dt><dd><p>If provided and non-empty, treated as categorical and a discrete colorbar is drawn.
+If None/empty, uses an index-based gradient with a continuous colorbar.</p>
 </dd>
-<dt><strong>savepath</strong><span class="classifier">str, default=os.getcwd()</span></dt><dd><p>Path <strong>including filename</strong> where the figure will be written, e.g. <cite>‘/tmp/embedding.png’</cite>.
-The function calls <cite>plt.savefig(savepath, dpi=500)</cite> directly and does not append an extension.</p>
+<dt><strong>savepath</strong><span class="classifier">str, default=os.getcwd()</span></dt><dd><p>Full output path <strong>including filename</strong> (no extension added automatically).</p>
 </dd>
-<dt><strong>title</strong><span class="classifier">str or None, default=”Dimensional Reduction of Systems”</span></dt><dd><p>Figure title. If <cite>None</cite>, the default title above is used.</p>
+<dt><strong>title</strong><span class="classifier">str or None, default=’Dimensional Reduction of Systems’</span></dt><dd><p>Figure title.</p>
 </dd>
-<dt><strong>cmap</strong><span class="classifier">matplotlib colormap or str, default=cm.magma_r</span></dt><dd><p>Colormap applied to the scatter points and colorbar.</p>
+<dt><strong>cmap</strong><span class="classifier">str or matplotlib.colors.Colormap or None, default=cm.magma_r</span></dt><dd><p>Colormap for points and colorbar.</p>
 </dd>
-<dt><strong>axis_one_label</strong><span class="classifier">str or None, default=’Embedding Space Axis 1’</span></dt><dd><p>Label for the x-axis.</p>
+<dt><strong>axis_one_label</strong><span class="classifier">str or None, default=’Embedding Space Axis 1’</span></dt><dd><p>X-axis label.</p>
 </dd>
-<dt><strong>axis_two_label</strong><span class="classifier">str or None, default=’Embedding Space Axis 2’</span></dt><dd><p>Label for the y-axis.</p>
+<dt><strong>axis_two_label</strong><span class="classifier">str or None, default=’Embedding Space Axis 2’</span></dt><dd><p>Y-axis label.</p>
 </dd>
-<dt><strong>cbar_label</strong><span class="classifier">str or None, default=’Value’</span></dt><dd><p>Label for the colorbar.</p>
+<dt><strong>cbar_label</strong><span class="classifier">str or None, default=’Value’</span></dt><dd><p>Colorbar label.</p>
 </dd>
-<dt><strong>gridvisible</strong><span class="classifier">bool, default=False</span></dt><dd><p>If True, shows a background grid on the axes.</p>
+<dt><strong>gridvisible</strong><span class="classifier">bool, default=False</span></dt><dd><p>Whether to show a background grid.</p>
 </dd>
 </dl>
 </dd>
@@ -659,32 +670,7 @@ The function calls <cite>plt.savefig(savepath, dpi=500)</cite> directly and does
 </dd>
 </dl>
 <p class="rubric">Notes</p>
-<ul class="simple">
-<li><p>Axes spines are hidden and ticks are adjusted via <cite>set_ticks</cite> for wide ranges.</p></li>
-<li><p>Points are drawn with <cite>alpha=0.6</cite>. Figure size is 16x12 inches (dpi=300 for the canvas,
-saved at dpi=500).</p></li>
-<li><p>When <cite>color_mappings</cite> is provided, the colorbar is treated as categorical (discrete bins).
-If you prefer a continuous mapping of your own numeric values, either omit <cite>color_mappings</cite>
-to use the default gradient or adapt the function to call <cite>add_continuous_colorbar</cite> on your
-numeric array.</p></li>
-</ul>
-<p class="rubric">Examples</p>
-<p># 1) Categorical coloring (e.g., cluster labels)
-&gt;&gt;&gt; X_2d = umap_result  # shape (n_samples, 2)
-&gt;&gt;&gt; labels = <a href="#id1"><span class="problematic" id="id2">kmeans.labels_</span></a>
-&gt;&gt;&gt; visualize_reduction(
-…     embedding_coordinates=X_2d,
-…     color_mappings=labels,
-…     savepath=”embedding_clusters.png”,
-…     title=”UMAP by Cluster”,
-…     cbar_label=”Cluster”,
-… )</p>
-<p># 2) Default continuous gradient (no labels provided)
-&gt;&gt;&gt; visualize_reduction(
-…     embedding_coordinates=X_2d,
-…     savepath=”embedding_default_gradient.png”,
-…     title=”UMAP (Default Gradient)”
-… )</p>
+<p>Axes spines are hidden; <cite>set_ticks</cite> is called to coarsen ticks on wide ranges.</p>
 </dd></dl>
 
 </section>
