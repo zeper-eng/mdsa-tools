@@ -694,7 +694,7 @@ class systems_analysis:
         max_clusters = max_clusters if max_clusters is not None else 10
         k=k if k is not None else None
         
-        if k is not None:
+        if k is not None: #basically single use run so you can just run a specific k instead of going from 1-10
             kmeans = KMeans(n_clusters=k, init='random', n_init=k, random_state=0)
             kmeans.fit(data)
             cluster_centers, inertia, cluster_labels = kmeans.cluster_centers_,kmeans.inertia_,kmeans.labels_

@@ -1,82 +1,131 @@
-import os
-import numpy as np
-import pytest
-
-from mdsa_tools.Viz import visualize_reduction, replicatemap_from_labels
+# Use non-GUI backend during tests (safe on CI)
+import matplotlib
+matplotlib.use("Agg", force=True)
+from pathlib import Path
+import mdsa_tools.Viz as vz
 
 
 def test_visualize_reduction_largebins_saves_file(tmp_path, small_embedding):
-
-    '''
-    Tests vizualizing 2-dimensional embeddings as a scatter-plot but, with no
-    provided colormappings
-
-    Since this defaults to using each individual value as its own bin this also changes the colorbar
-    used to be a continous one vs a discrete one b/c most matplot colormaps cap out at 256
-    discrete bins
-
-    '''
-
     out = tmp_path / "viz_continuous.png"
-    visualize_reduction(
+    vz.visualize_reduction(
         embedding_coordinates=small_embedding,
         color_mappings=None,      # triggers continuous colormap branch
-        savepath=str(out),        # function expects a file path here
+        savepath=out,        # function expects a file path here
         title="Test Continuous",
         cmap=None,
         axis_one_label=None,
         axis_two_label=None,
         cbar_label=None,
-        gridvisible=False
+        gridvisible=False,
     )
 
     assert out.exists(), "visualize_reduction did not create the output file"
     assert out.stat().st_size > 0, "output image is empty"
 
-    return
 
-def test_visualize_reduction__saves_file(tmp_path, small_embedding,less_than_256_bin_colormappings):
-    
-    '''
-    Tests vizualizing 2-dimensional embeddings as a scatter-plot *with* colormappings
-    that are less than or equal to 256 unique bins
-
-    Since this creates a discrete color bar instead of a continous one 
-    '''
-
+def test_visualize_reduction_saves_file(tmp_path, small_embedding, less_than_256_bin_colormappings):
     out = tmp_path / "viz_discrete.png"
-    visualize_reduction(
+    vz.visualize_reduction(
         embedding_coordinates=small_embedding,
-        color_mappings=less_than_256_bin_colormappings,      # triggers continuous colormap branch
-        savepath=str(out),        # function expects a file path here
+        color_mappings=less_than_256_bin_colormappings,  # triggers discrete colormap branch
+        savepath=out,
         title="Test Discrete",
         cmap=None,
         axis_one_label=None,
         axis_two_label=None,
         cbar_label=None,
-        gridvisible=False
+        gridvisible=False,
     )
 
     assert out.exists(), "visualize_reduction did not create the output file"
     assert out.stat().st_size > 0, "output image is empty"
 
-    return
 
 def test_replicatemap_from_labels_saves_png(tmp_path, simple_labels_and_frames):
-    '''test replicate map creation and if it saves (specificaly with no color mappings)'''
-    
     labels, frame_list = simple_labels_and_frames
-    save_dir = './tests/test_output/test_repmap'
-    replicatemap_from_labels(
+    out = tmp_path 
+
+    vz.replicatemap_from_labels(
         labels=labels,
         frame_list=frame_list,
-        savepath=save_dir,
+        savepath=out,   
         title="Replicate Map Test",
         xlabel="Frame",
         ylabel="Replicate",
         cmap=None,
     )
 
-    return
+    assert out.exists(), "replicatemap_from_labels did not create the output file"
+    assert out.stat().st_size > 0, "output image is empty"
 
+
+
+def test_continuous_colorbar_branch(tmp_path, small_embedding):
+    out = tmp_path / "viz_auto_continuous.png"
+    vz.visualize_reduction(
+        embedding_coordinates=small_embedding,
+        color_mappings=None,
+        savepath=out,
+        title=None,
+        cmap=None,
+        axis_one_label=None,
+        axis_two_label=None,
+        cbar_label=None,
+        gridvisible=False,
+    )
+
+    assert out.exists()
+
+def test_discrete_colorbar_branch(tmp_path, small_embedding,less_than_256_bin_colormappings):
+    out = tmp_path / "viz_auto_discrete.png"
+    vz.visualize_reduction(
+        embedding_coordinates=small_embedding,
+        color_mappings=less_than_256_bin_colormappings,
+        savepath=out,
+        title=None,
+        cmap=None,
+        axis_one_label=None,
+        axis_two_label=None,
+        cbar_label=None,
+        gridvisible=False,
+    )
+    
+    assert out.exists()
+
+def test_plot_silhouette_scores(tmp_path,kvals_and_scores):
+    kvals,scores=kvals_and_scores
+    out_prefix = tmp_path    
+    
+    best_k = vz.plot_sillohette_scores(
+        cluster_range=kvals,
+        silhouette_scores=scores,
+        outfile_path=str(out_prefix),
+        title="Sil scores",
+        xlabel="k",
+        ylabel="score",
+    )
+
+    assert best_k==5
+
+def test_plot_elbow_scores(tmp_path,kvals_and_inertiascores):
+    k_vals, inertia_scores=kvals_and_inertiascores
+    out_prefix = tmp_path / "elbow_test"  
+    
+    best_k = vz.plot_elbow_scores(
+        cluster_range=k_vals,
+        inertia_scores=inertia_scores,
+        outfile_path=str(out_prefix),
+        title="Elbow Test",
+        xlabel="k",
+        ylabel="Inertia"
+    )
+
+    # Verify the returned optimal k
+    assert best_k == 4  
+
+    # Verify that the plot file exists (function appends 'elbow_plot')
+    expected = out_prefix.parent / (out_prefix.name + "elbow_plot")
+    assert expected.exists()
+
+    
 

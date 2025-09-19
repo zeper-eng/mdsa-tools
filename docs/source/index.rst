@@ -46,7 +46,7 @@ suggesting long-range allosteric interactions across the neighborhood.
       :link-type: doc        
       :text-align: center
 
-      **Link to the Systems Paper**
+      **Link to the Systems Pre-print**
       ^^^
 
       .. image:: /resources/paperfigure.png

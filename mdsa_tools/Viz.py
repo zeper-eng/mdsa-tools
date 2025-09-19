@@ -11,7 +11,7 @@ to a continous colorbar and goes based on sample index.
 
 See Also
 --------
-mdsa_tools.Viz.Analysis : A lot of the results you will probably visualize
+mdsa_tools.Analysis : A lot of the results you will probably visualize
 mdsa_tools.Data_gen_hbond.create_system_representations : Build residue–residue H-bond adjacency matrices.
 numpy.linalg.svd : Linear algebra used under the hood.
 
@@ -111,8 +111,7 @@ def add_continuous_colorbar(scatter, labels, cbar_label=None, ax=None, cmap=None
         cbar.set_label(cbar_label, fontsize=10)
     return cbar
 
-
-def add_custom_colorbar(scatter, labels, cbar_label=None, ax=None, cmap=None):
+def add_discrete_colorbar(scatter, labels, cbar_label=None, ax=None, cmap=None):
     """
     Add a discrete (categorical) colorbar to a scatter plot.
 
@@ -175,7 +174,6 @@ def add_custom_colorbar(scatter, labels, cbar_label=None, ax=None, cmap=None):
     cbar.set_ticklabels([str(u) for u in uniques])
     return cbar
 
-
 def set_ticks(ax=None):
     """
     Set x and y ticks for an axis depending on range.
@@ -204,7 +202,6 @@ def set_ticks(ax=None):
     if ymax - ymin > 100:
         ax.set_yticks(np.arange(np.floor(ymin), np.ceil(ymax) + 1, 10))
     return
-
 
 # Replicate maps
 def replicatemap_from_labels(labels, frame_list,
@@ -295,7 +292,7 @@ def replicatemap_from_labels(labels, frame_list,
     if np.unique(final_coordinates).shape[0] >= 1000:
         add_continuous_colorbar(scatter, final_coordinates[:, 2], cbar_label, plt.gca(), cmap=cmap)
     else:
-        add_custom_colorbar(scatter, final_coordinates[:, 2], cbar_label, plt.gca(), cmap=cmap)
+        add_discrete_colorbar(scatter, final_coordinates[:, 2], cbar_label, plt.gca(), cmap=cmap)
 
     # Style
     plt.grid(visible=False)
@@ -315,13 +312,12 @@ def replicatemap_from_labels(labels, frame_list,
         plt.ylabel(ylabel)
 
     plt.tight_layout()
-    plt.savefig(f'{savepath}replicate_map.png', dpi=800)
+    plt.savefig(f'{savepath}_replicate_map.png', dpi=800)
     plt.close()
     return
 
-
 # K-means Cross-validation metrics
-def plot_sillohette_scores(cluster_range, silhouette_scores, outfile_path="sillohette_method.png",
+def plot_sillohette_scores(cluster_range, silhouette_scores, outfile_path=None,
                            title=None, xlabel=None, ylabel=None):
     """
     Plot silhouette scores over k, mark the maximum, and save.
@@ -350,6 +346,8 @@ def plot_sillohette_scores(cluster_range, silhouette_scores, outfile_path="sillo
     -----
     The filename suffix used in saving is ``'sillohuette_plot'`` for historical reasons.
     """
+    outfile_path = outfile_path if outfile_path is not None else os.getcwd()
+
     optimal_k_sil = cluster_range[np.argmax(silhouette_scores)]
     plt.figure(figsize=(8, 5))
     plt.plot(cluster_range, silhouette_scores, marker='o', linestyle='-')
@@ -360,12 +358,11 @@ def plot_sillohette_scores(cluster_range, silhouette_scores, outfile_path="sillo
     plt.title(title if title is not None else 'Silhouette Score for optimal K')
     plt.legend()
     plt.grid(True)
-    plt.savefig(outfile_path + 'sillohuette_plot', dpi=300)
+    plt.savefig(outfile_path + '/sillohuette_plot', dpi=300)
     plt.close()
     return optimal_k_sil
 
-
-def plot_elbow_scores(cluster_range, inertia_scores, outfile_path="elbow_method.png",
+def plot_elbow_scores(cluster_range, inertia_scores, outfile_path=None,
                       title=None, xlabel=None, ylabel=None):
     """
     Plot inertia over k, estimate the elbow via the second derivative, and save.
@@ -390,6 +387,7 @@ def plot_elbow_scores(cluster_range, inertia_scores, outfile_path="elbow_method.
     int
         Estimated elbow k (argmin of the second difference + 1).
     """
+    outfile_path=outfile_path if outfile_path is not None else os.getcwd()
     diff = np.diff(inertia_scores)
     diff2 = np.diff(diff)
     optimal_k = cluster_range[np.argmin(diff2) + 1]
@@ -405,8 +403,8 @@ def plot_elbow_scores(cluster_range, inertia_scores, outfile_path="elbow_method.
     plt.grid(True)
     plt.savefig(outfile_path + 'elbow_plot', dpi=300)
     plt.close()
+    
     return optimal_k
-
 
 # Circos plots
 def get_Circos_coordinates(residue, gcircle):
@@ -443,7 +441,6 @@ def get_Circos_coordinates(residue, gcircle):
     mid_position = arc.size * 0.5
     raxis_position = 550
     return (residue, mid_position, mid_position, raxis_position)
-
 
 def make_MDCircos_object(residue_indexes):
     """
@@ -510,7 +507,6 @@ def make_MDCircos_object(residue_indexes):
 
     circle.set_garcs()
     return circle
-
 
 def mdcircos_graph(empty_circle, residue_dict, savepath=os.getcwd()+'mdcircos_graph',
                    scale_factor=5, colormap=cm.magma_r):
@@ -602,7 +598,6 @@ def mdcircos_graph(empty_circle, residue_dict, savepath=os.getcwd()+'mdcircos_gr
     fig_cb.savefig(savepath + "_colorbar.png", dpi=300, bbox_inches="tight")
     plt.close(fig_cb)
 
-
 def extract_properties_from_weightsdf(pca_table):
     """
     Parse a Systems Analysis weights table into residue IDs and per-PC weight mappings.
@@ -638,7 +633,6 @@ def extract_properties_from_weightsdf(pca_table):
     PC2_weight_dict = pca_table.set_index('Comparisons')['PC2_magnitude'].to_dict()
     return residues, PC1_weight_dict, PC2_weight_dict
 
-
 def create_MDcircos_from_weightsdf(PCA_ranked_weights, outfilepath=None):
     """
     Create and save MD-circos diagrams for PC1 and PC2 magnitudes from a weights table.
@@ -672,7 +666,6 @@ def create_MDcircos_from_weightsdf(PCA_ranked_weights, outfilepath=None):
     mdcircos_graph(pc1_circos_object, PC1_magnitude_dict, outfilepath + 'PC1_magnitudeviz')
     mdcircos_graph(pc2_circos_object, PC2_magnitude_dict, outfilepath + 'PC2_magnitudeviz')
     return
-
 
 # Embedding-space visualizations
 def create_2d_color_mappings(labels=([80] * 20) + ([160] * 10),
@@ -715,7 +708,6 @@ def create_2d_color_mappings(labels=([80] * 20) + ([160] * 10),
         return sample_color_mappings
     # if clustering is False, intentionally return None so downstream uses a colormap
     return None
-
 
 def visualize_reduction(embedding_coordinates,
                         color_mappings=None,
@@ -788,7 +780,7 @@ def visualize_reduction(embedding_coordinates,
     if color_mappings is not None and len(color_mappings) > 0:
         scatter = ax.scatter(embedding_coordinates[:, 0], embedding_coordinates[:, 1],
                              c=color_mappings, cmap=cmap, alpha=0.6)
-        add_custom_colorbar(scatter, color_mappings, cbar_label, plt.gca(), cmap=cmap)
+        add_discrete_colorbar(scatter, color_mappings, cbar_label, plt.gca(), cmap=cmap)
     else:
         values = np.arange(embedding_coordinates.shape[0])
         scatter = ax.scatter(embedding_coordinates[:, 0], embedding_coordinates[:, 1],
@@ -810,7 +802,6 @@ def visualize_reduction(embedding_coordinates,
     plt.savefig(savepath, dpi=500)
     plt.close()
     return
-
 
 # RMSD lineplots
 def rmsd_lineplots(pandasdf=None, title='RMSD plot',
@@ -885,7 +876,6 @@ def rmsd_lineplots(pandasdf=None, title='RMSD plot',
     plt.savefig(outfilepath + '_rmsdlineplot', dpi=800)
     plt.close()
     return
-
 
 # Contour plots
 def contour_embedding_space(outfile_path, embeddingspace_coordinates, levels=10, thresh=0, bw_adjust=.5,

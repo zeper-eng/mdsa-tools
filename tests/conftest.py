@@ -84,6 +84,9 @@ def simple_labels_and_frames():
 #########################
 
 '''CPPTRAJ cases (more to be included)'''
+''' for example simple p53 ten frame out
+    from leftover data'''
+
 CPPTRAJ_CASES=[
     (Path(__file__).parent / "data" / "cpptraj_fake_data" / "Break_On_Fake_Cpptraj_Data.dat",Path(__file__).parent / "data" / "trajectories" / '5JUP_N2_GCU_nowat.prmtop')
     ]
@@ -107,3 +110,22 @@ def importer(request):
 def less_than_256_bin_colormappings():
     colormapping=np.concatenate((np.full(3200,1),np.full(3200,2)))
     return colormapping
+
+import matplotlib.pyplot as plt
+@pytest.fixture(scope='session')
+def emptyplotting_space():
+    fig, ax = plt.subplots()
+    return (fig, ax)
+
+@pytest.fixture(scope='session')
+def kvals_and_silscores():
+    k_vals   = np.array([2, 3, 4, 5, 6])
+    scores   = np.array([0.12, 0.28, 0.41, 0.57, 0.49])  # max at k=5
+    return k_vals,scores
+
+@pytest.fixture(scope='session')
+def kvals_and_inertiascores():
+    k_vals = np.array([2, 3, 4, 5, 6])
+    inertia_scores = np.array([500, 320, 220, 180, 170]) 
+    return k_vals, inertia_scores
+
