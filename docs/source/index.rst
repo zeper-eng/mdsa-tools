@@ -57,7 +57,7 @@ suggesting long-range allosteric interactions across the neighborhood.
       +++
       **A Systems Analysis of Ribosomal CAR-site Dynamics**
 
-Focused on leveraging unsupervised learning algorithm workflows—PCA/UMAP, clustering, and Markov state modeling (MSM)—our pipeline can build hydrogen-bond adjacency matrices from MDTraj or import them from Cpptraj. By design, the analysis and visualization modules are data-agnostic: they operate on either (i) an n×n adjacency matrix or (ii) an edge list (long-format table) of (i, j, weight) in the expected schema.
+Focused on leveraging unsupervised learning algorithm workflows—PCA/UMAP, clustering, and Markov state modeling (MSM)—our pipeline can build hydrogen-bond adjacency matrices from MDTraj or import them from Cpptraj. By design, the analysis and visualization modules are data-agnostic as long as you fit the expected schema.
 
    .. grid-item-card:: 
       :link: examples

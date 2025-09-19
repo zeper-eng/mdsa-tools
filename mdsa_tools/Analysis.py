@@ -385,6 +385,9 @@ class systems_analysis:
             print('No valid method supplied for dimensional reduction ')
         
     def cluster_embeddingspace(self, reduced_coordinates=None,outfile_path=None,num_systems=None,val_metric=None):
+        '''
+        Currently depreciated
+        '''
         '''A function for looking at conformational states in embedding space
 
         Parameters
@@ -459,9 +462,7 @@ class systems_analysis:
         return candidate_states_per_system
 
     def create_pearsontest_for_kmeans_distributions(self,labels,coordinates,cluster_centers):
-        '''
-        Currently depreciated
-        '''
+
         '''A function that is meant for the 
 
         Parameters
