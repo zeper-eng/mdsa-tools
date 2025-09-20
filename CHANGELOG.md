@@ -1,4 +1,6 @@
 ## Theese changes are mainly for the pipi releases you can download the most recent version straight from github always
+# [1.1.5]-2025-08-15
+Docstrings mostly complete, huge docs push, many functional fixes and trims after further tests implementations
 
 # [1.1.4]-2025-08-15
 Filled some flaws in analysis and in the colorbar function
