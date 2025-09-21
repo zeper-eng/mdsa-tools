@@ -11,7 +11,7 @@ hop forward) or **shrinking windows** (drop early frames and keep the tail).
 What you get
 ------------
 - Windowed **RMSD vs. time** per cluster (as ``.csv`` tables).
-- Publication-ready **line plots** via :func:`mdsa_tools.Viz.rmsd_lineplots`.
+- Easy to analyze **line plots** comparing your clusters progressive cohesion score via :func:`mdsa_tools.Viz.rmsd_lineplots`.
 - Hooks to extend into MSM diagnostics (implied timescales, CK test).
 
 Quickstart
