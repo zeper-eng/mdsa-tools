@@ -80,27 +80,28 @@ analysis of molecular dynamics data.
          :align: center
 
    .. grid-item-card::
-      :link: examples/example_systems
+      :link: examples/Contourplots
       :link-type: doc
       :shadow: lg
       :text-align: center
 
-      **Example Systems**
+      **Contourplots**
 
       ^^^
-      .. image:: ../resources/example_systems.png
+      .. image:: ../resources/test_one.png
          :alt: Example systems
          :width: 100%
          :align: center
 
    .. grid-item-card::
+      :link: examples/rmsd_example
       :shadow: lg
       :text-align: center
 
-      **Filler 7**
+      **Cohesion (RMSD) Analysis**
 
       ^^^
-      .. image:: ../resources/placeholder.png
+      .. image:: ../resources/rmsd_example.png
          :alt: Filler card 7
          :width: 100%
          :align: center

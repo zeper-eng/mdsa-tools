@@ -8,6 +8,10 @@ They serve as lightweight input systems so users can try out the pipeline withou
 - `5JUP_N2_GCU_nowat.prmtop` – second topology variant.  
 - `CCU_GCU_10frames.mdcrd` – matching short trajectory.  
 
+Also it contains a fake cpptraj out file if youd like to try out the hbond data import from cpptraj.
+
+- `Break_On_Fake_Cpptraj_Data.dat` 
+
 ---
 
 ## Earlier Quickstart with PDBs

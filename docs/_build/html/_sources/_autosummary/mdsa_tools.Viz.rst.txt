@@ -9,7 +9,7 @@
    .. autosummary::
    
       add_continuous_colorbar
-      add_custom_colorbar
+      add_discrete_colorbar
       contour_embedding_space
       create_2d_color_mappings
       create_MDcircos_from_weightsdf
