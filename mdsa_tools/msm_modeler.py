@@ -459,7 +459,7 @@ class MSM_Modeller:
         Systems_Analyzer = systems_analysis(systems_representations=all_systems, replicate_distribution=persys_frame_list)
         Systems_Analyzer.replicates_to_featurematrix()
         X_pca, _, _ = Systems_Analyzer.reduce_systems_representations()
-        cluster_labels, cluster_centers = Systems_Analyzer.cluster_system_level(
+        cluster_labels, cluster_centers = Systems_Analyzer.perform_kmeans(
             data=X_pca, k=6, outfile_path='../manuscript_explorations/GCU_solo/GCU_pcaspace_clustersolo'
         )
 

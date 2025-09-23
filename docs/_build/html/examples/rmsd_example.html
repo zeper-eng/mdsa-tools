@@ -23,7 +23,9 @@
       <script src="../_static/design-tabs.js?v=f930bc37"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
-    <link rel="search" title="Search" href="../search.html" /> 
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Feature matrix &amp; exploratory clustering" href="example_of_clustering_analysis.html" />
+    <link rel="prev" title="Contours on PCA/UMAP embeddings" href="Contourplots.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -45,9 +47,28 @@
   </form>
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
-              <ul>
+              <ul class="current">
+<li class="toctree-l1"><a class="reference external" href="https://github.com/zeper-eng/mdsa-tools">GitHub</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../api.html">mdsa-tools Python API</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../examples.html">Examples</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../examples.html">Examples</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="circos_style_visualization.html">MDcircos (PCA-weighted contacts)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="data_generation_workflow.html">Data generation (H-bond matrices)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="import_from_cpptraj.html">cpptraj (series) → residue×residue H-bond matrices</a></li>
+<li class="toctree-l2"><a class="reference internal" href="MSM_Example.html">MSM (embedding-space kinetics from embeddings)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Contourplots.html">Contours on PCA/UMAP embeddings</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Cohesion over time (sliding &amp; shrinking windows)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#what-you-get">What you get</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#quickstart">Quickstart</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#notes">Notes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#where-this-fits">Where this fits</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#see-also">See also</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="example_of_clustering_analysis.html">Feature matrix &amp; exploratory clustering</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hbond_replicate_maps.html">Replicate maps (discrete H-bond labels)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="umap_example.html">UMAP embeddings (per-frame labelling)</a></li>
+</ul>
+</li>
 </ul>
 
         </div>
@@ -64,6 +85,7 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../examples.html">Examples</a></li>
       <li class="breadcrumb-item active">Cohesion over time (sliding &amp; shrinking windows)</li>
       <li class="wy-breadcrumbs-aside">
       </li>
@@ -174,7 +196,7 @@ state usage across replicates in parallel to cohesion trends.</p></li>
 <li><p><a class="reference internal" href="../_autosummary/mdsa_tools.msm_modeler.html#mdsa_tools.msm_modeler.MSM_Modeller" title="mdsa_tools.msm_modeler.MSM_Modeller"><code class="xref py py-class docutils literal notranslate"><span class="pre">mdsa_tools.msm_modeler.MSM_Modeller</span></code></a> — cohesion windows, transition matrices,
 implied timescales, CK test.</p></li>
 <li><p><a class="reference internal" href="../_autosummary/mdsa_tools.Viz.html#mdsa_tools.Viz.rmsd_lineplots" title="mdsa_tools.Viz.rmsd_lineplots"><code class="xref py py-func docutils literal notranslate"><span class="pre">mdsa_tools.Viz.rmsd_lineplots()</span></code></a> — render per-cluster RMSD vs. window.</p></li>
-<li><p><a class="reference internal" href="../_autosummary/mdsa_tools.Analysis.html#mdsa_tools.Analysis.systems_analysis.cluster_system_level" title="mdsa_tools.Analysis.systems_analysis.cluster_system_level"><code class="xref py py-meth docutils literal notranslate"><span class="pre">mdsa_tools.Analysis.systems_analysis.cluster_system_level()</span></code></a> — produce labels/centers.</p></li>
+<li><p><code class="xref py py-meth docutils literal notranslate"><span class="pre">mdsa_tools.Analysis.systems_analysis.perform_kmeans()</span></code> — produce labels/centers.</p></li>
 <li><p><a class="reference internal" href="../_autosummary/mdsa_tools.Analysis.html#mdsa_tools.Analysis.systems_analysis.reduce_systems_representations" title="mdsa_tools.Analysis.systems_analysis.reduce_systems_representations"><code class="xref py py-meth docutils literal notranslate"><span class="pre">mdsa_tools.Analysis.systems_analysis.reduce_systems_representations()</span></code></a> — get PCA/UMAP.</p></li>
 </ul>
 </section>
@@ -183,7 +205,10 @@ implied timescales, CK test.</p></li>
 
            </div>
           </div>
-          <footer>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="Contourplots.html" class="btn btn-neutral float-left" title="Contours on PCA/UMAP embeddings" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="example_of_clustering_analysis.html" class="btn btn-neutral float-right" title="Feature matrix &amp; exploratory clustering" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
 
   <hr/>
 

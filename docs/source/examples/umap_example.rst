@@ -114,7 +114,7 @@ Where this fits
 
 After :ref:`datagen`, use UMAP/PCA to visualize conformational heterogeneity. Reuse
 the same feature matrix for clustering
-(:meth:`~mdsa_tools.Analysis.systems_analysis.cluster_system_level`) or MDcircos
+(:meth:`~mdsa_tools.Analysis.systems_analysis.perform_kmeans`) or MDcircos
 weighting downstream. Pair with replicate maps to connect embedding regions to
 contact-pattern dynamics.
 

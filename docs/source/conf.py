@@ -54,37 +54,21 @@ html_theme_options = {
     "show_toc_level": 2,
 }
 
+templates_path = ["_templates"]
+
+html_sidebars = {
+    "**": [
+        "globaltoc.html",     # RTD global ToC
+        "searchbox.html",     # RTD search box
+        "github-badge.html",  # your custom partial
+    ]
+}
+html_static_path = ["_static"]
+html_css_files = ["custom.css"]
+
 # Theme settings 
 html_theme = "renku"
 html_show_sourcelink = False
-
-html_theme_options = {
-    "logo": {
-        "image_light": "images/stackerlogo.svg",
-        "image_dark": "images/stacker_logo_dark.png",
-    },
-    "home_page_in_toc": True,
-    "icon_links" : [
-        {
-            "name" : "PyPI",
-            "url" : "https://pypi.org/project/pistacker/",
-            "type": "url",
-            "icon" : "https://raw.githubusercontent.com/esakkas24/stacker/refs/heads/main/docs/images/pypi.svg"
-        }
-    ],
-    "navbar_start" : [],
-    "navbar_center": ["navbar-nav"],
-    "navbar_end": [
-        "navbar-icon-links",
-        "search-button-field"
-    ],
-    "header_links_before_dropdown": 4,
-    "navbar_persistent": [],
-    "github_url" : "https://github.com/esakkas24/stacker",
-    "repository_url" : "https://github.com/esakkas24/stacker",
-    "use_repository_button" : True,
-    "collapse_navigation": True,
-}
 
 
 

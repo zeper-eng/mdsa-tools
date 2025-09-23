@@ -48,7 +48,7 @@ all_systems = [system_one, system_two]
 analyzer = systems_analysis(all_systems)
 
 analyzer.replicates_to_featurematrix()
-labels, _, _, _ = analyzer.cluster_system_level(outfile_path="./test_", max_clusters=5)
+labels, _, _, _ = analyzer.perform_kmeans(outfile_path="./test_", max_clusters=5)
 X_pca, weights, var = analyzer.reduce_systems_representations(method="PCA")
 
 ###

@@ -19,7 +19,7 @@ def test_proper_UMAP_reduction_output(analyzer):
     assert umap_coordinates.shape[1] == 2
 
 def test_system_clustering(analyzer):
-    optimal_k_silhouette_labels, optimal_k_elbow_labels, centers_silhouette, centers_elbow = analyzer.cluster_system_level(max_clusters=5)
+    optimal_k_silhouette_labels, optimal_k_elbow_labels, centers_silhouette, centers_elbow = analyzer.perform_kmeans(max_clusters=5)
 
     assert optimal_k_silhouette_labels.shape[0] == analyzer.feature_matrix.shape[0], "silhouette clustering labels dont match n_samples"
     assert optimal_k_elbow_labels.shape[0] == analyzer.feature_matrix.shape[0], "elbow clustering labels dont match n_samples"
@@ -61,15 +61,15 @@ def test_perform_clust_opt_fixed_k_returns_shapes(tmp_path, analyzer):
     assert labels.shape[0] == Feature_Matrix.shape[0]
     assert centers.shape == (2, Feature_Matrix.shape[1])
 
-def test_cluster_system_level_k_path(tmp_path, analyzer):
+def test_perform_kmeans_k_path(tmp_path, analyzer):
     Fm = analyzer.feature_matrix
-    labels, centers = analyzer.cluster_system_level(outfile_path=str(tmp_path) + os.sep, data=Fm, k=2)
+    labels, centers = analyzer.perform_kmeans(outfile_path=str(tmp_path) + os.sep, data=Fm, k=2)
     assert labels.shape[0] == Fm.shape[0]
     assert centers.shape[0] == 2
 
-def test_cluster_system_level_k_path(tmp_path, analyzer):
+def test_perform_kmeans_k_path(tmp_path, analyzer):
     X = analyzer.feature_matrix
-    labels, centers = analyzer.cluster_system_level(outfile_path=str(tmp_path) + os.sep, data=X, k=2)
+    labels, centers = analyzer.perform_kmeans(outfile_path=str(tmp_path) + os.sep, data=X, k=2)
     assert labels.shape[0] == X.shape[0]
     assert centers.shape[0] == 2
 

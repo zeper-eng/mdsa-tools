@@ -97,5 +97,5 @@ See also
 - :class:`mdsa_tools.msm_modeler.MSM_Modeller` — cohesion windows, transition matrices,
   implied timescales, CK test.
 - :func:`mdsa_tools.Viz.rmsd_lineplots` — render per-cluster RMSD vs. window.
-- :meth:`mdsa_tools.Analysis.systems_analysis.cluster_system_level` — produce labels/centers.
+- :meth:`mdsa_tools.Analysis.systems_analysis.perform_kmeans` — produce labels/centers.
 - :meth:`mdsa_tools.Analysis.systems_analysis.reduce_systems_representations` — get PCA/UMAP.

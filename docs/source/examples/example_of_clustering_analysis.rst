@@ -44,7 +44,7 @@ If you are unfamiliar with making these, see :ref:`datagen`.
    #########################################
    # System-level K-means sweep (elbow & silhouette)
    #########################################
-   k_labels_sil, k_labels_elbow, centers_sil, centers_elbow = SA.cluster_system_level(
+   k_labels_sil, k_labels_elbow, centers_sil, centers_elbow = SA.perform_kmeans(
        outfile_path="/path/to/output/syskmeans/",
        max_clusters=25
    )
@@ -93,6 +93,6 @@ See also
 --------
 - :mod:`mdsa_tools.Data_gen_hbond` — build per-frame H-bond adjacency matrices.
 - :mod:`mdsa_tools.Cpptraj_import` — construct the same matrices from cpptraj series tables.
-- :meth:`mdsa_tools.Analysis.systems_analysis.cluster_system_level` — K-sweep with elbow/silhouette.
+- :meth:`mdsa_tools.Analysis.systems_analysis.perform_kmeans` — K-sweep with elbow/silhouette.
 - :meth:`mdsa_tools.Analysis.systems_analysis.reduce_systems_representations` — PCA/UMAP embeddings.
 - :meth:`mdsa_tools.Analysis.systems_analysis.cluster_embeddingspace` — clustering in embedding space.

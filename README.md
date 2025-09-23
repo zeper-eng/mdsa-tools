@@ -66,7 +66,7 @@ Systems_Analyzer = systems_analysis(all_systems)
 
 # transform adjacency matrices, perform clustering and dimensional reduction
 Systems_Analyzer.replicates_to_featurematrix()
-optimal_k_silhouette_labels, optimal_k_elbow_labels, centers_silhouette, centers_elbow = Systems_Analyzer.cluster_system_level(outfile_path='./test_', max_clusters=5)
+optimal_k_silhouette_labels, optimal_k_elbow_labels, centers_silhouette, centers_elbow = Systems_Analyzer.perform_kmeans(outfile_path='./test_', max_clusters=5)
 print('clustering successfully completed')
 X_pca, weights, explained_variance_ratio_ = Systems_Analyzer.reduce_systems_representations(method='PCA')  # you could do method='PCA'/'UMAP' here
 print('reduction successful')

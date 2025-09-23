@@ -1,17 +1,18 @@
 '''
-Mostly functions as a big wrapper for conveniently storing a lot of our analysis methods. 
+High-level wrapper for storing and running common analyses over systems of
+residue–residue adjacency matrices (e.g., H-bond networks).
 
-Generally you can follow our pipeline but,the individual steps are pretty modular if your comfortable doing simple numpy transmutations etc.
-You could for instance use the clustering on various number of n_dimensional datasets, or pull H-bond values using 
-systems_analysis.extract_hbond_values() and use thoose in replicate maps instead of k-means cluster assignments.
-
+You can follow the provided pipeline end-to-end, or call individual, modular
+steps (flattening → feature matrix → dimensionality reduction → clustering).
+For example, you might cluster arbitrary n-dimensional feature matrices, or
+pull H-bond values via ``systems_analysis.extract_hbond_values()`` and use
+those in replicate maps instead of k-means cluster assignments.
 
 See Also
 --------
 mdsa_tools.Viz.visualize_reduction : Plot PCA/UMAP embeddings.
 mdsa_tools.Data_gen_hbond.create_system_representations : Build residue–residue H-bond adjacency matrices.
 numpy.linalg.svd : Linear algebra used under the hood.
-
 '''
 from mdsa_tools.Data_gen_hbond import TrajectoryProcessor
 import numpy as np
@@ -37,10 +38,10 @@ class systems_analysis:
     Parameters
     ----------
     systems_representations : list of np.ndarray
-        Expected format: ``[array_1, ..., array_m]``, where each array has
-        shape ``(n_frames, n_residues, n_residues)``. The only permitted
-        difference across arrays is ``n_frames``; all systems should share
-        the same residue dimension.
+        ``[array_1, ..., array_m]``, each of shape
+        ``(n_frames, n_residues, n_residues)``. The only permitted difference
+        across arrays is ``n_frames``; all systems should share the same residue
+        dimension. Index metadata are expected in row/column 0.
     replicate_distribution : array-like of int or None, optional
         Optional labels or indices describing how frames are distributed
         across replicates/systems. If ``None``, defaults to
@@ -49,13 +50,12 @@ class systems_analysis:
     Attributes
     ----------
     num_systems : int
-        Number of systems provided (i.e., ``len(systems_representations)``).
+        Number of systems provided (``len(systems_representations)``).
     systems_representations : list of np.ndarray
         Original input, retained for convenience.
     indexes : np.ndarray
-        Derived from ``systems_representations[0][0, 0, 1:]``. Arrays include
-        index data, introducing one extra row/column (negligible overhead for
-        typical datasets).
+        Derived from ``systems_representations[0][0, 0, 1:]``. These are used to
+        label residue–residue comparisons when generating feature names.
     feature_matrix : np.ndarray or None
         Cached 2D feature matrix produced by ``replicates_to_featurematrix``.
     replicate_distribution : np.ndarray
@@ -100,39 +100,36 @@ class systems_analysis:
 
     #pre-processing
     def replicates_to_featurematrix(self,arrays=None)->np.ndarray:
-        """returns an array formatted for kmeans clustering with scipy
+        """Construct a flattened, per-frame feature matrix from one or more
+        systems of residue×residue adjacency matrices.
 
         Parameters
         ----------
-        arrays:list, expected=list[array_1,...,array_n-1] where each array is an np.ndarray with shape=(n_frames,n_residues,n_residues)
-            Each array should have the shape as described above, where each frame has an adjacency matrix of pairwise
-            comparisons between all residues. The only axis that can differ between arrays is the number of frames (n_frames).
+        arrays : list of np.ndarray or None
+            ``[array_1, ..., array_m]`` where each array has shape
+            ``(n_frames, n_residues, n_residues)``. If ``None``, uses
+            ``self.systems_representations``.
+            The only axis allowed to differ across arrays is ``n_frames``.
 
-            
         Returns
         -------
-        array:np.ndarray,shape=(sum(n_frames),n_residues*n_residues) where the sum of n_frames refers to the total number of frames.
-            Each row of the new matrix represents a flattened adjacency matrix for each frame, and the frames are stacked
-            in such a way that each of the original arrays follow each other sequentially.
+        np.ndarray
+            Shape ``(sum(n_frames), n_features)``, where ``n_features`` equals the
+            number of unique residue–residue pairs from the *upper triangle*
+            (excluding the diagonal) of the per-frame matrix. Each row corresponds
+            to a single frame across all systems.
 
+        Notes
+        -----
+        * Index row/column ``0`` are dropped (``[1:, 1:]``) under the assumption
+          they hold metadata (residue indices).
+        * Only the upper triangle is used to avoid duplicate symmetric entries.
+        * The result is cached to ``self.feature_matrix`` for reuse.
 
         Examples
         --------
-        >>>CCU_GCU_fulltraj=np.load('/zfshomes/lperez/presentation_directory/CCU_GCU_Trajectory_array.npy',allow_pickle=True)
-        >>>CCU_CGU_fulltraj=np.load('/zfshomes/lperez/presentation_directory/CCU_CGU_Trajectory_array.npy',allow_pickle=True)
-        >>>arrays=[CCU_GCU_fulltraj,CCU_CGU_fulltraj]
-        >>>Kmeans_replicatearray=format_replicate_for_clust(arrays)
-            
-            
-        Notes
-        -----
-        First we concatenate all of our arrays into one large array. This does however rely on the premise that the only difference
-        between our arrays is the number of frames (n_frames). This holds true conceptually because if we have a different
-        number of pairwise residue comparisons we would not have comparable networks, or "systems".
-
-        The goal is to flatten each adjacency matrix into a 1 dimensional vector and then stack all frames.
-        This results in the expected formatting for scipy's kmeans clustering implementation where each .
-        
+        >>> arrays = [sys1, sys2]  # each (n_frames, n_res, n_res)
+        >>> X = sa.replicates_to_featurematrix(arrays)  # doctest: +SKIP
         """
         arrays = arrays if arrays is not None else self.systems_representations
         
@@ -163,39 +160,32 @@ class systems_analysis:
         return final_frames
 
     def extract_hbond_values(self,residues,systems_array=None,mode="sum"):
-        ''' returns a 1dimensional array of "average" values per entry in the array
-        
+        '''Aggregate per-frame H-bond values over a chosen residue set.
+
         Parameters
         ----------
-        systems_array:np.ndarray,shape(n_frames,n_residues,n_residues)
-            An averaged array (or individual frame of a trajectory) that is to be visualized.
-            Since a typical adjacency matrix is NxN observations we will not focus on the multiple
-            frames of the trajectory and will assume an averaged matrix has been provided. Alternatively
-            this function can take a single frame from anywhere in the trajectory if you wish to analyze it
+        residues : list of int
+            Residue indices to retain (e.g., a surface or motif). All pairwise
+            combinations among these residues are used.
+        systems_array : np.ndarray or None, shape ``(n_frames, n_res, n_res)``
+            Averaged array or a single 3D trajectory array. If ``None``, all
+            systems in ``self.systems_representations`` are concatenated.
+        mode : {'sum','average'}, default='sum'
+            Aggregation across the upper triangle for each frame.
 
-        residues:list,shape=(res_indexes,), where res_indexes==int
-            A list denoting all of the residue indexes that you would like to analyze pairwise interactions for.
-            This can be two residues meaning you just want to see the pairwise interactions between them or
-            more residues and then you would get *all possible pairwise combinations of theese residues interactions*
-        
-        mode:string,default="sum",
-            A string argument that decides the aggregation metric by which you would like to aggregate every frame. Mean of
-            the residues of the CAR interaction surface for example, would give you the average hydrogen bonding found between all
-            the residues of the car interaction surface and the +1 codon, sum would give you the total net hydrogen bond counts.
-            
         Returns
-        ----------
-        avg_ta_labels:array,shape=(n_frames,):
-            An array of the same size as the frames of interest except it just contains an average
-            of all the possible pairwise hydrogen bonding interactions of the residues of interest for
-            each frame
-        
-        Notes
-        ----------
-        This is actually a more powerful function than it may appear at first because if you only,
-        say your pca found a few pairwise comparisons be incredibly important, well now we can isolate
-        for just thoose frames and see which is best.
+        -------
+        np.ndarray
+            Shape ``(n_frames,)`` containing the aggregated value per frame.
 
+        Notes
+        -----
+        * Index/label row/column ``0`` are dropped before aggregation.
+        * Only the upper triangle is aggregated to avoid double counting.
+
+        Examples
+        --------
+        >>> vals = sa.extract_hbond_values([12, 47, 91], mode='average')  # doctest: +SKIP
         '''
         if systems_array is not None:
             systems_array=systems_array
@@ -229,46 +219,45 @@ class systems_analysis:
         return ta_labels
 
     #Analyses
-    def cluster_system_level(self,outfile_path=None, max_clusters=None,data=None,k=None):
+    def preform_kmeans(self,outfile_path=None, max_clusters=None,data=None,k=None):
         '''
+        Run KMeans clustering on a feature matrix, either:
+        (a) sweeping K to select optima by silhouette and elbow criteria, or
+        (b) fitting once at a fixed K.
+
         Parameters
         ----------
-        data:np.ndarray,shape=(n_sample,featuresures),
-            A feature matrix of any kind, hopefully one provided from the rest of the pipeline but in theory, this is 
-            just a scikit learn wrapper so you can plug anything you want really
+        outfile_path : str or pathlib.Path, optional
+            Directory where per-K label arrays are saved (``np.save``). Defaults
+            to ``os.getcwd()``.
+        max_clusters : int, optional
+            Upper bound (inclusive) for the K sweep when ``k is None``.
+            Default is ``10``.
+        data : np.ndarray, shape (n_samples, n_features), optional
+            Feature matrix to cluster. If ``None``, uses ``self.feature_matrix``.
+        k : int or None, optional
+            If provided, fit KMeans once at this K and return ``(labels, centers)``.
+            If ``None``, run the optimization sweep.
 
-        max_clusters:int,default=10
-            The maximum number of initial centroids we are iterating through while optimizing sillohuette scores and elbow plots.
-        
-        outfile_path:str,default=os.getcwd()
-            The path to where we would like to save the outputted labels (frame assignments of K-means)
-        
-        data:arraylike,shape=(n_samples,featuresures)
-            Ideally this is the feature matrix provided as input at the top of the workflow but, its provided as a parameter incase
-            you'd like to use theese in your own way.
-        
-        k:int,default=None
-            If you have a happen to have a specific number of k you would like to keep its data for you can do this
-            as otherwise you end up defaulting to either sillohuette score or elbow (inertia) evlauated optimal K. It does
-            save every array inbetween for thoroughness.
-        
         Returns
-        ----------
-        (optimal_k_silhouette_labels,optimal_k_elbow_labels,centers_sillohuette,centers_elbow):tuple,shape=(4)
-            A tuple holding all of the objects created by the clustering of our systems representations. In order from left to right
-            the labels from the optimal number of initial centroids as defined by sillohuette score analysis; then the labels from optimal
-            clustering as defined the the elbow plots, as well as the centroids found for the sillohuette centers and elbow centers.
-        
-            
-        Notes
         -------
-        We do assume you have atleast 10 frames worth of data... clustering any less than that
-        is a little out of the scope of this simple euclidean distance K-means clustering implementation.
-        
-        Examples
-        ---------
+        tuple
+            If ``k is None``:
+                ``(optimal_k_silhouette_labels, optimal_k_elbow_labels,
+                centers_sillohuette, centers_elbow)``.
+            If ``k`` provided:
+                ``(cluster_labels, cluster_centers)``.
 
-        
+        Notes
+        -----
+        * Deterministic seeds: ``init='random'``, ``random_state=0``, and ``n_init=k``.
+        * Silhouette is computed on the full feature space.
+        * Elbow selection is delegated to plotting helper(s) in ``mdsa_tools.Viz``.
+
+        Examples
+        --------
+        >>> labels_sil, labels_elb, C_sil, C_elb = sa.preform_kmeans(max_clusters=8)  # doctest: +SKIP
+        >>> labels_k3, C_k3 = sa.preform_kmeans(k=3)                                  # doctest: +SKIP
         '''
 
         max_clusters=max_clusters if max_clusters is not None else 10
@@ -294,74 +283,42 @@ class systems_analysis:
                                         min_dist=None,
                                         n_neighbors=None):
         '''
+        Reduce the dimensionality of the per-frame feature matrix using PCA or UMAP.
+
         Parameters
         ----------
-        feature_matrix : np.ndarray,shape=(sum(n_frames),n_residues*n_residues) where the sum of n_frames refers to the total number of frames.
-            Each row of the new matrix represents a flattened adjacency matrix for each frame, and the frames are stacked
-            in such a way that each of the original arrays follow each other sequentially.
-        
-            
-        n_components : int,default=2
-            The number of principal components you would like to reduce your dataset down to
-        
-            
-        str : outfile_path, default=os.getcwd()
-            path to where you would like to save your visualization
-        
-        method :str, order:{'PCA','UMAP'}
-            Define which method you would like to use to perform dim-reduction. We provide two methods a linear
-            and non-linear method, Principal Components Analysis (PCA) and Uniform Manifold Approximation and Projection
-            (UMAP).
+        feature_matrix : np.ndarray or None
+            If provided, use this matrix; otherwise prefer ``self.feature_matrix``.
+            If neither is set, calls ``replicates_to_featurematrix()`` to create it.
+        method : {'PCA','UMAP'}, optional
+            Reduction method. Default ``'PCA'``.
+        n_components : int, optional
+            Target dimensionality (default ``2``).
+        min_dist : float, optional
+            UMAP parameter controlling cluster tightness (default ``0.5``).
+        n_neighbors : int, optional
+            UMAP parameter controlling local vs global structure (default ``900``).
 
-        min_dist : float,default=0.5
-            This is a UMAP-specific parameter. It controls how tightly UMAP is allowed to pack points together. 
-            Lower values will preserve more of the local clusters in the data whereas higher values will push 
-            points further apart.
-
-        n_neighbors : int,default=900
-            Another UMAP-specific parameter. It determines the number of neighboring points used in 
-            local approximations of the manifold. Larger values result in more global structure being preserved.
- 
-
-            
-
-        
         Returns
         -------
-        X_pca,weights,explained_variance_ratio_
-
-        X_PCA:np.ndarray,shape=(n_samples,n_components)
-            An array returned by the PCA module in scikit-learns vs.cluster module. Essentially it is the x and y coordinates
-            of every sample from the original feature matrix now reduced into the principal component embedding space.
-            ---As in the output from scikit learns module PCA() from the cluster.vq() module check in later for link---
-
-            In theory it should be (n_sampels,2) since we are generally reducing to two principal components but, if you choose to 
-            use a different number of principal components this would be a different # thus, the signature is broad
-
-
-        weights:shape=(n_samples,n_components)
-            The loadings for each principal component. Theese can be thought of as eigenvector components and they are the raw values 
-            they have not been **2 for magnitude measurements yet. This is a seperate function in this module called create_PCA_ranked_weights.
-
-        explained_variance_ratio_:int,
-            The explained variance ratio of the principal components. This is just a fraction since we are using two principal components
-            but, if you choose to use more it would be slightly different. 
-            **Check back here**    
-        
-       
-
+        If method == 'PCA':
+            (X_pca, weights, explained_variance_ratio_) : tuple
+                ``X_pca`` has shape ``(n_samples, n_components)``.
+                ``weights`` are component loadings (``n_components × n_features``).
+                ``explained_variance_ratio_`` is length ``n_components``.
+        If method == 'UMAP':
+            embedding : np.ndarray
+                Shape ``(n_samples, n_components)``.
 
         Notes
         -----
-        You should include a pre-fix in your outfile path as the image will be saved with the ending
-        "PCA_reduction" so a good example input is
-
-        "/users/userone/desktop/project/output/test_"
+        * PCA uses ``sklearn.decomposition.PCA``.
+        * UMAP uses ``umap.UMAP`` with provided parameters.
 
         Examples
         --------
-
-        
+        >>> X, W, evr = sa.reduce_systems_representations(method='PCA', n_components=2)  # doctest: +SKIP
+        >>> U = sa.reduce_systems_representations(method='UMAP', n_components=2)         # doctest: +SKIP
         '''
         
         if feature_matrix is not None:
@@ -396,57 +353,38 @@ class systems_analysis:
         
     def cluster_embeddingspace(self, reduced_coordinates=None,outfile_path=None,num_systems=None,val_metric=None):
         '''
-        Currently depreciated
-        '''
-        '''A function for looking at conformational states in embedding space
+        (Deprecated) Cluster each system independently in a reduced embedding space.
+
+        This helper splits ``reduced_coordinates`` by system and runs KMeans per
+        split, returning labels/centers chosen by the specified validation metric.
 
         Parameters
         ----------
-        outfilepath:str
-            path to save
-
-        reduced_coordinates:np.Ndarray,default=self.reduced_coordinates,shape=
-            A feature matrix to be used for analysis
-        
-        n:int,default=2
-            number of principal components to reduce to
-        
-        max_clusters:int,default=10
-            The defualt number
-
-        val_metric:str,default='sillohuete'
-            The validation metric you would like to use for picking an "ideal number of clusters'
-            
-
+        reduced_coordinates : np.ndarray or None
+            Dimensionality-reduced coordinates (e.g., from PCA/UMAP). If ``None``,
+            runs ``reduce_systems_representations()`` (PCA, 2D).
+        outfile_path : str or pathlib.Path, optional
+            Directory to write intermediate artifacts (defaults to ``os.getcwd()``).
+        num_systems : int, optional
+            Number of systems to split the coordinates into. Defaults to
+            ``self.num_systems``.
+        val_metric : {'sillohuette','elbow'}, optional
+            Which validation metric to use when choosing K per system. Default
+            ``'sillohuette'``.
 
         Returns
         -------
-        candidate_states_per_system:list,shape=(n_systems,)
-            A list where each entry corresponds to a system. Each entry is a tuple of
-            (labels, centers) representing the cluster assignments for that system and
-            the cluster centers determined by the chosen validation metric.
-
-
+        list of tuple
+            Per-system tuples of ``(labels, centers)`` chosen by ``val_metric``.
 
         Notes
         -----
-        This function runs clustering for each system independently, based on the 
-        dimensionality-reduced feature space. Both elbow and sillohuete methods are 
-        computed internally, but only the method specified in val_metric is returned.
-        Returned states are meant for downstream analysis such as transition probability 
-        calculations, replicate maps, or visualization.
-
-
+        Prefer running clustering on the full feature space and only plotting
+        in the reduced space. This routine is kept for exploratory workflows.
 
         Examples
         --------
-        >>> systems_clusters=self.cluster_embeddingspace(reduced_coordinates=X_pca,
-        ...                                               outfile_path='/results/',
-        ...                                               num_systems=2,
-        ...                                               val_metric='sillohuete')
-        >>> print(len(systems_clusters))
-        2
-
+        >>> states = sa.cluster_embeddingspace(val_metric='elbow')  # doctest: +SKIP
         '''
 
         outfile_path = outfile_path if outfile_path is not None else os.getcwd()
@@ -473,21 +411,17 @@ class systems_analysis:
 
     def create_pearsontest_for_kmeans_distributions(self,labels,coordinates,cluster_centers):
 
-        '''A function that is meant for the 
+        '''Compute pairwise Pearson correlations between per-cluster distance
+        distributions (to their respective KMeans centroids).
 
         Parameters
         ----------
-        labels:listlike
-            A list or array of labels that tell us which cluster each sample belongs to
-
-        coordinates:array,shape=(n_samples,featuresures)
-            An array which tells us the coordinates of each sample so we can form distributions from them and run statistical tests
-            (pearson corellation coefficient)
-        
-        cluster_centers:listlike,shape=k
-            A list of arrays which tell us the coordinates for each cluster center so that we can calculate distributions
-            to them
-
+        labels : array-like of int
+            Cluster assignment for each sample (length ``n_samples``).
+        coordinates : np.ndarray, shape (n_samples, n_features)
+            Coordinates of samples in some space (e.g., embedding or feature space).
+        cluster_centers : np.ndarray, shape (k, n_features)
+            Coordinates of cluster centers.
 
         Returns
         -------
@@ -500,27 +434,15 @@ class systems_analysis:
               - ``pearson_r`` (float): correlation coefficient
               - ``p_value`` (float): two-sided p-value
 
-
         Notes
         -----
-        Distances are computed as Euclidean distances from each point to the center of its
-        assigned cluster. Because clusters can have different sizes, distributions are
-        truncated to the minimum cluster size before computing pairwise correlations to
-        avoid unequal-sample artifacts.
-
-        This is a simple exploratory comparison of cluster compactness/shape; interpret
-        p-values cautiously, especially when sample sizes are small or heavily truncated.
+        Distances are Euclidean from each point to its assigned center. Because cluster
+        sizes differ, distributions are truncated to the minimum cluster size before
+        computing correlations.
 
         Examples
         --------
-        >>> # labels: shape (n_samples,), coordinates: (n_samples, n_features)
-        >>> # cluster_centers: (k, n_features)
-        >>> df = systems_analysis.create_pearsontest_for_kmeans_distributions(
-        ...     self, labels, coordinates, cluster_centers)  # doctest: +SKIP
-        >>> list(df.columns)                                  # doctest: +SKIP
-        ['cluster_i', 'cluster_j', 'pearson_r', 'p_value']
-
-        
+        >>> df = sa.create_pearsontest_for_kmeans_distributions(labels, X, C)  # doctest: +SKIP
         '''
         distances = np.linalg.norm(coordinates - cluster_centers[labels], axis=1) #euclidean distances to centroid
 
@@ -565,63 +487,43 @@ class systems_analysis:
     def create_PCA_ranked_weights(self,outfile_path=None, weights=None, indexes=None):
         '''Create a ranked table of PCA feature weights for the first two principal components.
 
-    Parameters
-    ----------
-    outfile_path : str or pathlib.Path, optional
-        Directory where outputs may be written. If ``None``, uses the current working directory.
-    weights : np.ndarray, shape = (n_components, n_features), optional
-        PCA component loadings (rows = components, columns = features). If ``None``, this
-        function calls ``reduce_systems_representations()`` to compute PCA (default n=2)
-        and uses the returned ``weights``.
-    indexes : array-like of int, optional
-        Residue indices used to label pairwise comparisons. If ``None``, uses ``self.indexes``.
-        These indices define the order used to generate upper-triangle residue–residue
-        comparison labels (e.g., "12-47").
+        Parameters
+        ----------
+        outfile_path : str or pathlib.Path, optional
+            Directory where outputs may be written. If ``None``, uses the current working directory.
+        weights : np.ndarray, shape = (n_components, n_features), optional
+            PCA component loadings (rows = components, columns = features). If ``None``, this
+            function calls ``reduce_systems_representations()`` to compute PCA (default n=2)
+            and uses the returned ``weights``.
+        indexes : array-like of int, optional
+            Residue indices used to label pairwise comparisons. If ``None``, uses ``self.indexes``.
+            These indices define the order used to generate upper-triangle residue–residue
+            comparison labels (e.g., "12-47").
 
-    Returns
-    -------
-    dataframe: pandas.DataFrame,
-        A table mapping each feature (upper-triangle residue pair) to its PCA weights and
-        magnitudes.
-        
-        
-        Columns include:
+        Returns
+        -------
+        pandas.DataFrame
+            A table mapping each feature (upper-triangle residue pair) to its PCA weights and
+            magnitudes with columns:
 
-        
-        * `Comparisons`    : str   — 'i-j' residue pair label
-        * `PC1_Weights`    : float — raw loading for PC1
-        * `PC2_Weights`    : float — raw loading for PC2
-        * `PC1_magnitude`  : float — (PC1_Weights)**2
-        * `PC2_magnitude`  : float — (PC2_Weights)**2
-        * `PC1_mag_norm`   : float — min–max normalized PC1_magnitude to [0, 1] (within PC1)
-        * `PC2_mag_norm`   : float — min–max normalized PC2_magnitude to [0, 1] (within PC2)
+            * ``Comparisons``     — 'i-j' residue pair label (str)
+            * ``PC1_Weights``     — raw loading for PC1 (float)
+            * ``PC2_Weights``     — raw loading for PC2 (float)
+            * ``PC1_magnitude``   — (PC1_Weights)**2 (float)
+            * ``PC2_magnitude``   — (PC2_Weights)**2 (float)
+            * ``PC1_mag_norm``    — min–max normalized PC1_magnitude to [0, 1] (float)  [*optional if postprocessed*]
+            * ``PC2_mag_norm``    — min–max normalized PC2_magnitude to [0, 1] (float)  [*optional if postprocessed*]
 
-        
-    Notes
-    -----
-    
+        Notes
+        -----
+        Only the upper triangle (excluding the diagonal) of the residue–residue matrix is used,
+        so each row corresponds to a unique residue pair. The function assumes at least two
+        principal components are available.
 
-    - Only the upper triangle (excluding the diagonal) of the residue–residue matrix is used,
-    so each row corresponds to a unique residue pair.
-    - “Weights” are PCA component loadings (eigenvector entries). Squaring gives a magnitude
-    that is convenient for ranking feature importance within a component (sign is discarded).
-    - The min–max normalization is performed **within each component** to [0, 1] and is intended
-    for visualization/ranking. Do not compare these normalized values across different PCA
-    runs unless you control scaling consistently.
-    - This function assumes at least two components are available; it reports PC1 and PC2.
-
-
-    Examples
-    --------
-
-
-    >>> sa = systems_analysis([traj_array_sys1, traj_array_sys2])  # doctest: +SKIP
-    >>> df = sa.create_PCA_ranked_weights()                         # doctest: +SKIP
-    >>> df.head()                                                   # doctest: +SKIP
-
-    
-    '''
-
+        Examples
+        --------
+        >>> df = sa.create_PCA_ranked_weights()  # doctest: +SKIP
+        '''
         if weights is None:
             _,weights,_ =self.reduce_systems_representations()
         if weights is not None:
@@ -735,36 +637,36 @@ class systems_analysis:
         return optimal_k_silhouette_labels, optimal_k_elbow_labels, centers_sillohuette, centers_elbow
         
     def run_PCA(self,feature_matrix,n):
-        '''small function for running principal components analysis
+        '''Run Principal Components Analysis (PCA) and return transformed
+        coordinates, component loadings, and explained variance ratios.
 
         Parameters
         ----------
-        feature_matrix:np.ndarray,shape=(sum(n_frames),n_residues*n_residues) where the sum of n_frames refers to the total number of frames.
-            Each row of the new matrix represents a flattened adjacency matrix for each frame, and the frames are stacked
-            in such a way that each of the original arrays follow each other sequentially.
-        
-        n:int,default=2
-            The number of principal components you would like to reduce your dataset down to
+        feature_matrix : np.ndarray
+            Shape ``(n_samples, n_features)``. Typically produced by
+            ``replicates_to_featurematrix()``.
+        n : int
+            Number of components to retain (default ``2`` in upstream callers).
 
         Returns
         -------
-        X_pca : np.ndarray, shape = (n_samples, n)
+        X_pca : np.ndarray, shape (n_samples, n)
             Transformed coordinates in the principal-component space.
-        weights : np.ndarray, shape = (n, n_features)
+        weights : np.ndarray, shape (n, n_features)
             PCA component loadings (rows = components, columns = original features).
-        explained_variances : np.ndarray, shape = (n,)
+        explained_variances : np.ndarray, shape (n,)
             Fraction of variance explained by each selected component.
 
         Notes
         -----
-        This is a thin wrapper around ``sklearn.decomposition.PCA`` that fits on the
-        provided feature matrix and returns the transformed coordinates, component
-        loadings, and explained-variance ratios.
+        Thin wrapper around ``sklearn.decomposition.PCA``; fits on the provided
+        feature matrix and returns the transformed coordinates, component loadings,
+        and explained-variance ratios.
 
         Examples
         --------
-        >>> X_pca, W, evr = systems_analysis.run_PCA(self, feature_matrix, 2)  # doctest: +SKIP
-        >>> X_pca.shape                                                        # doctest: +SKIP
+        >>> X_pca, W, evr = sa.run_PCA(feature_matrix, 2)  # doctest: +SKIP
+        >>> X_pca.shape                                     # doctest: +SKIP
         (feature_matrix.shape[0], 2)
         '''
 

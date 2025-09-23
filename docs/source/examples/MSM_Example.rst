@@ -64,9 +64,9 @@ by :class:`mdsa_tools.Data_gen_hbond.TrajectoryProcessor` or :mod:`mdsa_tools.Cp
    # cluster embedding space → candidate MSM
    #########################################
 
-   # pick a K (or call SA.cluster_system_level with max_clusters for an elbow/silhouette search)
+   # pick a K (or call SA.perform_kmeans with max_clusters for an elbow/silhouette search)
    k = 6
-   labels, centers = SA.cluster_system_level(data=X_pca, k=k)
+   labels, centers = SA.perform_kmeans(data=X_pca, k=k)
 
    visualize_reduction(
        X_pca,
