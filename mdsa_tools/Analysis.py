@@ -219,7 +219,7 @@ class systems_analysis:
         return ta_labels
 
     #Analyses
-    def preform_kmeans(self,outfile_path=None, max_clusters=None,data=None,k=None):
+    def perform_kmeans(self,outfile_path=None, max_clusters=None,data=None,k=None):
         '''
         Run KMeans clustering on a feature matrix, either:
         (a) sweeping K to select optima by silhouette and elbow criteria, or
