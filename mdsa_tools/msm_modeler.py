@@ -13,9 +13,7 @@ mdsa_tools.Viz.visualize_reduction
     plot pca/umap embeddings.
 mdsa_tools.Data_gen_hbond.create_system_representations
     build residue–residue H-bond adjacency matrices.
-numpy.linalg.svd
-    linear algebra under the hood.
-    
+
 '''
 
 import numpy as np

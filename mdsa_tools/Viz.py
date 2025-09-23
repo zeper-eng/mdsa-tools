@@ -12,8 +12,9 @@ to a continous colorbar and goes based on sample index.
 See Also
 --------
 mdsa_tools.Analysis : A lot of the results you will probably visualize
+
 mdsa_tools.Data_gen_hbond.create_system_representations : Build residue–residue H-bond adjacency matrices.
-numpy.linalg.svd : Linear algebra used under the hood.
+
 
 '''
 
@@ -703,7 +704,6 @@ def create_2d_color_mappings(
             label_dict[label] = colors_list[i % len(colors_list)]
             i += 1
     return [label_dict[i] for i in labels]
-
 
 def visualize_reduction(embedding_coordinates,
                         color_mappings=None,

@@ -18,8 +18,6 @@ mdsa_tools.Viz.visualize_reduction
     Plot PCA/UMAP embeddings of reduced systems.
 mdsa_tools.Data_gen_hbond.create_system_representations
     Build system-level adjacency matrices from trajectories.
-numpy.linalg.svd
-    Linear algebra backend for certain reduction methods.
 
 '''
 

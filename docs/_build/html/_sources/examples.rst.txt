@@ -81,6 +81,7 @@ analysis of molecular dynamics data.
 
    .. grid-item-card::
       :link: examples/rmsd_example
+      :link-type: doc
       :shadow: lg
       :text-align: center
 
