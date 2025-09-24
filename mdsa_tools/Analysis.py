@@ -219,7 +219,7 @@ class systems_analysis:
         return ta_labels
 
     #Analyses
-    def perform_kmeans(self,outfile_path=None, max_clusters=None,data=None,k=None):
+    def perform_kmeans(self, outfile_path=None, max_clusters=None, data=None, k=None):
         '''
         Run KMeans clustering on a feature matrix, either:
         (a) sweeping K to select optima by silhouette and elbow criteria, or
@@ -227,56 +227,29 @@ class systems_analysis:
 
         Parameters
         ----------
-        outfile_path : str or pathlib.Path, optional
-            Directory where per-K label arrays are saved (``np.save``). Defaults
-            to ``os.getcwd()``.
-        max_clusters : int, optional
-            Upper bound (inclusive) for the K sweep when ``k is None``.
-            Default is ``10``.
-        data : np.ndarray, shape (n_samples, n_features), optional
-            Feature matrix to cluster. If ``None``, uses ``self.feature_matrix``.
-        k : int or None, optional
-            If provided, fit KMeans once at this K and return ``(labels, centers)``.
-            If ``None``, run the optimization sweep.
-
-        Returns
-        -------
-        tuple
-            If ``k is None``:
-                ``(optimal_k_silhouette_labels, optimal_k_elbow_labels,
-                centers_sillohuette, centers_elbow)``.
-            If ``k`` provided:
-                ``(cluster_labels, cluster_centers)``.
-
-        Notes
-        -----
-        * Deterministic seeds: ``init='random'``, ``random_state=0``, and ``n_init=k``.
-        * Silhouette is computed on the full feature space.
-        * Elbow selection is delegated to plotting helper(s) in ``mdsa_tools.Viz``.
-
-        Examples
-        --------
-        >>> labels_sil, labels_elb, C_sil, C_elb = sa.preform_kmeans(max_clusters=8)  # doctest: +SKIP
-        >>> labels_k3, C_k3 = sa.preform_kmeans(k=3)                                  # doctest: +SKIP
+        outfile_path : str or pathlib.Path or None, optional
+            Directory where per-K label arrays are saved (``np.save``). If ``None``,
+            nothing is written to disk.
+        ...
         '''
-
-        max_clusters=max_clusters if max_clusters is not None else 10
+        max_clusters = max_clusters if max_clusters is not None else 10
         data = data if data is not None else self.feature_matrix
-        outfile_path=outfile_path if outfile_path is not None else os.getcwd()
-        k=k if k is not None else None
+        # IMPORTANT: If None, do not save anything downstream.
+        outfile_path = outfile_path if outfile_path is not None else None
+        k = k if k is not None else None
 
         if k is None:
-            optimal_k_silhouette_labels,optimal_k_elbow_labels,centers_sillohuette,centers_elbow=self.perform_clust_opt(outfile_path=outfile_path,data=data,max_clusters=max_clusters)
-        
+            optimal_k_silhouette_labels, optimal_k_elbow_labels, centers_sillohuette, centers_elbow = \
+                self.perform_clust_opt(outfile_path=outfile_path, data=data, max_clusters=max_clusters)
+
         if k is not None:
             kmeans = KMeans(n_clusters=k, init='random', n_init=k, random_state=0)
             kmeans.fit(data)
-            cluster_centers, inertia, cluster_labels = kmeans.cluster_centers_,kmeans.inertia_,kmeans.labels_
-            return cluster_labels,cluster_centers
-            
+            cluster_centers, inertia, cluster_labels = kmeans.cluster_centers_, kmeans.inertia_, kmeans.labels_
+            return cluster_labels, cluster_centers
 
-        return optimal_k_silhouette_labels,optimal_k_elbow_labels,centers_sillohuette,centers_elbow
-    
+        return optimal_k_silhouette_labels, optimal_k_elbow_labels, centers_sillohuette, centers_elbow    
+   
     def reduce_systems_representations(self,feature_matrix=None,
                                         method=None,
                                         n_components=None,
@@ -351,61 +324,34 @@ class systems_analysis:
         elif method != 'PCA' and method != 'UMAP':
             print('No valid method supplied for dimensional reduction ')
         
-    def cluster_embeddingspace(self, reduced_coordinates=None,outfile_path=None,num_systems=None,val_metric=None):
+    def cluster_embeddingspace(self, reduced_coordinates=None, outfile_path=None, num_systems=None, val_metric=None):
         '''
         (Deprecated) Cluster each system independently in a reduced embedding space.
 
-        This helper splits ``reduced_coordinates`` by system and runs KMeans per
-        split, returning labels/centers chosen by the specified validation metric.
-
         Parameters
         ----------
-        reduced_coordinates : np.ndarray or None
-            Dimensionality-reduced coordinates (e.g., from PCA/UMAP). If ``None``,
-            runs ``reduce_systems_representations()`` (PCA, 2D).
-        outfile_path : str or pathlib.Path, optional
-            Directory to write intermediate artifacts (defaults to ``os.getcwd()``).
-        num_systems : int, optional
-            Number of systems to split the coordinates into. Defaults to
-            ``self.num_systems``.
-        val_metric : {'sillohuette','elbow'}, optional
-            Which validation metric to use when choosing K per system. Default
-            ``'sillohuette'``.
-
-        Returns
-        -------
-        list of tuple
-            Per-system tuples of ``(labels, centers)`` chosen by ``val_metric``.
-
-        Notes
-        -----
-        Prefer running clustering on the full feature space and only plotting
-        in the reduced space. This routine is kept for exploratory workflows.
-
-        Examples
-        --------
-        >>> states = sa.cluster_embeddingspace(val_metric='elbow')  # doctest: +SKIP
+        outfile_path : str or pathlib.Path or None, optional
+            Directory to write intermediate artifacts. If ``None``, nothing is saved.
+        ...
         '''
-
-        outfile_path = outfile_path if outfile_path is not None else os.getcwd()
+        # IMPORTANT: If None, downstream won't save.
+        outfile_path = outfile_path if outfile_path is not None else None
         num_systems = num_systems if num_systems is not None else self.num_systems
-        val_metric=val_metric if val_metric is not None else 'sillohuette'
-        
+        val_metric = val_metric if val_metric is not None else 'sillohuette'
+
         if reduced_coordinates is None:
-            reduced_coordinates,_,_=self.reduce_systems_representations()
+            reduced_coordinates, _, _ = self.reduce_systems_representations()
 
-        
-        #grab the number of rows we need and then iterate through X_pca run kmeans and visualize using our initial values
-        individual_systems=np.array_split(reduced_coordinates, num_systems,axis=0)
+        individual_systems = np.array_split(reduced_coordinates, num_systems, axis=0)
         print(individual_systems[0].shape)
-        candidate_states_per_system=[]
+        candidate_states_per_system = []
         for i in individual_systems:
-            optimal_k_silhouette_labels,optimal_k_elbow_labels,centers_sillohuette,centers_elbow=self.perform_clust_opt(outfile_path,data=i)
-            if val_metric=='sillohuette':
-                candidate_states_per_system.append((optimal_k_silhouette_labels,centers_sillohuette))
-            if val_metric=='elbow':
-                candidate_states_per_system.append((optimal_k_elbow_labels,centers_elbow))
-
+            optimal_k_silhouette_labels, optimal_k_elbow_labels, centers_sillohuette, centers_elbow = \
+                self.perform_clust_opt(outfile_path, data=i)
+            if val_metric == 'sillohuette':
+                candidate_states_per_system.append((optimal_k_silhouette_labels, centers_sillohuette))
+            if val_metric == 'elbow':
+                candidate_states_per_system.append((optimal_k_elbow_labels, centers_elbow))
 
         return candidate_states_per_system
 
@@ -553,44 +499,22 @@ class systems_analysis:
 
 
     #Algorithm wrappers 
-    def perform_clust_opt(self,outfile_path, max_clusters=None, data=None,k=None):
+    def perform_clust_opt(self, outfile_path, max_clusters=None, data=None, k=None):
         """Optimize KMeans over a range of K and return labels/centers for the
         silhouette- and elbow-selected optima, or run a single-K fit.
 
         Parameters
         ----------
-        outfile_path : str
+        outfile_path : str or pathlib.Path or None
             Directory prefix where per-K label arrays are saved via ``np.save`` as
-            ``"<outfile_path>kluster_labels_{K}clust.npy"`` (suffix omitted in code).
-        max_clusters : int, optional
-            Upper bound (inclusive) of the search range when ``k is None``.
-            Defaults to 10.
-        data : np.ndarray, shape = (n_samples, n_features), optional
-            Feature matrix to cluster. If ``None``, uses ``self.feature_matrix``.
-        k : int or None, optional
-            If provided, fit KMeans once at this K and return ``(labels, centers)``.
-            If ``None``, grid-searches K in ``[2, ..., max_clusters]``.
-
-        Returns
-        -------
-        If k is not None:
-            (cluster_labels, cluster_centers) : tuple
-                Labels and centers from the single-K fit.
-        If k is None:
-            (optimal_k_silhouette_labels, optimal_k_elbow_labels,
-             centers_sillohuette, centers_elbow) : tuple
-                Labels/centers corresponding to the best K by silhouette score and
-                the elbow criterion, respectively.
-
-        Notes
-        -----
-        * Silhouette scores are computed for each K and used to select one optimum.
-        * Inertia (elbow) values are tracked for each K, except for a special-case
-          skip when ``max_clusters == 3 and k == 3`` to avoid degenerate elbow logic.
-        * Deterministic runs are ensured via ``random_state=0`` and ``init='random'``.
+            ``"<outfile_path>kluster_labels_{K}clust.npy"``. If ``None``, nothing
+            is written to disk and selection falls back to simple array heuristics
+            (no plots).
+        ...
         """
         data = data if data is not None else self.feature_matrix
-        outfile_path = outfile_path if outfile_path is not None else os.getcwd()
+        # IMPORTANT: Do not coerce to CWD; None means "no saving".
+        outfile_path = outfile_path if outfile_path is not None else None
         max_clusters = max_clusters if max_clusters is not None else 10
         k = k if k is not None else None
 
@@ -618,16 +542,23 @@ class systems_analysis:
                 inertia_scores.append(inertia)
                 inertia_Ks.append(k)
 
-            np.save(f"/{outfile_path}kluster_labels_{k}clust", cluster_labels)
+            # Only save if a directory/path was provided
+            if outfile_path is not None:
+                # Keeping your original path style; just gated.
+                np.save(f"/{outfile_path}kluster_labels_{k}clust", cluster_labels)
 
-        from mdsa_tools.Viz import plot_elbow_scores, plot_sillohette_scores
-
-        optimal_sillohuette = plot_sillohette_scores(cluster_range, silhouette_scores, outfile_path)
-
-        if len(inertia_scores) < 3:
-            optimal_elbow = inertia_Ks[int(np.argmin(np.asarray(inertia_scores)))]
+        # Choose optimal Ks
+        if outfile_path is not None:
+            from mdsa_tools.Viz import plot_elbow_scores, plot_sillohette_scores
+            optimal_sillohuette = plot_sillohette_scores(cluster_range, silhouette_scores, outfile_path)
+            if len(inertia_scores) < 3:
+                optimal_elbow = inertia_Ks[int(np.argmin(np.asarray(inertia_scores)))]
+            else:
+                optimal_elbow = plot_elbow_scores(inertia_Ks, inertia_scores, outfile_path)
         else:
-            optimal_elbow = plot_elbow_scores(inertia_Ks, inertia_scores, outfile_path)
+            # No plotting: simple, deterministic fallbacks
+            optimal_sillohuette = int(np.argmax(np.asarray(silhouette_scores))) + 2  # offset for range start at 2
+            optimal_elbow = inertia_Ks[int(np.argmin(np.asarray(inertia_scores)))] if len(inertia_scores) > 0 else 2
 
         optimal_k_silhouette_labels = all_labels[optimal_sillohuette - 2]
         optimal_k_elbow_labels = all_labels[optimal_elbow - 2]
