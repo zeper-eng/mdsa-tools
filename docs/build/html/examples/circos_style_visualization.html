@@ -1,0 +1,227 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MDcircos (PCA-weighted contacts) &mdash; mdsa-tools</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=a6a68382" />
+      <link rel="stylesheet" type="text/css" href="../_static/fonts.css?v=5583d106" />
+      <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
+      <link rel="stylesheet" type="text/css" href="../_static/fullwidth.css" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../_static/design-tabs.js?v=f930bc37"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Data generation (H-bond matrices)" href="data_generation_workflow.html" />
+    <link rel="prev" title="Feature matrix &amp; exploratory clustering" href="example_of_clustering_analysis.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            mdsa-tools
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../api.html">mdsa-tools Python API</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../examples.html">Examples</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="example_of_clustering_analysis.html">Feature matrix &amp; exploratory clustering</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">MDcircos (PCA-weighted contacts)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#what-you-get">What you get</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#quickstart">Quickstart</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#notes">Notes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#where-this-fits">Where this fits</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#see-also">See also</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="data_generation_workflow.html">Data generation (H-bond matrices)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="import_from_cpptraj.html">cpptraj (series) → residue×residue H-bond matrices</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hbond_replicate_maps.html">Replicate maps (discrete H-bond labels)</a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">mdsa-tools</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../examples.html">Examples</a></li>
+      <li class="breadcrumb-item active">MDcircos (PCA-weighted contacts)</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="mdcircos-pca-weighted-contacts">
+<span id="analysis"></span><h1>MDcircos (PCA-weighted contacts)<a class="headerlink" href="#mdcircos-pca-weighted-contacts" title="Link to this heading"></a></h1>
+<p>Use <a class="reference internal" href="../_autosummary/mdsa_tools.Analysis.html#mdsa_tools.Analysis.systems_analysis" title="mdsa_tools.Analysis.systems_analysis"><code class="xref py py-class docutils literal notranslate"><span class="pre">mdsa_tools.Analysis.systems_analysis</span></code></a> to build feature matrices from
+saved H-bond adjacency arrays and compute PCA weightings. Then visualize the
+most salient residue–residue contacts with <a class="reference internal" href="../_autosummary/mdsa_tools.Viz.html#module-mdsa_tools.Viz" title="mdsa_tools.Viz"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mdsa_tools.Viz</span></code></a>’s MDcircos helpers.</p>
+<section id="what-you-get">
+<h2>What you get<a class="headerlink" href="#what-you-get" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>A <a class="reference internal" href="../_autosummary/mdsa_tools.Analysis.html#mdsa_tools.Analysis.systems_analysis" title="mdsa_tools.Analysis.systems_analysis"><code class="xref py py-class docutils literal notranslate"><span class="pre">systems_analysis</span></code></a> instance bound to your list of systems.</p></li>
+<li><p>A PCA-ranked weights table (<code class="docutils literal notranslate"><span class="pre">pandas.DataFrame</span></code>) with columns like
+<code class="docutils literal notranslate"><span class="pre">Comparisons</span></code>, <code class="docutils literal notranslate"><span class="pre">PC1_Weights</span></code>, and <code class="docutils literal notranslate"><span class="pre">PC1_magnitude</span></code>, sorted by importance.</p></li>
+<li><p>Circos-style images that highlight contact weights overall or split by
+<strong>positive vs. negative</strong> loadings on the first principal component.</p></li>
+</ul>
+</section>
+<section id="quickstart">
+<h2>Quickstart<a class="headerlink" href="#quickstart" title="Link to this heading"></a></h2>
+<p>Minimal example using two previously generated systems (<code class="docutils literal notranslate"><span class="pre">.npy</span></code> arrays created by
+<code class="xref py py-class docutils literal notranslate"><span class="pre">mdsa_tools.Data_gen_hbond.TrajectoryProcessor</span></code> or <a class="reference internal" href="../_autosummary/mdsa_tools.Cpptraj_import.html#module-mdsa_tools.Cpptraj_import" title="mdsa_tools.Cpptraj_import"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mdsa_tools.Cpptraj_import</span></code></a>).</p>
+<p>If you are unfamiliar with making theese see <a class="reference internal" href="data_generation_workflow.html#datagen"><span class="std std-ref">Data generation (H-bond matrices)</span></a>.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">mdsa_tools.Analysis</span><span class="w"> </span><span class="kn">import</span> <span class="n">systems_analysis</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">mdsa_tools.Viz</span><span class="w"> </span><span class="kn">import</span> <span class="n">create_MDcircos_from_weightsdf</span>
+
+<span class="c1">#########################################</span>
+<span class="c1"># Load systems (each is a list of frames</span>
+<span class="c1">#########################################</span>
+
+<span class="n">system_a</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s2">&quot;/path/to/CCU_GCU_Trajectory_array.npy&quot;</span><span class="p">,</span> <span class="n">allow_pickle</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">system_b</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s2">&quot;/path/to/CCU_CGU_Trajectory_array.npy&quot;</span><span class="p">,</span> <span class="n">allow_pickle</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+<span class="c1"># Each system should be an array-like of shape:</span>
+<span class="c1"># (n_frames, n_res+1, n_res+1), where the leading row/col store 1-based residue IDs.</span>
+<span class="n">all_systems</span> <span class="o">=</span> <span class="p">[</span><span class="n">system_a</span><span class="p">,</span> <span class="n">system_b</span><span class="p">]</span>
+
+<span class="c1">#########################################</span>
+<span class="c1"># Build analyzer and get weights</span>
+<span class="c1">#########################################</span>
+<span class="n">SA</span> <span class="o">=</span> <span class="n">systems_analysis</span><span class="p">(</span><span class="n">all_systems</span><span class="p">)</span>
+<span class="n">PCA_ranked_weights</span> <span class="o">=</span> <span class="n">SA</span><span class="o">.</span><span class="n">create_PCA_ranked_weights</span><span class="p">()</span>  <span class="c1"># DataFrame with PC loadings</span>
+
+<span class="c1">#########################################</span>
+<span class="c1"># One-shot MDcircos of top-weighted pairs</span>
+<span class="c1">#########################################</span>
+<span class="n">outdir</span> <span class="o">=</span> <span class="s2">&quot;/path/to/output/circos&quot;</span>
+<span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">outdir</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">create_MDcircos_from_weightsdf</span><span class="p">(</span><span class="n">PCA_ranked_weights</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">outdir</span><span class="p">,</span> <span class="s2">&quot;PC1_overall&quot;</span><span class="p">))</span>
+</pre></div>
+</div>
+<p>In our case, PC1 clearly separates systems (e.g., one system loads positively and the
+other negatively). In that case, we wanted to plot <strong>only</strong> positive or <strong>only</strong>
+negative PC1 weights:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">mdsa_tools.Viz</span><span class="w"> </span><span class="kn">import</span> <span class="n">create_MDcircos_from_weightsdf</span>
+
+<span class="c1"># Keep only the columns we need for filtering/plotting</span>
+<span class="n">PC1_df</span> <span class="o">=</span> <span class="n">PCA_ranked_weights</span><span class="p">[[</span><span class="s2">&quot;Comparisons&quot;</span><span class="p">,</span> <span class="s2">&quot;PC1_magnitude&quot;</span><span class="p">,</span> <span class="s2">&quot;PC1_Weights&quot;</span><span class="p">]]</span>
+
+<span class="n">pos</span> <span class="o">=</span> <span class="n">PC1_df</span><span class="p">[</span><span class="n">PC1_df</span><span class="p">[</span><span class="s2">&quot;PC1_Weights&quot;</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">][[</span><span class="s2">&quot;Comparisons&quot;</span><span class="p">,</span> <span class="s2">&quot;PC1_magnitude&quot;</span><span class="p">]]</span>
+<span class="n">neg</span> <span class="o">=</span> <span class="n">PC1_df</span><span class="p">[</span><span class="n">PC1_df</span><span class="p">[</span><span class="s2">&quot;PC1_Weights&quot;</span><span class="p">]</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">][[</span><span class="s2">&quot;Comparisons&quot;</span><span class="p">,</span> <span class="s2">&quot;PC1_magnitude&quot;</span><span class="p">]]</span>
+
+<span class="n">create_MDcircos_from_weightsdf</span><span class="p">(</span><span class="n">pos</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">outdir</span><span class="p">,</span> <span class="s2">&quot;PC1_positive&quot;</span><span class="p">))</span>
+<span class="n">create_MDcircos_from_weightsdf</span><span class="p">(</span><span class="n">neg</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">outdir</span><span class="p">,</span> <span class="s2">&quot;PC1_negative&quot;</span><span class="p">))</span>
+</pre></div>
+</div>
+</section>
+<section id="notes">
+<h2>Notes<a class="headerlink" href="#notes" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p><strong>Inputs:</strong> Each system is a per-frame H-bond adjacency stack of shape
+<code class="docutils literal notranslate"><span class="pre">(n_frames,</span> <span class="pre">n_res+1,</span> <span class="pre">n_res+1)</span></code>, with the <code class="docutils literal notranslate"><span class="pre">0</span></code>-th row/col storing <strong>1-based</strong>
+residue indices. Slice <code class="docutils literal notranslate"><span class="pre">[1:,</span> <span class="pre">1:]</span></code> if you only need the numeric adjacency.</p></li>
+<li><p><strong>Weight scaling:</strong> MDcircos helpers may apply <strong>min–max scaling</strong> to magnitudes
+for legibility, which is helpful even if PCA weights are already normalized.</p></li>
+<li><p><strong>Filtering:</strong> The <code class="docutils literal notranslate"><span class="pre">PCA_ranked_weights</span></code> table is typically sorted by absolute
+contribution. You can subset by sign (positive/negative) or threshold by
+<code class="docutils literal notranslate"><span class="pre">PC1_magnitude</span></code> before plotting.</p></li>
+<li><p><strong>Reproducibility:</strong> Keep your saved arrays and output figures in versioned folders
+so you can re-run the analysis when trajectory preprocessing changes.</p></li>
+</ul>
+</section>
+<section id="where-this-fits">
+<h2>Where this fits<a class="headerlink" href="#where-this-fits" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>Generate the adjacency arrays with <code class="xref py py-class docutils literal notranslate"><span class="pre">mdsa_tools.Data_gen_hbond.TrajectoryProcessor</span></code>
+(or build from cpptraj tables via <a class="reference internal" href="../_autosummary/mdsa_tools.Cpptraj_import.html#module-mdsa_tools.Cpptraj_import" title="mdsa_tools.Cpptraj_import"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mdsa_tools.Cpptraj_import</span></code></a>), then pass them here.</p></li>
+<li><p>After identifying key contacts with PCA/MDcircos, you can:
+- Cluster or label states with <a class="reference internal" href="../_autosummary/mdsa_tools.Analysis.html#module-mdsa_tools.Analysis" title="mdsa_tools.Analysis"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mdsa_tools.Analysis</span></code></a>.
+- Reduce and visualize embeddings with <a class="reference internal" href="../_autosummary/mdsa_tools.Viz.html#module-mdsa_tools.Viz" title="mdsa_tools.Viz"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mdsa_tools.Viz</span></code></a>.
+- Feed features into MSM workflows (see <a class="reference internal" href="../_autosummary/mdsa_tools.msm_modeler.html#module-mdsa_tools.msm_modeler" title="mdsa_tools.msm_modeler"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mdsa_tools.msm_modeler</span></code></a>).</p></li>
+</ul>
+</section>
+<section id="see-also">
+<h2>See also<a class="headerlink" href="#see-also" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p><a class="reference internal" href="../_autosummary/mdsa_tools.Data_gen_hbond.html#module-mdsa_tools.Data_gen_hbond" title="mdsa_tools.Data_gen_hbond"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mdsa_tools.Data_gen_hbond</span></code></a> — build per-frame H-bond adjacency matrices.</p></li>
+<li><p><a class="reference internal" href="../_autosummary/mdsa_tools.Cpptraj_import.html#module-mdsa_tools.Cpptraj_import" title="mdsa_tools.Cpptraj_import"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mdsa_tools.Cpptraj_import</span></code></a> — construct the same matrices from cpptraj series tables.</p></li>
+<li><p><a class="reference internal" href="../_autosummary/mdsa_tools.Analysis.html#mdsa_tools.Analysis.systems_analysis.create_PCA_ranked_weights" title="mdsa_tools.Analysis.systems_analysis.create_PCA_ranked_weights"><code class="xref py py-meth docutils literal notranslate"><span class="pre">mdsa_tools.Analysis.systems_analysis.create_PCA_ranked_weights()</span></code></a> — ranked PC loadings.</p></li>
+<li><p><a class="reference internal" href="../_autosummary/mdsa_tools.Viz.html#mdsa_tools.Viz.create_MDcircos_from_weightsdf" title="mdsa_tools.Viz.create_MDcircos_from_weightsdf"><code class="xref py py-func docutils literal notranslate"><span class="pre">mdsa_tools.Viz.create_MDcircos_from_weightsdf()</span></code></a> — quick MDcircos from a weights DataFrame.</p></li>
+</ul>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="example_of_clustering_analysis.html" class="btn btn-neutral float-left" title="Feature matrix &amp; exploratory clustering" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="data_generation_workflow.html" class="btn btn-neutral float-right" title="Data generation (H-bond matrices)" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright .</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

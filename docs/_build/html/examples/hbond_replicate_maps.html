@@ -1,0 +1,237 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Replicate maps (discrete H-bond labels) &mdash; mdsa-tools</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=a6a68382" />
+      <link rel="stylesheet" type="text/css" href="../_static/fonts.css?v=5583d106" />
+      <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
+      <link rel="stylesheet" type="text/css" href="../_static/fullwidth.css" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../_static/design-tabs.js?v=f930bc37"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="UMAP embeddings (per-frame labelling)" href="umap_example.html" />
+    <link rel="prev" title="Feature matrix &amp; exploratory clustering" href="example_of_clustering_analysis.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            mdsa-tools
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference external" href="https://github.com/zeper-eng/mdsa-tools">GitHub</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api.html">mdsa-tools Python API</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../examples.html">Examples</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="circos_style_visualization.html">MDcircos (PCA-weighted contacts)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="data_generation_workflow.html">Data generation (H-bond matrices)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="import_from_cpptraj.html">cpptraj (series) → residue×residue H-bond matrices</a></li>
+<li class="toctree-l2"><a class="reference internal" href="MSM_Example.html">MSM (embedding-space kinetics from embeddings)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Contourplots.html">Contours on PCA/UMAP embeddings</a></li>
+<li class="toctree-l2"><a class="reference internal" href="rmsd_example.html">Cohesion over time (sliding &amp; shrinking windows)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="example_of_clustering_analysis.html">Feature matrix &amp; exploratory clustering</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Replicate maps (discrete H-bond labels)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#what-you-get">What you get</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#quickstart">Quickstart</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#notes">Notes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#where-this-fits">Where this fits</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#see-also">See also</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="umap_example.html">UMAP embeddings (per-frame labelling)</a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">mdsa-tools</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../examples.html">Examples</a></li>
+      <li class="breadcrumb-item active">Replicate maps (discrete H-bond labels)</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="replicate-maps-discrete-h-bond-labels">
+<span id="replicatemap"></span><h1>Replicate maps (discrete H-bond labels)<a class="headerlink" href="#replicate-maps-discrete-h-bond-labels" title="Link to this heading"></a></h1>
+<p>Use <a class="reference internal" href="../_autosummary/mdsa_tools.Analysis.html#mdsa_tools.Analysis.systems_analysis" title="mdsa_tools.Analysis.systems_analysis"><code class="xref py py-class docutils literal notranslate"><span class="pre">mdsa_tools.Analysis.systems_analysis</span></code></a> to bind previously saved H-bond adjacency arrays, then pull per-frame, discrete H-bond <strong>labels</strong> for specific residue pairs. Finally, plot replicate maps with <a class="reference internal" href="../_autosummary/mdsa_tools.Viz.html#mdsa_tools.Viz.replicatemap_from_labels" title="mdsa_tools.Viz.replicatemap_from_labels"><code class="xref py py-func docutils literal notranslate"><span class="pre">mdsa_tools.Viz.replicatemap_from_labels()</span></code></a> to compare label dynamics across frames/replicates.</p>
+<section id="what-you-get">
+<h2>What you get<a class="headerlink" href="#what-you-get" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>A <a class="reference internal" href="../_autosummary/mdsa_tools.Analysis.html#mdsa_tools.Analysis.systems_analysis" title="mdsa_tools.Analysis.systems_analysis"><code class="xref py py-class docutils literal notranslate"><span class="pre">systems_analysis</span></code></a> instance bound to your systems.</p></li>
+<li><p>Per-frame integer labels (or counts/states) for the requested residue pairs.</p></li>
+<li><p>Replicate map images saved to disk—useful for quick visual comparisons across replicates and time windows.</p></li>
+</ul>
+</section>
+<section id="quickstart">
+<h2>Quickstart<a class="headerlink" href="#quickstart" title="Link to this heading"></a></h2>
+<p>Minimal example using two pre-generated systems (<code class="docutils literal notranslate"><span class="pre">.npy</span></code> arrays produced by <a class="reference internal" href="../_autosummary/mdsa_tools.Data_gen_hbond.html#mdsa_tools.Data_gen_hbond.TrajectoryProcessor" title="mdsa_tools.Data_gen_hbond.TrajectoryProcessor"><code class="xref py py-class docutils literal notranslate"><span class="pre">mdsa_tools.Data_gen_hbond.TrajectoryProcessor</span></code></a> or <a class="reference internal" href="../_autosummary/mdsa_tools.Cpptraj_import.html#module-mdsa_tools.Cpptraj_import" title="mdsa_tools.Cpptraj_import"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mdsa_tools.Cpptraj_import</span></code></a>).
+If you’re unfamiliar with producing these arrays, see <a class="reference internal" href="data_generation_workflow.html#datagen"><span class="std std-ref">Data generation (H-bond matrices)</span></a>.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">mdsa_tools.Analysis</span><span class="w"> </span><span class="kn">import</span> <span class="n">systems_analysis</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">mdsa_tools.Viz</span><span class="w"> </span><span class="kn">import</span> <span class="n">replicatemap_from_labels</span>
+
+<span class="c1">#########################################</span>
+<span class="c1"># Load systems (each is a list of frames)</span>
+<span class="c1">#########################################</span>
+<span class="c1"># Each system should be an array-like of shape:</span>
+<span class="c1"># (n_frames, n_res+1, n_res+1), where the leading row/col store 1-based residue IDs.</span>
+<span class="n">redone_CCU_GCU_fulltraj</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">load</span><span class="p">(</span>
+    <span class="s2">&quot;/Users/luis/Downloads/redone_unrestrained_CCU_GCU_Trajectory_array.npy&quot;</span><span class="p">,</span>
+    <span class="n">allow_pickle</span><span class="o">=</span><span class="kc">True</span>
+<span class="p">)</span>
+<span class="n">redone_CCU_CGU_fulltraj</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">load</span><span class="p">(</span>
+    <span class="s2">&quot;/Users/luis/Downloads/redone_unrestrained_CCU_CGU_Trajectory_array.npy&quot;</span><span class="p">,</span>
+    <span class="n">allow_pickle</span><span class="o">=</span><span class="kc">True</span>
+<span class="p">)</span>
+<span class="n">all_systems</span> <span class="o">=</span> <span class="p">[</span><span class="n">redone_CCU_GCU_fulltraj</span><span class="p">,</span> <span class="n">redone_CCU_CGU_fulltraj</span><span class="p">]</span>
+
+<span class="c1">#########################################</span>
+<span class="c1"># Build analyzer and compute features</span>
+<span class="c1">#########################################</span>
+<span class="n">Systems_Analyzer</span> <span class="o">=</span> <span class="n">systems_analysis</span><span class="p">(</span><span class="n">all_systems</span><span class="p">)</span>
+<span class="c1"># Creates a feature matrix for downstream extraction/label ops</span>
+<span class="n">Systems_Analyzer</span><span class="o">.</span><span class="n">replicates_to_featurematrix</span><span class="p">()</span>
+
+<span class="c1">#########################################</span>
+<span class="c1"># Extract discrete labels for residue pairs</span>
+<span class="c1">#########################################</span>
+<span class="c1"># Example pairs: (411, 422) and (412, 422)</span>
+<span class="n">hbond_counts_411_422</span> <span class="o">=</span> <span class="n">Systems_Analyzer</span><span class="o">.</span><span class="n">extract_hbond_values</span><span class="p">(</span><span class="n">residues</span><span class="o">=</span><span class="p">[</span><span class="mi">411</span><span class="p">,</span> <span class="mi">422</span><span class="p">])</span>
+<span class="n">hbond_counts_412_422</span> <span class="o">=</span> <span class="n">Systems_Analyzer</span><span class="o">.</span><span class="n">extract_hbond_values</span><span class="p">(</span><span class="n">residues</span><span class="o">=</span><span class="p">[</span><span class="mi">412</span><span class="p">,</span> <span class="mi">422</span><span class="p">])</span>
+
+<span class="c1">#########################################</span>
+<span class="c1"># Make a frame window list (for map layout)</span>
+<span class="c1">#########################################</span>
+<span class="c1"># Here we build two blocks of frames per replicate: 20*80 and 10*160,</span>
+<span class="c1"># and then duplicate for two systems/replicates -&gt; total length matches labels.</span>
+<span class="n">frames</span> <span class="o">=</span> <span class="p">(([</span><span class="mi">80</span><span class="p">]</span> <span class="o">*</span> <span class="mi">20</span><span class="p">)</span> <span class="o">+</span> <span class="p">([</span><span class="mi">160</span><span class="p">]</span> <span class="o">*</span> <span class="mi">10</span><span class="p">))</span> <span class="o">*</span> <span class="mi">2</span>
+
+<span class="c1">#########################################</span>
+<span class="c1"># Plot replicate maps</span>
+<span class="c1">#########################################</span>
+<span class="n">outdir</span> <span class="o">=</span> <span class="s2">&quot;/Users/luis/Downloads/replicate_maps&quot;</span>
+<span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">outdir</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+<span class="n">replicatemap_from_labels</span><span class="p">(</span>
+    <span class="n">labels</span><span class="o">=</span><span class="n">hbond_counts_411_422</span><span class="p">,</span>
+    <span class="n">frame_list</span><span class="o">=</span><span class="n">frames</span><span class="p">,</span>
+    <span class="n">savepath</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">outdir</span><span class="p">,</span> <span class="s2">&quot;replicatemap_discrete_411_422&quot;</span><span class="p">)</span>
+<span class="p">)</span>
+
+<span class="n">replicatemap_from_labels</span><span class="p">(</span>
+    <span class="n">labels</span><span class="o">=</span><span class="n">hbond_counts_412_422</span><span class="p">,</span>
+    <span class="n">frame_list</span><span class="o">=</span><span class="n">frames</span><span class="p">,</span>
+    <span class="n">savepath</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">outdir</span><span class="p">,</span> <span class="s2">&quot;replicatemap_discrete_412_422&quot;</span><span class="p">)</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="notes">
+<h2>Notes<a class="headerlink" href="#notes" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p><strong>Inputs:</strong> Each system is a per-frame H-bond adjacency stack of shape <code class="docutils literal notranslate"><span class="pre">(n_frames,</span> <span class="pre">n_res+1,</span> <span class="pre">n_res+1)</span></code>, with the 0-th row/col storing <strong>1-based</strong> residue indices. Slice <code class="docutils literal notranslate"><span class="pre">[:,</span> <span class="pre">1:,</span> <span class="pre">1:]</span></code> if you only need the numeric adjacency.</p></li>
+<li><p><strong>Feature prep:</strong> Call <a class="reference internal" href="../_autosummary/mdsa_tools.Analysis.html#mdsa_tools.Analysis.systems_analysis.replicates_to_featurematrix" title="mdsa_tools.Analysis.systems_analysis.replicates_to_featurematrix"><code class="xref py py-meth docutils literal notranslate"><span class="pre">replicates_to_featurematrix()</span></code></a> before extracting labels so that downstream methods have aligned internal representations.</p></li>
+<li><p><strong>Labels shape:</strong> <code class="docutils literal notranslate"><span class="pre">labels</span></code> returned by <a class="reference internal" href="../_autosummary/mdsa_tools.Analysis.html#mdsa_tools.Analysis.systems_analysis.extract_hbond_values" title="mdsa_tools.Analysis.systems_analysis.extract_hbond_values"><code class="xref py py-meth docutils literal notranslate"><span class="pre">extract_hbond_values()</span></code></a> should align with your total frames across replicates/systems. Your <code class="docutils literal notranslate"><span class="pre">frame_list</span></code> must be the same total length.</p></li>
+<li><p><strong>Windowing:</strong> The <code class="docutils literal notranslate"><span class="pre">frame_list</span></code> can segment the visualization by blocks (e.g., different sampling intervals or concatenated runs). Adjust the counts to match your actual concatenation scheme.</p></li>
+<li><p><strong>Saving:</strong> <a class="reference internal" href="../_autosummary/mdsa_tools.Viz.html#mdsa_tools.Viz.replicatemap_from_labels" title="mdsa_tools.Viz.replicatemap_from_labels"><code class="xref py py-func docutils literal notranslate"><span class="pre">replicatemap_from_labels()</span></code></a> writes figures to <code class="docutils literal notranslate"><span class="pre">savepath</span></code> (without extension); ensure the directory exists.</p></li>
+</ul>
+</section>
+<section id="where-this-fits">
+<h2>Where this fits<a class="headerlink" href="#where-this-fits" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>Generate the adjacency arrays with <a class="reference internal" href="../_autosummary/mdsa_tools.Data_gen_hbond.html#mdsa_tools.Data_gen_hbond.TrajectoryProcessor" title="mdsa_tools.Data_gen_hbond.TrajectoryProcessor"><code class="xref py py-class docutils literal notranslate"><span class="pre">mdsa_tools.Data_gen_hbond.TrajectoryProcessor</span></code></a> (or build from cpptraj via <a class="reference internal" href="../_autosummary/mdsa_tools.Cpptraj_import.html#module-mdsa_tools.Cpptraj_import" title="mdsa_tools.Cpptraj_import"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mdsa_tools.Cpptraj_import</span></code></a>), then pass them here.</p></li>
+<li><p>After inspecting replicate maps, you can:
+- Perform dimensionality reduction or clustering with <a class="reference internal" href="../_autosummary/mdsa_tools.Analysis.html#module-mdsa_tools.Analysis" title="mdsa_tools.Analysis"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mdsa_tools.Analysis</span></code></a>.
+- Visualize embeddings or MDcircos contact weights with <a class="reference internal" href="../_autosummary/mdsa_tools.Viz.html#module-mdsa_tools.Viz" title="mdsa_tools.Viz"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mdsa_tools.Viz</span></code></a>.
+- Feed features into MSM workflows (see <a class="reference internal" href="../_autosummary/mdsa_tools.msm_modeler.html#module-mdsa_tools.msm_modeler" title="mdsa_tools.msm_modeler"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mdsa_tools.msm_modeler</span></code></a>).</p></li>
+</ul>
+</section>
+<section id="see-also">
+<h2>See also<a class="headerlink" href="#see-also" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p><a class="reference internal" href="../_autosummary/mdsa_tools.Data_gen_hbond.html#module-mdsa_tools.Data_gen_hbond" title="mdsa_tools.Data_gen_hbond"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mdsa_tools.Data_gen_hbond</span></code></a> — build per-frame H-bond adjacency matrices.</p></li>
+<li><p><a class="reference internal" href="../_autosummary/mdsa_tools.Cpptraj_import.html#module-mdsa_tools.Cpptraj_import" title="mdsa_tools.Cpptraj_import"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mdsa_tools.Cpptraj_import</span></code></a> — construct the same matrices from cpptraj series tables.</p></li>
+<li><p><a class="reference internal" href="../_autosummary/mdsa_tools.Analysis.html#mdsa_tools.Analysis.systems_analysis.extract_hbond_values" title="mdsa_tools.Analysis.systems_analysis.extract_hbond_values"><code class="xref py py-meth docutils literal notranslate"><span class="pre">mdsa_tools.Analysis.systems_analysis.extract_hbond_values()</span></code></a> — pull per-frame labels/counts for residue pairs.</p></li>
+<li><p><a class="reference internal" href="../_autosummary/mdsa_tools.Viz.html#mdsa_tools.Viz.replicatemap_from_labels" title="mdsa_tools.Viz.replicatemap_from_labels"><code class="xref py py-func docutils literal notranslate"><span class="pre">mdsa_tools.Viz.replicatemap_from_labels()</span></code></a> — render replicate maps from discrete label sequences.</p></li>
+</ul>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="example_of_clustering_analysis.html" class="btn btn-neutral float-left" title="Feature matrix &amp; exploratory clustering" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="umap_example.html" class="btn btn-neutral float-right" title="UMAP embeddings (per-frame labelling)" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright .</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
