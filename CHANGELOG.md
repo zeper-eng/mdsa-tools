@@ -1,4 +1,7 @@
 ## Theese changes are mainly for the pipi releases you can download the most recent version straight from github always
+# [1.1.6]-2025-08-15
+All basic functions thoroughly tested
+
 # [1.1.5]-2025-08-15
 Docstrings mostly complete, huge docs push, many functional fixes and trims after further tests implementations
 
