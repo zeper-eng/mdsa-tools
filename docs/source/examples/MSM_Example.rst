@@ -7,6 +7,8 @@ Use :class:`mdsa_tools.msm_modeler.MSM_Modeller` to turn **embedding-space clust
 (PCA/UMAP + k-means) into a lightweight Markov-state analysis: transition matrices,
 stationary distribution, cohesion-over-time diagnostics, and quick visualizations.
 
+**Note** this module heavily relies on the fact that you have multiple "concatenated" trajectories or replicates but, will then also take that into account and not have cross-replicate boundary counts.
+
 What you get
 ------------
 - A :class:`~mdsa_tools.msm_modeler.MSM_Modeller` instance bound to your labels, centers,
@@ -14,8 +16,12 @@ What you get
 - A **transition probability matrix** ``(n_states+1)×(n_states+1)`` with header row/col.
 - A **stationary distribution** vector (π) aligned to state IDs.
 - **Cohesion over time** (sliding & shrinking windows) as tidy ``pandas.DataFrame``s.
-- Optional UMAP/PCA scatter plots colored by clusters or by replicate/frame index.
-- Optional **replicate map** images to visualize state visitation by replicate.
+
+optional
+--------
+
+- UMAP/PCA scatter plots colored by clusters or by replicate/frame index.
+- **replicate map** images to visualize state visitation by replicate.
 
 Quickstart
 ----------

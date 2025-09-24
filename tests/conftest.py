@@ -203,13 +203,13 @@ def generic_labels_and_centers(request):
 
 
 @pytest.fixture(scope="session", params=CASES_MSM, ids=IDS)
-def modellers(request):
+def modeller(request):
     labels_path, centers_path, coords_path = request.param
     labels = np.load(labels_path).astype(int)
     centers = np.load(centers_path)
     reduced_coordinates = np.load(coords_path)
 
-    # frame_scale = list of replicate lengths; if unknown, treat as one replicate
+    
     frame_scale = [len(reduced_coordinates)]
 
     # make sure labels are contiguous 0..n_states-1
