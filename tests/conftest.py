@@ -157,21 +157,6 @@ def rmsd_df():
 for example other coordinates ten frame out
     from leftover data'''
 
-DATA_MSM = Path(__file__).parent / "data" / "klust"
-
-CASES_MSM = [
-    # (labels_path, centers_path)
-    (DATA_MSM / "GCU_coordinates_kluster_labels_5clust.npy", DATA_MSM / "GCU_sil_centers.npy"),
-    (DATA_MSM / "GCU_coordinates_kluster_labels_2clust.npy", DATA_MSM / "CGU_sil_centers.npy"),
-]
-
-@pytest.fixture(scope="session", params=CASES_MSM, ids=["GCU", "CGU"])  # ids for nice reporting
-def generic_labels_and_centers(request):
-    labels_path, centers_path = request.param
-    labels = np.load(labels_path)
-    centers = np.load(centers_path)
-    return labels, centers
-
 
 from mdsa_tools.msm_modeler import MSM_Modeller
 

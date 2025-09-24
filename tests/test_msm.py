@@ -55,3 +55,9 @@ def test_step_size_effect(modeller):
 
     # Smaller step → more windows
     assert df_small["window"].nunique() > df_large["window"].nunique()
+
+############
+# Moving into some MSM tests
+############
+
+
