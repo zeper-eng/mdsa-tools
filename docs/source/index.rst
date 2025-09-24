@@ -9,7 +9,7 @@ Welcome to mdsa-tools!
    :target: https://pypi.org/project/mdsa-tools/
    :alt: PyPI: mdsa-tools
 
-.. image:: https://img.shields.io/badge/License-MIT-brightgreen.svg
+.. image:: https://zenodo.org/badge/DOI/10.5281/zenodo.17195649.svg
    :target: https://github.com/zeper-eng/mdsa-tools/blob/main/LICENSE
    :alt: License: MIT
 
