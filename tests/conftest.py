@@ -5,6 +5,9 @@ from mdsa_tools.Convenience import unrestrained_residues
 from mdsa_tools.Analysis import systems_analysis
 import numpy as np
 
+'''DATA cases (more to be included)
+for example simple p53 ten frame out
+    from leftover data'''
 DATA = Path(__file__).parent / "data" / "trajectories"
 CASES = [
     (DATA / "CCU_GCU_10frames.mdcrd", DATA / "5JUP_N2_GCU_nowat.prmtop"),
@@ -83,8 +86,8 @@ def simple_labels_and_frames():
 #Cpptraj Import Fixtures#
 #########################
 
-'''CPPTRAJ cases (more to be included)'''
-''' for example simple p53 ten frame out
+'''CPPTRAJ data cases (more to be included)
+for example simple p53 ten frame out
     from leftover data'''
 
 CPPTRAJ_CASES=[
@@ -142,3 +145,85 @@ def rmsd_df():
         "rmsd": [0.5, 0.6, 0.7, 0.8],
         "cluster": ["A", "A", "B", "B"]
     })
+
+
+
+
+###
+# Cohesion tests; since our iniditial data was 
+###
+
+'''Downstream data cases (more to be included)
+for example other coordinates ten frame out
+    from leftover data'''
+
+DATA_MSM = Path(__file__).parent / "data" / "klust"
+
+CASES_MSM = [
+    # (labels_path, centers_path)
+    (DATA_MSM / "GCU_coordinates_kluster_labels_5clust.npy", DATA_MSM / "GCU_sil_centers.npy"),
+    (DATA_MSM / "GCU_coordinates_kluster_labels_2clust.npy", DATA_MSM / "CGU_sil_centers.npy"),
+]
+
+@pytest.fixture(scope="session", params=CASES_MSM, ids=["GCU", "CGU"])  # ids for nice reporting
+def generic_labels_and_centers(request):
+    labels_path, centers_path = request.param
+    labels = np.load(labels_path)
+    centers = np.load(centers_path)
+    return labels, centers
+
+
+from mdsa_tools.msm_modeler import MSM_Modeller
+
+DATA_MSM = Path(__file__).parent / "data" / "klust"
+
+# Each case now has 3 paths: (labels, centers, coords)
+CASES_MSM = [
+    (
+        DATA_MSM / "GCU_coordinates_kluster_labels_5clust.npy",
+        DATA_MSM / "GCU_sil_centers.npy",
+        DATA_MSM / "GCU_coordinates.npy",   
+    ),
+    (
+        DATA_MSM / "GCU_coordinates_kluster_labels_2clust.npy",
+        DATA_MSM / "CGU_sil_centers.npy",
+        DATA_MSM / "CGU_coordinates.npy",   
+    ),
+]
+
+IDS = ["GCU", "CGU"]
+
+@pytest.fixture(scope="session", params=CASES_MSM, ids=IDS)
+def generic_labels_and_centers(request):
+    labels_path, centers_path, coords_path = request.param
+    labels = np.load(labels_path).astype(int)
+    centers = np.load(centers_path)
+    coords = np.load(coords_path)
+    return labels, centers, coords
+
+
+@pytest.fixture(scope="session", params=CASES_MSM, ids=IDS)
+def modellers(request):
+    labels_path, centers_path, coords_path = request.param
+    labels = np.load(labels_path).astype(int)
+    centers = np.load(centers_path)
+    reduced_coordinates = np.load(coords_path)
+
+    # frame_scale = list of replicate lengths; if unknown, treat as one replicate
+    frame_scale = [len(reduced_coordinates)]
+
+    # make sure labels are contiguous 0..n_states-1
+    uniq = np.unique(labels)
+    if not np.array_equal(uniq, np.arange(len(uniq))):
+        remap = {old: i for i, old in enumerate(uniq)}
+        labels = np.vectorize(remap.get)(labels)
+
+    return MSM_Modeller(labels, centers, reduced_coordinates, frame_scale)
+
+
+
+
+
+###
+# MSM tests
+###

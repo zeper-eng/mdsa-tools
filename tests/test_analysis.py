@@ -1,6 +1,5 @@
 # tests/test_analysis.py
 import numpy as np
-
 import os
 
 def test_feature_matrix_shape(analyzer):
