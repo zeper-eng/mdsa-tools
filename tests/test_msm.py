@@ -1,4 +1,6 @@
-def test_rmsd_calculation(modeller): #test both cases
-    
+import numpy as np
 
-    return
+def test_rmsd_calculation(modeller): #test both cases
+    results = modeller.rmsd_from_centers()
+    assert isinstance(results, np.ndarray)
+    
