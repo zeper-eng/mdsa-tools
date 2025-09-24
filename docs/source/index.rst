@@ -10,8 +10,8 @@ Welcome to mdsa-tools!
    :alt: PyPI: mdsa-tools
 
 .. image:: https://zenodo.org/badge/DOI/10.5281/zenodo.17195649.svg
-   :target: https://github.com/zeper-eng/mdsa-tools/blob/main/LICENSE
-   :alt: License: MIT
+   :target: https://doi.org/10.5281/zenodo.17195649
+   :alt: DOI: 10.5281/zenodo.17195649
 
 mdsa-tools is a Python package for systems-level analysis of molecular-dynamics (MD) data. It provides utilities for clustering, dimensionality reduction (PCA, UMAP), visualization, and hydrogen-bond network generation.
 
