@@ -24,10 +24,7 @@ In the Weir Group at Wesleyan University, we perform molecular dynamics (MD) sim
 
 [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](
 https://colab.research.google.com/github/zeper-eng/mdsa-tools/blob/main/notebooks/Quick_Start.ipynb)
-[![Binder](https://mybinder.org/badge_logo.svg)](
-https://mybinder.org/v2/gh/zeper-eng/mdsa-tools/HEAD?labpath=notebooks/Quick_Start.ipynb)
-[![nbviewer](https://img.shields.io/badge/View%20Notebook-nbviewer-blue)](
-https://nbviewer.org/github/zeper-eng/mdsa-tools/blob/main/notebooks/Quick_Start.ipynb)
+
 
 ```python
 from mdsa_tools.Data_gen_hbond import TrajectoryProcessor as tp
