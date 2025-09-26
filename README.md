@@ -20,7 +20,7 @@ pip install mdsa-tools
 
 In the Weir Group at Wesleyan University, we perform molecular dynamics (MD) simulations of a ribosomal subsystem to study tuning of protein translation by the CAR interaction surface — a ribosomal interface identified by the lab that interacts with the +1 codon (poised to enter the ribosome A site). Our "computational genetics" research focuses on modifying adjacent codon identities at the A-site and the +1 positions to model how changes at these sites influence the behavior of the CAR surface and correlate with translation rate variations.
 
-## Quickstart example (see [docs](https://mdsa-tools.readthedocs.io/en/latest/) for more examples):
+## Quickstart example (see [docs](https://mdsa-tools.readthedocs.io/en/latest/examples.html) for more examples):
 
 [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](
 https://colab.research.google.com/github/zeper-eng/mdsa-tools/blob/main/notebooks/Quick_Start.ipynb)
