@@ -46,7 +46,7 @@ mdsa-tools is a Python package for systems-level analysis of molecular-dynamics 
       **Full description of the modules included as a part of the workflow**
 
 
-**Excerpt from our paper:**
+**Excerpt from our paper (in preparation):**
 
 With the impressive development of force field parameters that allow successful computational simulations of biological molecules, bringing in systems modes of analysis is a natural next step to begin to understand the molecular dynamics behaviors that emerge from these experiments. We think of this as trying out and exploring lenses that can reveal different important behaviors. 
 
