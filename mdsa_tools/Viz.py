@@ -359,7 +359,7 @@ def plot_sillohette_scores(cluster_range, silhouette_scores, outfile_path=None,
     plt.title(title if title is not None else 'Silhouette Score for optimal K')
     plt.legend()
     plt.grid(True)
-    plt.savefig(outfile_path + '/sillohuette_plot', dpi=300)
+    plt.savefig(outfile_path + 'sillohuette_plot', dpi=300)
     plt.close()
     return optimal_k_sil
 

@@ -545,7 +545,7 @@ class systems_analysis:
             # Only save if a directory/path was provided
             if outfile_path is not None:
                 # Keeping your original path style; just gated.
-                np.save(f"/{outfile_path}kluster_labels_{k}clust", cluster_labels)
+                np.save(f"{outfile_path}kluster_labels_{k}clust", cluster_labels)
 
         # Choose optimal Ks
         if outfile_path is not None:
