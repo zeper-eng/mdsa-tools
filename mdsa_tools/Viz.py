@@ -714,7 +714,8 @@ def visualize_reduction(embedding_coordinates,
                         axis_one_label=None,
                         axis_two_label=None,
                         cbar_label=None,
-                        gridvisible=False):
+                        gridvisible=False,
+                        color_palette=None):
     """
     Scatter plot of a 2-D embedding with optional color mapping and colorbar; saves the figure.
 
@@ -748,6 +749,12 @@ def visualize_reduction(embedding_coordinates,
     gridvisible : bool, default=False
         Whether to show a background grid.
 
+    color_palette : sequence of color specs or matplotlib.colors.Colormap, default=None
+        Your own palette. If provided, it overrides `cmap`.
+        - With categorical `color_mappings`: uses a ListedColormap from the sequence.
+        - Without `color_mappings`: uses a LinearSegmentedColormap from the sequence.
+        - If a Colormap object is passed, it is used directly.
+
     Returns
     -------
     None
@@ -757,11 +764,24 @@ def visualize_reduction(embedding_coordinates,
     -----
     Axes spines are hidden; `set_ticks` is called to coarsen ticks on wide ranges.
     """
+    from matplotlib import colors as mcolors
+
     axis_one_label = axis_one_label if axis_one_label is not None else 'Embedding Space Axis 1'
     axis_two_label = axis_two_label if axis_two_label is not None else 'Embedding Space Axis 2'
     title = title if title is not None else "Dimensional Reduction of Systems"
     cbar_label = cbar_label if cbar_label is not None else "Value"
     cmap = cmap if cmap is not None else cm.magma_r
+
+    # If a custom palette is supplied, convert it to a Colormap and override `cmap`.
+    if color_palette is not None:
+        if isinstance(color_palette, mcolors.Colormap):
+            cmap = color_palette
+        else:
+            palette_list = list(color_palette)
+            if color_mappings is not None and len(color_mappings) > 0:
+                cmap = mcolors.ListedColormap(palette_list)
+            else:
+                cmap = mcolors.LinearSegmentedColormap.from_list('custom_palette', palette_list)
 
     labels_font_dict = {
         'family': 'monospace',
@@ -799,6 +819,7 @@ def visualize_reduction(embedding_coordinates,
     plt.savefig(savepath, dpi=500)
     plt.close()
     return
+
 
 # RMSD lineplots
 def rmsd_lineplots(pandasdf=None, title='RMSD plot',

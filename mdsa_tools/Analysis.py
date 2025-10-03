@@ -328,10 +328,6 @@ class systems_analysis:
         '''
         (Deprecated) Cluster each system independently in a reduced embedding space.
 
-        Parameters
-        ----------
-        outfile_path : str or pathlib.Path or None, optional
-            Directory to write intermediate artifacts. If ``None``, nothing is saved.
         ...
         '''
         # IMPORTANT: If None, downstream won't save.
@@ -499,19 +495,60 @@ class systems_analysis:
 
 
     #Algorithm wrappers 
+    #Algorithm wrappers 
     def perform_clust_opt(self, outfile_path, max_clusters=None, data=None, k=None):
-        """Optimize KMeans over a range of K and return labels/centers for the
-        silhouette- and elbow-selected optima, or run a single-K fit.
+        """Sweep K for KMeans and pick “best” K by silhouette and elbow, or fit a single K.
 
         Parameters
         ----------
         outfile_path : str or pathlib.Path or None
-            Directory prefix where per-K label arrays are saved via ``np.save`` as
-            ``"<outfile_path>kluster_labels_{K}clust.npy"``. If ``None``, nothing
-            is written to disk and selection falls back to simple array heuristics
-            (no plots).
-        ...
+            If provided, per-K label arrays are saved via ``np.save`` as
+            ``"<outfile_path>kluster_labels_{K}clust.npy"`` and selection plots
+            are delegated to ``mdsa_tools.Viz``. If ``None``, nothing is written
+            and elbow selection falls back to a simple heuristic.
+        max_clusters : int, optional
+            Upper bound (inclusive) for the K sweep (default ``10``). The sweep
+            runs from ``K=2`` through ``K=max_clusters``.
+        data : np.ndarray or None, shape (n_samples, n_features), optional
+            Feature matrix to cluster. If ``None``, uses ``self.feature_matrix``.
+        k : int or None, optional
+            If set, skip the sweep and fit one KMeans at exactly ``k`` clusters.
+
+        Returns
+        -------
+        If ``k`` is None:
+            optimal_k_silhouette_labels : np.ndarray of int, shape (n_samples,)
+                Labels for the silhouette-selected K.
+            optimal_k_elbow_labels : np.ndarray of int, shape (n_samples,)
+                Labels for the elbow-selected K.
+            centers_sillohuette : np.ndarray, shape (K_sil, n_features)
+                Cluster centers for the silhouette-selected K. (Legacy spelling kept.)
+            centers_elbow : np.ndarray, shape (K_elb, n_features)
+                Cluster centers for the elbow-selected K.
+        If ``k`` is not None:
+            cluster_labels : np.ndarray of int, shape (n_samples,)
+                Labels from the single KMeans run.
+            cluster_centers : np.ndarray, shape (k, n_features)
+                Cluster centers from the single KMeans run.
+
+        Notes
+        -----
+        * Silhouette uses ``sklearn.metrics.silhouette_score`` on the provided
+          feature space (no precomputed distance matrix).
+        * Elbow choice:
+            - If ``outfile_path`` is provided, the decision is delegated to
+              ``mdsa_tools.Viz.plot_elbow_scores`` (with plotting).
+            - If not, and too few points exist to fit a curve, falls back to the
+              argmin of inertia over the available Ks.
+        * ``KMeans(init='random', n_init=K, random_state=0)`` is used for reproducibility.
+        * The variable/name ``sillohuette`` is spelled as-is to preserve legacy usage.
+
+        Examples
+        --------
+        >>> labels_sil, labels_elb, C_sil, C_elb = sa.perform_clust_opt(None, max_clusters=8, data=X)  # doctest: +SKIP
+        >>> labels, centers = sa.perform_clust_opt(None, data=X, k=3)                                   # doctest: +SKIP
         """
+        
         data = data if data is not None else self.feature_matrix
         # IMPORTANT: Do not coerce to CWD; None means "no saving".
         outfile_path = outfile_path if outfile_path is not None else None
