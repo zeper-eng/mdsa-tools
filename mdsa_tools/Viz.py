@@ -28,6 +28,7 @@ import seaborn as sns
 from matplotlib.colors import BoundaryNorm
 import matplotlib.colors as mcolors
 from matplotlib.cm import ScalarMappable
+import pandas as pd
 
 
 # Miscellaneous tools
@@ -808,7 +809,6 @@ def rmsd_lineplots(pandasdf=None, title='RMSD plot',
                    groupingvar='cluster',
                    cmap=cm.inferno_r,
                    cmap_is_colormap=True,
-                   cmap_is_string=False,
                    legendtitle='Cluster',
                    outfilepath=os.getcwd()):
     """
@@ -843,9 +843,6 @@ def rmsd_lineplots(pandasdf=None, title='RMSD plot',
     cmap_is_colormap : bool, default=True
         If True, interpret `cmap` as a Matplotlib colormap.
 
-    cmap_is_string : bool, default=False
-        If True, interpret `cmap` as a Seaborn/Matplotlib palette string.
-
     legendtitle : str, default='Cluster'
         Legend title.
 
@@ -872,9 +869,19 @@ def rmsd_lineplots(pandasdf=None, title='RMSD plot',
         hue=groupingvar,
         palette=cmap
     )
+
     ax = plt.gca()
     for spine in ax.spines.values():
         spine.set_visible(False)
+    
+    # show ticks where theres actually have windows
+    unique_x = np.sort(pd.to_numeric(pandasdf[xgroupvar], errors="coerce").dropna().unique())
+    ax.set_xticks(unique_x)                          # ticks exactly at your windows
+    ax.set_xlim(unique_x.min(), unique_x.max())      # trim extra space
+    ax.minorticks_off()                              # no half-step minor ticks
+
+    # (optional) pretty integer labels if they’re whole numbers
+    ax.set_xticklabels([str(int(x)) if float(x).is_integer() else f"{x:g}" for x in unique_x])
 
     plt.legend(title=legendtitle, bbox_to_anchor=(1.0, 1), loc="upper left")
     plt.xlabel(xlab)
