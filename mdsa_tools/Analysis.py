@@ -232,6 +232,7 @@ class systems_analysis:
             nothing is written to disk.
         ...
         '''
+        
         max_clusters = max_clusters if max_clusters is not None else 10
         data = data if data is not None else self.feature_matrix
         # IMPORTANT: If None, do not save anything downstream.
@@ -548,7 +549,7 @@ class systems_analysis:
         >>> labels_sil, labels_elb, C_sil, C_elb = sa.perform_clust_opt(None, max_clusters=8, data=X)  # doctest: +SKIP
         >>> labels, centers = sa.perform_clust_opt(None, data=X, k=3)                                   # doctest: +SKIP
         """
-        
+
         data = data if data is not None else self.feature_matrix
         # IMPORTANT: Do not coerce to CWD; None means "no saving".
         outfile_path = outfile_path if outfile_path is not None else None

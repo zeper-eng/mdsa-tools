@@ -764,24 +764,26 @@ def visualize_reduction(embedding_coordinates,
     -----
     Axes spines are hidden; `set_ticks` is called to coarsen ticks on wide ranges.
     """
-    from matplotlib import colors as mcolors
+     
+    is_categorical = color_mappings is not None and len(color_mappings) > 0
 
-    axis_one_label = axis_one_label if axis_one_label is not None else 'Embedding Space Axis 1'
-    axis_two_label = axis_two_label if axis_two_label is not None else 'Embedding Space Axis 2'
-    title = title if title is not None else "Dimensional Reduction of Systems"
-    cbar_label = cbar_label if cbar_label is not None else "Value"
-    cmap = cmap if cmap is not None else cm.magma_r
+    # --- minimal palette handling (keeps your previous usage working) ---
+    def _as_colormap(seq_or_cmap, categorical):
+        if isinstance(seq_or_cmap, mcolors.Colormap):
+            return seq_or_cmap
+        # treat lists/tuples/arrays of colors as a user palette
+        seq = list(seq_or_cmap)
+        return (mcolors.ListedColormap(seq)
+                if categorical
+                else mcolors.LinearSegmentedColormap.from_list('custom_palette', seq))
 
-    # If a custom palette is supplied, convert it to a Colormap and override `cmap`.
+    # If user supplies a dedicated palette, it overrides cmap
     if color_palette is not None:
-        if isinstance(color_palette, mcolors.Colormap):
-            cmap = color_palette
-        else:
-            palette_list = list(color_palette)
-            if color_mappings is not None and len(color_mappings) > 0:
-                cmap = mcolors.ListedColormap(palette_list)
-            else:
-                cmap = mcolors.LinearSegmentedColormap.from_list('custom_palette', palette_list)
+        cmap = _as_colormap(color_palette, is_categorical)
+    # Back-compat: if user passed a list/tuple/ndarray to `cmap`, make it a proper Colormap
+    elif isinstance(cmap, (list, tuple, np.ndarray)):
+        cmap = _as_colormap(cmap, is_categorical)
+
 
     labels_font_dict = {
         'family': 'monospace',
@@ -794,7 +796,7 @@ def visualize_reduction(embedding_coordinates,
     fig = plt.figure(figsize=(16, 12), dpi=300)
     ax = plt.gca()
 
-    if color_mappings is not None and len(color_mappings) > 0:
+    if color_mappings is not None and len(color_mappings) < 250:
         scatter = ax.scatter(embedding_coordinates[:, 0], embedding_coordinates[:, 1],
                              c=color_mappings, cmap=cmap, alpha=0.6)
         add_discrete_colorbar(scatter, color_mappings, cbar_label, plt.gca(), cmap=cmap)
