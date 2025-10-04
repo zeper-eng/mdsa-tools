@@ -707,6 +707,7 @@ def create_2d_color_mappings(
     return [label_dict[i] for i in labels]
 
 def visualize_reduction(embedding_coordinates,
+                        cbar_type=None,
                         color_mappings=None,
                         savepath=os.getcwd(),
                         title=None,
@@ -717,25 +718,38 @@ def visualize_reduction(embedding_coordinates,
                         gridvisible=False,
                         color_palette=None):
     """
-    Scatter plot of a 2-D embedding with optional color mapping and colorbar; saves the figure.
+    Plot a 2-D embedding (e.g., PCA/UMAP) as a scatter with optional coloring and colorbar,
+    and save the figure to disk.
 
     Parameters
     ----------
     embedding_coordinates : array-like of shape (n_samples, 2)
-        Two-column array of embedding coordinates (e.g., PCA/UMAP).
+        The 2D coordinates to plot.
+
+    cbar_type : {'discrete', 'continuous'} or None, default=None
+        Desired colorbar behavior. If None, defaults to 'discrete'.
+        When 'discrete' is selected but the number of unique values in `color_mappings`
+        is large (>= 250), the function automatically falls back to a continuous colorbar.
 
     color_mappings : array-like of shape (n_samples,) or None, default=None
-        If provided and non-empty, treated as categorical and a discrete colorbar is drawn.
-        If None/empty, uses an index-based gradient with a continuous colorbar.
+        Values used to color points.
+        - If provided (non-empty) and treated as *categorical* (i.e., `cbar_type='discrete'`
+          and < 250 unique values), a discrete colorbar is drawn.
+        - If provided but either `cbar_type='continuous'` or >= 250 unique values,
+          a continuous colorbar is drawn.
+        - If None or empty, points are colored by their index (0..n_samples-1)
+          with a continuous colorbar.
 
     savepath : str, default=os.getcwd()
-        Full output path **including filename** (no extension added automatically).
+        Full output path **including filename**. No extension is appended automatically.
+        The figure is saved at 500 DPI.
 
     title : str or None, default='Dimensional Reduction of Systems'
         Figure title.
 
-    cmap : str or matplotlib.colors.Colormap or None, default=cm.magma_r
-        Colormap for points and colorbar.
+    cmap : str or matplotlib.colors.Colormap or sequence, default=cm.magma_r
+        Base colormap. If a sequence is passed, it is converted to a Colormap.
+        Ignored when `color_palette` is provided.
 
     axis_one_label : str or None, default='Embedding Space Axis 1'
         X-axis label.
@@ -747,13 +761,14 @@ def visualize_reduction(embedding_coordinates,
         Colorbar label.
 
     gridvisible : bool, default=False
-        Whether to show a background grid.
+        If True, show a background grid.
 
     color_palette : sequence of color specs or matplotlib.colors.Colormap, default=None
-        Your own palette. If provided, it overrides `cmap`.
-        - With categorical `color_mappings`: uses a ListedColormap from the sequence.
-        - Without `color_mappings`: uses a LinearSegmentedColormap from the sequence.
-        - If a Colormap object is passed, it is used directly.
+        User-supplied palette that overrides `cmap`.
+        - With categorical coloring: builds a ListedColormap from the sequence.
+        - With continuous coloring or when `color_mappings` is None: builds a
+          LinearSegmentedColormap from the sequence.
+        - If a Colormap object is supplied, it is used directly.
 
     Returns
     -------
@@ -762,12 +777,15 @@ def visualize_reduction(embedding_coordinates,
 
     Notes
     -----
-    Axes spines are hidden; `set_ticks` is called to coarsen ticks on wide ranges.
+    - Figure size is 16×12 inches at 300 DPI (saved at 500 DPI).
+    - Axes spines are hidden; tick density is coarsened via `set_ticks`.
+    - Automatically switches from discrete to continuous colorbar when
+      unique categories >= 250 to keep the legend readable.
     """
      
     is_categorical = color_mappings is not None and len(color_mappings) > 0
+    cbar_type=cbar_type if cbar_type is not None else 'discrete'
 
-    # --- minimal palette handling (keeps your previous usage working) ---
     def _as_colormap(seq_or_cmap, categorical):
         if isinstance(seq_or_cmap, mcolors.Colormap):
             return seq_or_cmap
@@ -796,11 +814,19 @@ def visualize_reduction(embedding_coordinates,
     fig = plt.figure(figsize=(16, 12), dpi=300)
     ax = plt.gca()
 
-    if color_mappings is not None and len(color_mappings) < 250:
+    if cbar_type == 'discrete' and len(np.unique(color_mappings)) < 250:
         scatter = ax.scatter(embedding_coordinates[:, 0], embedding_coordinates[:, 1],
                              c=color_mappings, cmap=cmap, alpha=0.6)
         add_discrete_colorbar(scatter, color_mappings, cbar_label, plt.gca(), cmap=cmap)
-    else:
+    
+    if cbar_type == 'discrete' and len(np.unique(color_mappings)) > 250:
+        scatter = ax.scatter(embedding_coordinates[:, 0], embedding_coordinates[:, 1],
+                             c=color_mappings, cmap=cmap, alpha=0.6)
+        add_continuous_colorbar(scatter, color_mappings, cbar_label, plt.gca(), cmap=cmap)
+
+    if color_mappings is None:#default for no colormaps is values
+        if cbar_type == 'discrete':
+            print('Too many bins for discrete colormappings, transitioning to continous')
         values = np.arange(embedding_coordinates.shape[0])
         scatter = ax.scatter(embedding_coordinates[:, 0], embedding_coordinates[:, 1],
                              c=values, cmap=cmap, alpha=0.6)
