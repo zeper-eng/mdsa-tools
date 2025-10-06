@@ -848,7 +848,6 @@ def visualize_reduction(embedding_coordinates,
     plt.close()
     return
 
-
 # RMSD lineplots
 def rmsd_lineplots(pandasdf=None, title='RMSD plot',
                    xgroupvar='window',

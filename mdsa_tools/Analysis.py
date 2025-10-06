@@ -228,9 +228,60 @@ class systems_analysis:
         Parameters
         ----------
         outfile_path : str or pathlib.Path or None, optional
-            Directory where per-K label arrays are saved (``np.save``). If ``None``,
-            nothing is written to disk.
-        ...
+            Directory where per-K label arrays are saved (via ``np.save``) when
+            sweeping K (i.e., when ``k is None``). One file is written per value of K.
+            If ``None``, nothing is written to disk. Default is ``None``.
+        max_clusters : int or None, optional
+            Upper bound on the number of clusters to consider when sweeping K.
+            Effective only when ``k is None``. The exact K range is determined by
+            :meth:`perform_clust_opt` (typically ``2..max_clusters`` inclusive).
+            Default is ``10``.
+        data : array-like of shape (n_samples, n_features) or None, optional
+            Feature matrix to cluster. If ``None``, uses ``self.feature_matrix``.
+        k : int or None, optional
+            If provided, fit a single KMeans model with exactly ``k`` clusters and
+            return its labels and centers. If ``None``, perform a sweep over K and
+            return the best solutions under the silhouette and elbow criteria.
+
+        Returns
+        -------
+        cluster_labels : ndarray of shape (n_samples,), dtype=int
+            (Only when ``k`` is not ``None``) Cluster assignment for each sample,
+            with labels in ``[0, k-1]``.
+        cluster_centers : ndarray of shape (k, n_features)
+            (Only when ``k`` is not ``None``) Centroids of the fitted model.
+        optimal_k_silhouette_labels : ndarray of shape (n_samples,), dtype=int
+            (Only when ``k`` is ``None``) Labels for the K chosen by the silhouette
+            criterion.
+        optimal_k_elbow_labels : ndarray of shape (n_samples,), dtype=int
+            (Only when ``k`` is ``None``) Labels for the K chosen by the elbow
+            (inertia) criterion.
+        centers_sillohuette : ndarray of shape (k_silhouette, n_features)
+            (Only when ``k`` is ``None``) Centers corresponding to
+            ``optimal_k_silhouette_labels``.
+        centers_elbow : ndarray of shape (k_elbow, n_features)
+            (Only when ``k`` is ``None``) Centers corresponding to
+            ``optimal_k_elbow_labels``.
+
+        Notes
+        -----
+        - When ``k`` is provided, this method fits ``sklearn.cluster.KMeans`` with
+          ``init='random'``, ``n_init=k``, and ``random_state=0`` for reproducibility.
+        - When ``k`` is ``None``, selection of the optimal K and any per-K saving
+          behavior are delegated to :meth:`perform_clust_opt`, which is expected to
+          return the label arrays and centers for the silhouette- and elbow-selected
+          solutions.
+
+        Examples
+        --------
+        Fit a fixed-K model:
+
+        >>> labels, centers = obj.perform_kmeans(k=5)
+
+        Sweep K (saving per-K labels):
+
+        >>> sil_labels, elbow_labels, sil_centers, elbow_centers = \
+        ...     obj.perform_kmeans(outfile_path="results/kmeans", max_clusters=12)
         '''
         
         max_clusters = max_clusters if max_clusters is not None else 10
@@ -492,7 +543,6 @@ class systems_analysis:
         dataframe=pd.DataFrame(dataframe).round(3)
         
         return dataframe
-
 
 
     #Algorithm wrappers 
