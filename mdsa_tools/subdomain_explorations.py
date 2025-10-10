@@ -1,6 +1,3 @@
-import numpy as np
-import os
-import pandas as pd
 '''
 Use results of systems analysis to explore potential preferred structural conformations
 
@@ -15,6 +12,11 @@ See Also
 mdsa_tools.Cpptraj_import.cpptraj_hbond_import
 
 '''
+
+import numpy as np
+import os
+import pandas as pd
+
 
 class subdomain_explorations:
     """
