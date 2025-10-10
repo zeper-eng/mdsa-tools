@@ -3,7 +3,7 @@
 Cohesion over time (sliding & shrinking windows)
 ================================================
 
-Use :class:`mdsa_tools.msm_modeler.MSM_Modeller` to quantify **cluster cohesion**
+Use :class:`mdsa_tools.msm_modeler.subdomain_explorations` to quantify **cluster cohesion**
 over time in a 2-D embedding (PCA/UMAP). We compute per-cluster RMSD to the
 assigned center within moving windows—either **sliding windows** (fixed width,
 hop forward) or **shrinking windows** (drop early frames and keep the tail).
@@ -26,7 +26,7 @@ K-means labels/centers from :meth:`mdsa_tools.Analysis.systems_analysis.*`.
    import pandas as pd
    import matplotlib.cm as cm
 
-   from mdsa_tools.msm_modeler import MSM_Modeller as msm
+   from mdsa_tools.msm_modeler import subdomain_explorations as msm
    from mdsa_tools.Viz import rmsd_lineplots
 
    #########################################
@@ -94,7 +94,7 @@ Where this fits
 
 See also
 --------
-- :class:`mdsa_tools.msm_modeler.MSM_Modeller` — cohesion windows, transition matrices,
+- :class:`mdsa_tools.msm_modeler.subdomain_explorations` — cohesion windows, transition matrices,
   implied timescales, CK test.
 - :func:`mdsa_tools.Viz.rmsd_lineplots` — render per-cluster RMSD vs. window.
 - :meth:`mdsa_tools.Analysis.systems_analysis.perform_kmeans` — produce labels/centers.
