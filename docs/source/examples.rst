@@ -122,7 +122,15 @@ analysis of molecular dynamics data.
          :width: 100%
          :align: center
 
+   .. grid-item-card::
+      :shadow: lg
+      :link-type: doc
+      :link: examples/Subdomain_example
+      :text-align: center
 
+      **UMAP embedding visualization example**
+
+      ^^^
 
 .. toctree::
    :hidden:
@@ -130,7 +138,7 @@ analysis of molecular dynamics data.
    examples/circos_style_visualization
    examples/data_generation_workflow
    examples/import_from_cpptraj
-   examples/MSM_Example
+   examples/Subdomain_example
    examples/Contourplots
    examples/rmsd_example
    examples/example_of_clustering_analysis

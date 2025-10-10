@@ -1,27 +1,30 @@
-.. _msm_from_embeddings:
+.. _subdomain_exploration_from_embeddings:
 
-MSM (embedding-space kinetics from embeddings)
+
+subdomain_exploration (embedding-space kinetics from embeddings)
 =============================================
 
-Use :class:`mdsa_tools.msm_modeler.MSM_Modeller` to turn **embedding-space clusters**
-(PCA/UMAP + k-means) into a lightweight Markov-state analysis: transition matrices,
-stationary distribution, cohesion-over-time diagnostics, and quick visualizations.
+Use :class:`mdsa_tools.subdomain_explorations` to turn **embedding-space clusters**
+Explore (PCA/UMAP + k-means) potential preffered conformational spaces derived from embeddings,and includes cohesion-over-time diagnostics.
+lightweight Markov-state analysis: transition matrices, and quick visualizations.
 
 **Note** this module heavily relies on the fact that you have multiple "concatenated" trajectories or replicates but, will then also take that into account and not have cross-replicate boundary counts.
 
+
 What you get
 ------------
-- A :class:`~mdsa_tools.msm_modeler.MSM_Modeller` instance bound to your labels, centers,
+- A :class:`~mdsa_tools.subdomain_explorations` instance bound to your labels, centers,
   reduced coordinates, and per-replicate frame lengths.
 - A **transition probability matrix** ``(n_states+1)×(n_states+1)`` with header row/col.
-- A **stationary distribution** vector (π) aligned to state IDs.
 - **Cohesion over time** (sliding & shrinking windows) as tidy ``pandas.DataFrame``s.
+
 
 optional
 --------
 
 - UMAP/PCA scatter plots colored by clusters or by replicate/frame index.
 - **replicate map** images to visualize state visitation by replicate.
+
 
 Quickstart
 ----------
@@ -31,7 +34,7 @@ by :class:`mdsa_tools.Data_gen_hbond.TrajectoryProcessor` or :mod:`mdsa_tools.Cp
 .. code-block:: python
 
    from mdsa_tools.Analysis import systems_analysis
-   from mdsa_tools.msm_modeler import MSM_Modeller
+   from mdsa_tools.subdomain_exploration_modeler import subdomain_exploration_Modeller
    from mdsa_tools.Viz import visualize_reduction, replicatemap_from_labels
    import numpy as np
    import matplotlib.cm as cm
@@ -63,11 +66,11 @@ by :class:`mdsa_tools.Data_gen_hbond.TrajectoryProcessor` or :mod:`mdsa_tools.Cp
    SA.replicates_to_featurematrix()
    X_pca, _, _ = SA.reduce_systems_representations(method="PCA")
 
-   outdir = "./msm_example_outputs"
+   outdir = "./subdomain_exploration_example_outputs"
    os.makedirs(outdir, exist_ok=True)
 
    #########################################
-   # cluster embedding space → candidate MSM
+   # cluster embedding space → candidate subdomain_exploration
    #########################################
 
    # pick a K (or call SA.perform_kmeans with max_clusters for an elbow/silhouette search)
@@ -83,24 +86,13 @@ by :class:`mdsa_tools.Data_gen_hbond.TrajectoryProcessor` or :mod:`mdsa_tools.Cp
    )
 
    #########################################
-   # lightweight MSM on the clustered embedding
+   # lightweight subdomain_exploration on the clustered embedding
    #########################################
 
-   msm = MSM_Modeller(labels, centers, X_pca, frame_scale=per_rep_lengths)
+   subdomain_exploration = subdomain_exploration_Modeller(labels, centers, X_pca, frame_scale=per_rep_lengths)
 
-   # transition matrix (lag=1 by default) + stationary distribution
-   T = msm.create_transition_probability_matrix()          # (n+1, n+1) with header row/col
-   pi = msm.extract_stationary_states(T)                   # (n_states,)
-
-   np.savetxt(os.path.join(outdir, "transition_matrix.csv"), T, delimiter=",")
-   np.savetxt(os.path.join(outdir, "stationary_distribution.csv"), pi, delimiter=",")
-
-   #########################################
-   # cohesion over time (diagnostics)
-   #########################################
-
-   sliding = msm.evaluate_cohesion_slidingwindow(step_size=20)
-   shrinking = msm.evaluate_cohesion_shrinkingwindow(step_size=20)
+   sliding = subdomain_exploration.evaluate_cohesion_slidingwindow(step_size=20)
+   shrinking = subdomain_exploration.evaluate_cohesion_shrinkingwindow(step_size=20)
 
    sliding.to_csv(os.path.join(outdir, "cohesion_sliding.csv"), index=False)
    shrinking.to_csv(os.path.join(outdir, "cohesion_shrinking.csv"), index=False)
@@ -123,14 +115,12 @@ Notes
 -----
 - **Lag is in frames.** If your MD timestep is ``dt`` ps, multiply implied timescales by ``dt`` to convert.
 - Labels must be **0-based contiguous** (``0..K-1``) to align with the centers rows and the transition-matrix headers.
-- Windowed cohesion never crosses replicate boundaries; replicates shorter than a window step simply don’t contribute to that window.
+- Windowed cohesion never crosses replicate boundaries; replicates shorter than a window step simply don’t contribute to that window. We recommend seperating out different length replicates
 - For UMAP, call ``SA.reduce_systems_representations(method="UMAP", n_neighbors=..., min_dist=...)`` and reuse the same workflow.
 
 Where this fits
 ---------------
 - Upstream: :mod:`mdsa_tools.Analysis` produces the feature matrix, embeddings, and clusters.
-- This page: :class:`mdsa_tools.msm_modeler.MSM_Modeller` wraps the MSM-ish pieces.
-- Downstream: include implied timescales and CK tests in your figures/tables.
 
 See also
 --------
