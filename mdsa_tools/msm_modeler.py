@@ -39,9 +39,9 @@ class MSM_Modeller:
         self.frame_scale = frame_scale
         self.reduced_coordinates = reduced_coordinates
 
-    ###########################################################################
-    # candidate state evaluation
-    ###########################################################################
+###########################################################################
+# candidate state evaluation
+###########################################################################
 
     def rmsd_from_centers(self, X=None, labels=None, centers=None):
         """
@@ -216,9 +216,9 @@ class MSM_Modeller:
         print(window_df_all)
         return window_df_all
 
-    ###########################################################################
-    # implied timescales + ck test
-    ###########################################################################
+###########################################################################
+# implied timescales + ck test
+###########################################################################
 
     def compute_implied_timescales(self, lags, labels=None, frame_list=None, n_timescales=None):
         """
@@ -264,6 +264,7 @@ class MSM_Modeller:
             eigvals = np.sort(np.abs(eigvals))[::-1][1:n_timescales + 1]
             timescales = -lag / np.log(eigvals)
             results[lag] = timescales
+            
         return results
 
     def chapman_kolmogorov_test(self, labels=None, frame_list=None, lag=None, steps=None):
@@ -301,9 +302,9 @@ class MSM_Modeller:
             results[k] = (T_pred, T_direct)
         return results
 
-    ###########################################################################
-    # transition probability matrix
-    ###########################################################################
+###########################################################################
+# transition probability matrix
+###########################################################################
 
     def create_transition_probability_matrix(self, labels=None, frame_list=None, lag=None):
         """
