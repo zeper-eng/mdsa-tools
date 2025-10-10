@@ -5,7 +5,7 @@ Here you can find worked-out example scripts that demonstrate
 how to use **mdsa-tools** for clustering, visualization, and 
 analysis of molecular dynamics data.
 
-.. grid:: 3 3 3 3 
+.. grid:: 4 4 4 4
    :gutter: 3
    :class-container: full-width 
 
