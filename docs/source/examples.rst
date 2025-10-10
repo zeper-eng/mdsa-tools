@@ -52,20 +52,6 @@ analysis of molecular dynamics data.
          :align: center
 
    .. grid-item-card::
-      :link: examples/MSM_Example
-      :link-type: doc
-      :shadow: lg
-      :text-align: center
-
-      **Exploratory MSM (from embeddings)**
-
-      ^^^
-      .. image:: ../resources/msmhelper.png
-         :alt: KMeans visualization
-         :width: 100%
-         :align: center
-
-   .. grid-item-card::
       :link: examples/Contourplots
       :link-type: doc
       :shadow: lg

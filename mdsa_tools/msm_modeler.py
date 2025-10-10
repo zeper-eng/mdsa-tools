@@ -11,7 +11,6 @@ class MSM_Modeller:
     - Pulling H-bond values via ``systems_analysis.extract_hbond_values()``
       and using those in replicate maps instead of k-means labels.
     - Cohesion over time, transition matrices, implied timescales,
-      Chapman–Kolmogorov (CK) tests, etc.
 
     Attributes
     ----------
@@ -267,41 +266,6 @@ class MSM_Modeller:
             
         return results
 
-    def chapman_kolmogorov_test(self, labels=None, frame_list=None, lag=None, steps=None):
-        """
-        Chapman–Kolmogorov check: compare T(lag)^k vs T(k*lag).
-
-        Parameters
-        ----------
-        labels, frame_list : optional
-            Override stored attributes.
-        lag : int, default 30
-            Base lag (frames).
-        steps : int, default 4
-            Number of multiples (k) to compare.
-
-        Returns
-        -------
-        dict[int, tuple[np.ndarray, np.ndarray]]
-            k -> (T_pred, T_direct).
-        """
-        if labels is None:
-            labels = self.labels
-        if lag is None:
-            lag = 30
-        if frame_list is None:
-            frame_list = self.frame_scale
-        if steps is None:
-            steps = 4
-
-        T_tau = self.create_transition_probability_matrix(labels, frame_list, lag=lag)[1:, 1:]
-        results = {}
-        for k in range(1, steps + 1):
-            T_pred = np.linalg.matrix_power(T_tau, k)
-            T_direct = self.create_transition_probability_matrix(labels, frame_list, lag=lag * k)[1:, 1:]
-            results[k] = (T_pred, T_direct)
-        return results
-
 ###########################################################################
 # transition probability matrix
 ###########################################################################
@@ -394,43 +358,3 @@ class MSM_Modeller:
         print("Eigenvalues:", eigvals)
         print("Stationary distribution:", stationary)
         return stationary
-
-    def evaluate_Chapman_Kolmogorov(self, transition_probability_matrix=None, n=None, labels=None, original_lag=None):
-        """
-        Single-number CK summary via Frobenius norm.
-
-        Δ = || T(lag)^n − T(n*lag) ||_F (smaller is “more Markovian”).
-
-        Parameters
-        ----------
-        transition_probability_matrix : np.ndarray, optional
-            If None, builds from stored data with original_lag.
-        n : int, default 4
-            Exponent on T(lag) for predicted evolution.
-        labels : array-like, optional
-            Override stored labels if rebuilding.
-        original_lag : int, default 1
-            Lag used to construct T(lag).
-
-        Returns
-        -------
-        float
-            Frobenius norm of the difference.
-        """
-        if transition_probability_matrix is None:
-            transition_probability_matrix = self.create_transition_probability_matrix()
-        if original_lag is None:
-            original_lag = 1
-        if n is None:
-            n = 4
-        if labels is None:
-            labels = self.labels
-
-        transition_prob_data = transition_probability_matrix[1:, 1:]
-        post_timestep_data = np.linalg.matrix_power(transition_prob_data, n)
-        transition_probability_matrix[1:, 1:] = post_timestep_data
-        total_lag = original_lag * n
-        matrix_from_total_lag = self.create_transition_probability_matrix(lag=total_lag)
-        diff = matrix_from_total_lag[1:, 1:] - transition_probability_matrix[1:, 1:]
-        frob = np.linalg.norm(diff, ord='fro')
-        return frob
