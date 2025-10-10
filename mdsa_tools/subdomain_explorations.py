@@ -2,7 +2,7 @@ import numpy as np
 import os
 import pandas as pd
 
-class MSM_Modeller:
+class subdomain_explorations:
     """
     Use results of systems analysis as candidate states for MarkovStateModel
     kinetics analysis (or foundations of one). This helper supports:

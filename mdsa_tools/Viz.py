@@ -814,15 +814,16 @@ def visualize_reduction(embedding_coordinates,
     fig = plt.figure(figsize=(16, 12), dpi=300)
     ax = plt.gca()
 
-    if cbar_type == 'discrete' and len(np.unique(color_mappings)) < 250:
-        scatter = ax.scatter(embedding_coordinates[:, 0], embedding_coordinates[:, 1],
-                             c=color_mappings, cmap=cmap, alpha=0.6)
-        add_discrete_colorbar(scatter, color_mappings, cbar_label, plt.gca(), cmap=cmap)
-    
-    if cbar_type == 'discrete' and len(np.unique(color_mappings)) > 250:
-        scatter = ax.scatter(embedding_coordinates[:, 0], embedding_coordinates[:, 1],
-                             c=color_mappings, cmap=cmap, alpha=0.6)
-        add_continuous_colorbar(scatter, color_mappings, cbar_label, plt.gca(), cmap=cmap)
+    if color_mappings is not None:
+        if cbar_type == 'discrete' and len(np.unique(color_mappings)) < 250:
+            scatter = ax.scatter(embedding_coordinates[:, 0], embedding_coordinates[:, 1],
+                                c=color_mappings, cmap=cmap, alpha=0.6)
+            add_discrete_colorbar(scatter, color_mappings, cbar_label, plt.gca(), cmap=cmap)
+        
+        if cbar_type == 'discrete' and len(np.unique(color_mappings)) > 250:
+            scatter = ax.scatter(embedding_coordinates[:, 0], embedding_coordinates[:, 1],
+                                c=color_mappings, cmap=cmap, alpha=0.6)
+            add_continuous_colorbar(scatter, color_mappings, cbar_label, plt.gca(), cmap=cmap)
 
     if color_mappings is None:#default for no colormaps is values
         if cbar_type == 'discrete':

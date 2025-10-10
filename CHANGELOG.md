@@ -1,4 +1,8 @@
 ## Theese changes are mainly for the pipi releases you can download the most recent version straight from github always
+
+# [1.1.7]-2025-08-15
+Many updates to visualization modules, new colorpallete trial feature for reductions, and scope has been reduced for kinetics to simple count matrices and transition probability matrices as well as emphasis on subdomain exploration instead of kinetic.
+
 # [1.1.6]-2025-08-15
 All basic functions thoroughly tested
 

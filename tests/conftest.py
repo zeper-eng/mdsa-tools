@@ -149,7 +149,7 @@ def rmsd_df():
 # ----------------------------------------------------------------
 # MSM Fixtures
 # ----------------------------------------------------------------
-from mdsa_tools.msm_modeler import MSM_Modeller
+from mdsa_tools.subdomain_explorations import subdomain_explorations
 
 DATA_MSM = Path(__file__).parent / "data" / "klust"
 CASES_MSM = [
@@ -187,4 +187,4 @@ def modeller(request):
         remap = {old: i for i, old in enumerate(uniq)}
         labels = np.vectorize(remap.get)(labels)
 
-    return MSM_Modeller(labels, centers, reduced_coordinates, frame_scale)
+    return subdomain_explorations(labels, centers, reduced_coordinates, frame_scale)
