@@ -122,16 +122,6 @@ analysis of molecular dynamics data.
          :width: 100%
          :align: center
 
-   .. grid-item-card::
-      :shadow: lg
-      :link-type: doc
-      :link: examples/Subdomain_example
-      :text-align: center
-
-      **UMAP embedding visualization example**
-
-      ^^^
-
 .. toctree::
    :hidden:
 
