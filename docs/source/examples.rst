@@ -138,7 +138,6 @@ analysis of molecular dynamics data.
    examples/circos_style_visualization
    examples/data_generation_workflow
    examples/import_from_cpptraj
-   examples/Subdomain_example
    examples/Contourplots
    examples/rmsd_example
    examples/example_of_clustering_analysis
