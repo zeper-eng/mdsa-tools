@@ -1,0 +1,359 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>mdsa_tools.subdomain_explorations &mdash; mdsa-tools</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=a6a68382" />
+      <link rel="stylesheet" type="text/css" href="../_static/fonts.css?v=5583d106" />
+      <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
+      <link rel="stylesheet" type="text/css" href="../_static/fullwidth.css" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../_static/design-tabs.js?v=f930bc37"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="mdsa_tools.Cpptraj_import" href="mdsa_tools.Cpptraj_import.html" />
+    <link rel="prev" title="mdsa_tools.Analysis" href="mdsa_tools.Analysis.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            mdsa-tools
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference external" href="https://github.com/zeper-eng/mdsa-tools">GitHub</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../api.html">mdsa-tools Python API</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="mdsa_tools.Data_gen_hbond.html">mdsa_tools.Data_gen_hbond</a></li>
+<li class="toctree-l2"><a class="reference internal" href="mdsa_tools.Analysis.html">mdsa_tools.Analysis</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">mdsa_tools.subdomain_explorations</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#mdsa_tools.subdomain_explorations.subdomain_explorations"><code class="docutils literal notranslate"><span class="pre">subdomain_explorations</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#mdsa_tools.subdomain_explorations.subdomain_explorations.compute_implied_timescales"><code class="docutils literal notranslate"><span class="pre">subdomain_explorations.compute_implied_timescales()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mdsa_tools.subdomain_explorations.subdomain_explorations.create_transition_probability_matrix"><code class="docutils literal notranslate"><span class="pre">subdomain_explorations.create_transition_probability_matrix()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mdsa_tools.subdomain_explorations.subdomain_explorations.evaluate_cohesion_shrinkingwindow"><code class="docutils literal notranslate"><span class="pre">subdomain_explorations.evaluate_cohesion_shrinkingwindow()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mdsa_tools.subdomain_explorations.subdomain_explorations.evaluate_cohesion_slidingwindow"><code class="docutils literal notranslate"><span class="pre">subdomain_explorations.evaluate_cohesion_slidingwindow()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mdsa_tools.subdomain_explorations.subdomain_explorations.extract_stationary_states"><code class="docutils literal notranslate"><span class="pre">subdomain_explorations.extract_stationary_states()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mdsa_tools.subdomain_explorations.subdomain_explorations.rmsd_from_centers"><code class="docutils literal notranslate"><span class="pre">subdomain_explorations.rmsd_from_centers()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="mdsa_tools.Cpptraj_import.html">mdsa_tools.Cpptraj_import</a></li>
+<li class="toctree-l2"><a class="reference internal" href="mdsa_tools.Viz.html">mdsa_tools.Viz</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../examples.html">Examples</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">mdsa-tools</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../api.html">mdsa-tools Python API</a></li>
+      <li class="breadcrumb-item active">mdsa_tools.subdomain_explorations</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-mdsa_tools.subdomain_explorations">
+<span id="mdsa-tools-subdomain-explorations"></span><h1>mdsa_tools.subdomain_explorations<a class="headerlink" href="#module-mdsa_tools.subdomain_explorations" title="Link to this heading"></a></h1>
+<p class="rubric">Classes</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#mdsa_tools.subdomain_explorations.subdomain_explorations" title="mdsa_tools.subdomain_explorations.subdomain_explorations"><code class="xref py py-obj docutils literal notranslate"><span class="pre">subdomain_explorations</span></code></a>([labels, centers, ...])</p></td>
+<td><p>Use results of systems analysis as candidate states for MarkovStateModel kinetics analysis (or foundations of one).</p></td>
+</tr>
+</tbody>
+</table>
+<dl class="py class">
+<dt class="sig sig-object py" id="mdsa_tools.subdomain_explorations.subdomain_explorations">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mdsa_tools.subdomain_explorations.</span></span><span class="sig-name descname"><span class="pre">subdomain_explorations</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">labels</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">centers</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reduced_coordinates</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">frame_scale</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mdsa_tools.subdomain_explorations.subdomain_explorations" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Use results of systems analysis as candidate states for MarkovStateModel
+kinetics analysis (or foundations of one). This helper supports:</p>
+<ul class="simple">
+<li><p>Clustering PCA/UMAP embeddings at different target dimensions.</p></li>
+<li><p>Pulling H-bond values via <code class="docutils literal notranslate"><span class="pre">systems_analysis.extract_hbond_values()</span></code>
+and using those in replicate maps instead of k-means labels.</p></li>
+<li><p>Cohesion over time, transition matrices, implied timescales,</p></li>
+</ul>
+<dl class="field-list simple">
+<dt class="field-odd">Attributes<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>labels</strong><span class="classifier">array-like of int or None</span></dt><dd><p>Cluster labels per frame (0-based).</p>
+</dd>
+<dt><strong>centers</strong><span class="classifier">np.ndarray or None</span></dt><dd><p>Cluster centers in the same space as reduced coordinates.</p>
+</dd>
+<dt><strong>reduced_coordinates</strong><span class="classifier">np.ndarray or None</span></dt><dd><p>Low-dimensional embedding coordinates (e.g., PCA/UMAP).</p>
+</dd>
+<dt><strong>frame_scale</strong><span class="classifier">list[int] or None</span></dt><dd><p>Number of frames per replicate.</p>
+</dd>
+<dt><strong>transition_probability_matrix</strong><span class="classifier">np.ndarray</span></dt><dd><p>Set after calling <code class="docutils literal notranslate"><span class="pre">create_transition_probability_matrix</span></code>.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<p class="rubric">Methods</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#mdsa_tools.subdomain_explorations.subdomain_explorations.compute_implied_timescales" title="mdsa_tools.subdomain_explorations.subdomain_explorations.compute_implied_timescales"><code class="xref py py-obj docutils literal notranslate"><span class="pre">compute_implied_timescales</span></code></a>(lags[, labels, ...])</p></td>
+<td><p>Implied timescales τ_i(lag) = -lag / ln(<a href="#id1"><span class="problematic" id="id2">|λ_i|</span></a>) from eigenvalues of T(lag).</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#mdsa_tools.subdomain_explorations.subdomain_explorations.create_transition_probability_matrix" title="mdsa_tools.subdomain_explorations.subdomain_explorations.create_transition_probability_matrix"><code class="xref py py-obj docutils literal notranslate"><span class="pre">create_transition_probability_matrix</span></code></a>([...])</p></td>
+<td><p>Build a row-normalized transition matrix from labels (no cross-replicate jumps).</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#mdsa_tools.subdomain_explorations.subdomain_explorations.evaluate_cohesion_shrinkingwindow" title="mdsa_tools.subdomain_explorations.subdomain_explorations.evaluate_cohesion_shrinkingwindow"><code class="xref py py-obj docutils literal notranslate"><span class="pre">evaluate_cohesion_shrinkingwindow</span></code></a>([labels, ...])</p></td>
+<td><p><em>Shrinking-from-the-start</em> window (aka keep the tail).</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#mdsa_tools.subdomain_explorations.subdomain_explorations.evaluate_cohesion_slidingwindow" title="mdsa_tools.subdomain_explorations.subdomain_explorations.evaluate_cohesion_slidingwindow"><code class="xref py py-obj docutils literal notranslate"><span class="pre">evaluate_cohesion_slidingwindow</span></code></a>([labels, ...])</p></td>
+<td><p>Fixed-size <em>sliding window</em> per replicate.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#mdsa_tools.subdomain_explorations.subdomain_explorations.extract_stationary_states" title="mdsa_tools.subdomain_explorations.subdomain_explorations.extract_stationary_states"><code class="xref py py-obj docutils literal notranslate"><span class="pre">extract_stationary_states</span></code></a>([...])</p></td>
+<td><p>Stationary distribution π from the transition matrix.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#mdsa_tools.subdomain_explorations.subdomain_explorations.rmsd_from_centers" title="mdsa_tools.subdomain_explorations.subdomain_explorations.rmsd_from_centers"><code class="xref py py-obj docutils literal notranslate"><span class="pre">rmsd_from_centers</span></code></a>([X, labels, centers])</p></td>
+<td><p>Per-cluster RMSD of points to their assigned cluster center.</p></td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Notes</p>
+<p>Intentionally lightweight: common artifacts are stashed so you don’t
+have to pass them to every call.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="mdsa_tools.subdomain_explorations.subdomain_explorations.compute_implied_timescales">
+<span class="sig-name descname"><span class="pre">compute_implied_timescales</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">lags</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">labels</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">frame_list</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_timescales</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mdsa_tools.subdomain_explorations.subdomain_explorations.compute_implied_timescales" title="Link to this definition"></a></dt>
+<dd><p>Implied timescales τ_i(lag) = -lag / ln(<a href="#id3"><span class="problematic" id="id4">|λ_i|</span></a>) from eigenvalues of T(lag).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>lags</strong><span class="classifier">list[int]</span></dt><dd><p>Lag times (frames) at which to estimate the transition matrix.</p>
+</dd>
+<dt><strong>labels</strong><span class="classifier">array-like, optional</span></dt><dd><p>Override stored labels.</p>
+</dd>
+<dt><strong>frame_list</strong><span class="classifier">list[int], optional</span></dt><dd><p>Override stored frame_scale.</p>
+</dd>
+<dt><strong>n_timescales</strong><span class="classifier">int, default 10</span></dt><dd><p>Number of slowest timescales to return.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt>dict[int, np.ndarray]</dt><dd><p>Map lag -&gt; array of slowest implied timescales.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<p>Uses eigenvalues of the row-normalized T; takes real(abs(.)).
+Timescales are in frames—multiply by dt for physical time.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mdsa_tools.subdomain_explorations.subdomain_explorations.create_transition_probability_matrix">
+<span class="sig-name descname"><span class="pre">create_transition_probability_matrix</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">labels</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">frame_list</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lag</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mdsa_tools.subdomain_explorations.subdomain_explorations.create_transition_probability_matrix" title="Link to this definition"></a></dt>
+<dd><p>Build a row-normalized transition matrix from labels (no cross-replicate jumps).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>labels</strong><span class="classifier">array-like, optional</span></dt><dd><p>Override stored labels. Integer states per frame (0-based).</p>
+</dd>
+<dt><strong>frame_list</strong><span class="classifier">list[int], optional</span></dt><dd><p>Override stored frame_scale. Frames per replicate.</p>
+</dd>
+<dt><strong>lag</strong><span class="classifier">int, default 1</span></dt><dd><p>Transition lag (frames).</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt>np.ndarray</dt><dd><p>(n_states+1, n_states+1) with header row/col for state ids.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<ul class="simple">
+<li><p>Rows with zero outgoing counts are all zeros.</p></li>
+<li><p>Prints raw counts pre-normalization for sanity check.</p></li>
+</ul>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mdsa_tools.subdomain_explorations.subdomain_explorations.evaluate_cohesion_shrinkingwindow">
+<span class="sig-name descname"><span class="pre">evaluate_cohesion_shrinkingwindow</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">labels</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">centers</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reduced_coordinates</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">frame_scale</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">step_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mdsa_tools.subdomain_explorations.subdomain_explorations.evaluate_cohesion_shrinkingwindow" title="Link to this definition"></a></dt>
+<dd><p><em>Shrinking-from-the-start</em> window (aka keep the tail).</p>
+<p>At step j, drop the first creepingstart frames of each replicate and
+use the rest.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>labels, centers, reduced_coordinates, frame_scale</strong><span class="classifier">optional</span></dt><dd><p>Override stored attributes.</p>
+</dd>
+<dt><strong>step_size</strong><span class="classifier">int, default 10</span></dt><dd><p>How much to move the left edge each step.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt>pandas.DataFrame</dt><dd><p>Columns: [‘cluster’, ‘rmsd’, ‘window’].</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<p>Complements the sliding-window view—asks whether cohesion improves
+as you toss early frames.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mdsa_tools.subdomain_explorations.subdomain_explorations.evaluate_cohesion_slidingwindow">
+<span class="sig-name descname"><span class="pre">evaluate_cohesion_slidingwindow</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">labels</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">centers</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reduced_coordinates</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">frame_scale</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">step_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mdsa_tools.subdomain_explorations.subdomain_explorations.evaluate_cohesion_slidingwindow" title="Link to this definition"></a></dt>
+<dd><p>Fixed-size <em>sliding window</em> per replicate.</p>
+<p>At window j, take a slice of length step_size from each replicate,
+concatenate, then compute per-cluster RMSD to centers for that slice.
+Advance by step_size each step.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>labels, centers, reduced_coordinates, frame_scale</strong><span class="classifier">optional</span></dt><dd><p>Override stored attributes.</p>
+</dd>
+<dt><strong>step_size</strong><span class="classifier">int, default 10</span></dt><dd><p>Window length (in frames) and hop size.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt>pandas.DataFrame</dt><dd><p>Columns: [‘cluster’, ‘rmsd’, ‘window’] where window is 1-based.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<ul class="simple">
+<li><p>Replicates shorter than the current window contribute nothing.</p></li>
+<li><p>Windows never cross replicate boundaries.</p></li>
+<li><p>Handy for checking “settling”/drift of clusters over time.</p></li>
+</ul>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mdsa_tools.subdomain_explorations.subdomain_explorations.extract_stationary_states">
+<span class="sig-name descname"><span class="pre">extract_stationary_states</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">final_transition_prob_matrix</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mdsa_tools.subdomain_explorations.subdomain_explorations.extract_stationary_states" title="Link to this definition"></a></dt>
+<dd><p>Stationary distribution π from the transition matrix.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>final_transition_prob_matrix</strong><span class="classifier">np.ndarray, optional</span></dt><dd><p>If None, rebuild from stored labels/frame lengths at lag=1.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt>np.ndarray</dt><dd><p>Stationary distribution (nonnegative, sums to 1).</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mdsa_tools.subdomain_explorations.subdomain_explorations.rmsd_from_centers">
+<span class="sig-name descname"><span class="pre">rmsd_from_centers</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">labels</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">centers</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mdsa_tools.subdomain_explorations.subdomain_explorations.rmsd_from_centers" title="Link to this definition"></a></dt>
+<dd><p>Per-cluster RMSD of points to their assigned cluster center.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>X</strong><span class="classifier">np.ndarray, shape (n_samples, n_dims), optional</span></dt><dd><p>Points in embedding space (PCA/UMAP). Defaults to stored coordinates.</p>
+</dd>
+<dt><strong>labels</strong><span class="classifier">array-like of int, shape (n_samples,), optional</span></dt><dd><p>Cluster labels for each row of X. Defaults to stored labels.</p>
+</dd>
+<dt><strong>centers</strong><span class="classifier">np.ndarray, shape (n_states, n_dims), optional</span></dt><dd><p>Cluster centers. Defaults to stored centers.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt>np.ndarray of shape (n_present_states, 2)</dt><dd><p>Columns: (cluster_id, rmsd). Cluster ids as int, rmsd as float.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<p>Uses Euclidean norm in the embedding space; no cluster-size weighting.</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="mdsa_tools.Analysis.html" class="btn btn-neutral float-left" title="mdsa_tools.Analysis" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="mdsa_tools.Cpptraj_import.html" class="btn btn-neutral float-right" title="mdsa_tools.Cpptraj_import" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright .</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
