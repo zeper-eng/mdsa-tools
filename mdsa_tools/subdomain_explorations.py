@@ -23,7 +23,7 @@ class subdomain_explorations:
     - Clustering PCA/UMAP embeddings at different target dimensions.
     - Pulling H-bond values via ``systems_analysis.extract_hbond_values()``
       and using those in replicate maps instead of k-means labels.
-    - Cohesion over time, transition matrices, implied timescales,
+    - Cohesion over time, transition matrices.
 
     Attributes
     ----------
@@ -35,8 +35,6 @@ class subdomain_explorations:
         Low-dimensional embedding coordinates (e.g., PCA/UMAP).
     frame_scale : list[int] or None
         Number of frames per replicate.
-    transition_probability_matrix : np.ndarray
-        Set after calling ``create_transition_probability_matrix``.
 
     Notes
     -----
@@ -228,56 +226,6 @@ class subdomain_explorations:
         print(window_df_all)
         return window_df_all
 
-###########################################################################
-# implied timescales + ck test
-###########################################################################
-
-    def compute_implied_timescales(self, lags, labels=None, frame_list=None, n_timescales=None):
-        """
-        Implied timescales τ_i(lag) = -lag / ln(|λ_i|) from eigenvalues of T(lag).
-
-        Parameters
-        ----------
-        lags : list[int]
-            Lag times (frames) at which to estimate the transition matrix.
-        labels : array-like, optional
-            Override stored labels.
-        frame_list : list[int], optional
-            Override stored frame_scale.
-        n_timescales : int, default 10
-            Number of slowest timescales to return.
-
-        Returns
-        -------
-        dict[int, np.ndarray]
-            Map lag -> array of slowest implied timescales.
-
-        Notes
-        -----
-        Uses eigenvalues of the row-normalized T; takes real(abs(.)).
-        Timescales are in frames—multiply by dt for physical time.
-        """
-        if labels is None:
-            labels = self.labels
-        if frame_list is None:
-            frame_list = self.frame_scale
-        if n_timescales is None:
-            n_timescales = 10
-
-        results = {}
-        for lag in lags:
-            T = self.create_transition_probability_matrix(
-                labels=labels,
-                frame_list=frame_list,
-                lag=lag
-            )[1:, 1:]
-            eigvals, _ = np.linalg.eig(T.T)
-            eigvals = np.real(eigvals)
-            eigvals = np.sort(np.abs(eigvals))[::-1][1:n_timescales + 1]
-            timescales = -lag / np.log(eigvals)
-            results[lag] = timescales
-            
-        return results
 
 ###########################################################################
 # transition probability matrix

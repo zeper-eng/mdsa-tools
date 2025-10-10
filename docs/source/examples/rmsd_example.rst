@@ -12,7 +12,7 @@ What you get
 ------------
 - Windowed **RMSD vs. time** per cluster (as ``.csv`` tables).
 - Easy to analyze **line plots** comparing your clusters progressive cohesion score via :func:`mdsa_tools.Viz.rmsd_lineplots`.
-- Hooks to extend into subdomain_explorations diagnostics (implied timescales, CK test).
+- Hooks to extend into subdomain_explorations diagnostics.
 
 Quickstart
 ----------
