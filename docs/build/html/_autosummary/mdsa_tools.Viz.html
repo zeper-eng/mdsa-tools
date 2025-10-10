@@ -48,10 +48,10 @@
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul class="current">
+<li class="toctree-l1"><a class="reference external" href="https://github.com/zeper-eng/mdsa-tools">GitHub</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="../api.html">mdsa-tools Python API</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="mdsa_tools.Data_gen_hbond.html">mdsa_tools.Data_gen_hbond</a></li>
 <li class="toctree-l2"><a class="reference internal" href="mdsa_tools.Analysis.html">mdsa_tools.Analysis</a></li>
-<li class="toctree-l2"><a class="reference internal" href="mdsa_tools.msm_modeler.html">mdsa_tools.msm_modeler</a></li>
 <li class="toctree-l2"><a class="reference internal" href="mdsa_tools.Cpptraj_import.html">mdsa_tools.Cpptraj_import</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">mdsa_tools.Viz</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#see-also">See Also</a></li>
@@ -110,9 +110,8 @@ depending on values etc.</p>
 to a continous colorbar and goes based on sample index.</p>
 <section id="see-also">
 <h2>See Also<a class="headerlink" href="#see-also" title="Link to this heading"></a></h2>
-<p>mdsa_tools.Analysis : A lot of the results you will probably visualize
-mdsa_tools.Data_gen_hbond.create_system_representations : Build residue–residue H-bond adjacency matrices.
-numpy.linalg.svd : Linear algebra used under the hood.</p>
+<p>mdsa_tools.Analysis : A lot of the results you will probably visualize</p>
+<p>mdsa_tools.Data_gen_hbond.create_system_representations : Build residue–residue H-bond adjacency matrices.</p>
 </section>
 <p class="rubric">Functions</p>
 <table class="autosummary longtable docutils align-default">
@@ -160,7 +159,7 @@ numpy.linalg.svd : Linear algebra used under the hood.</p>
 <td><p>Set x and y ticks for an axis depending on range.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#mdsa_tools.Viz.visualize_reduction" title="mdsa_tools.Viz.visualize_reduction"><code class="xref py py-obj docutils literal notranslate"><span class="pre">visualize_reduction</span></code></a>(embedding_coordinates[, ...])</p></td>
-<td><p>Scatter plot of a 2-D embedding with optional color mapping and colorbar; saves the figure.</p></td>
+<td><p>Plot a 2-D embedding (e.g., PCA/UMAP) as a scatter with optional coloring and colorbar, and save the figure to disk.</p></td>
 </tr>
 </tbody>
 </table>
@@ -422,7 +421,7 @@ sets a 10×10 figure with narrower labels and bigger arc sizes is used.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="mdsa_tools.Viz.mdcircos_graph">
-<span class="sig-prename descclassname"><span class="pre">mdsa_tools.Viz.</span></span><span class="sig-name descname"><span class="pre">mdcircos_graph</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">empty_circle</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">residue_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">savepath</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'/Users/luis/Desktop/workspacetwomdcircos_graph'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scale_factor</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">colormap</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">matplotlib.cm.magma_r</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mdsa_tools.Viz.mdcircos_graph" title="Link to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">mdsa_tools.Viz.</span></span><span class="sig-name descname"><span class="pre">mdcircos_graph</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">empty_circle</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">residue_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">savepath</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'/Users/luis/Desktop/workspacetwo/docsmdcircos_graph'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scale_factor</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">colormap</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">matplotlib.cm.magma_r</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mdsa_tools.Viz.mdcircos_graph" title="Link to this definition"></a></dt>
 <dd><p>Draw chords on a PyCircos circle from pairwise weights and save images.</p>
 <p>Creates a chord diagram on <cite>empty_circle</cite> using <cite>residue_dict</cite> where keys
 are residue pair strings <code class="docutils literal notranslate"><span class="pre">'i-j'</span></code> and values are magnitudes (signed allowed).
@@ -574,7 +573,7 @@ axis is inverted for a top-down visual.</p></li>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="mdsa_tools.Viz.rmsd_lineplots">
-<span class="sig-prename descclassname"><span class="pre">mdsa_tools.Viz.</span></span><span class="sig-name descname"><span class="pre">rmsd_lineplots</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pandasdf</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">title</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'RMSD</span> <span class="pre">plot'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xgroupvar</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'window'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ygroupvar</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'rmsd'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xlab</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'window'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ylab</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'rmsd'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">groupingvar</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'cluster'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cmap</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">matplotlib.cm.inferno_r</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cmap_is_colormap</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cmap_is_string</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">legendtitle</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Cluster'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">outfilepath</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'/Users/luis/Desktop/workspacetwo'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mdsa_tools.Viz.rmsd_lineplots" title="Link to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">mdsa_tools.Viz.</span></span><span class="sig-name descname"><span class="pre">rmsd_lineplots</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pandasdf</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">title</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'RMSD</span> <span class="pre">plot'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xgroupvar</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'window'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ygroupvar</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'rmsd'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xlab</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'window'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ylab</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'rmsd'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">groupingvar</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'cluster'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cmap</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">matplotlib.cm.inferno_r</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cmap_is_colormap</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">legendtitle</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Cluster'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">outfilepath</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'/Users/luis/Desktop/workspacetwo/docs'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mdsa_tools.Viz.rmsd_lineplots" title="Link to this definition"></a></dt>
 <dd><p>Create a grouped line plot of RMSD (or similar metric) over a window variable.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -596,8 +595,6 @@ axis is inverted for a top-down visual.</p></li>
 <dt><strong>cmap</strong><span class="classifier">str or matplotlib.colors.Colormap, default=cm.inferno_r</span></dt><dd><p>Palette/colormap to use.</p>
 </dd>
 <dt><strong>cmap_is_colormap</strong><span class="classifier">bool, default=True</span></dt><dd><p>If True, interpret <cite>cmap</cite> as a Matplotlib colormap.</p>
-</dd>
-<dt><strong>cmap_is_string</strong><span class="classifier">bool, default=False</span></dt><dd><p>If True, interpret <cite>cmap</cite> as a Seaborn/Matplotlib palette string.</p>
 </dd>
 <dt><strong>legendtitle</strong><span class="classifier">str, default=’Cluster’</span></dt><dd><p>Legend title.</p>
 </dd>
@@ -638,21 +635,37 @@ otherwise, Matplotlib’s default tick locator is preserved.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="mdsa_tools.Viz.visualize_reduction">
-<span class="sig-prename descclassname"><span class="pre">mdsa_tools.Viz.</span></span><span class="sig-name descname"><span class="pre">visualize_reduction</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">embedding_coordinates</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">color_mappings</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">savepath</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'/Users/luis/Desktop/workspacetwo'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">title</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cmap</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">axis_one_label</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">axis_two_label</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cbar_label</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gridvisible</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mdsa_tools.Viz.visualize_reduction" title="Link to this definition"></a></dt>
-<dd><p>Scatter plot of a 2-D embedding with optional color mapping and colorbar; saves the figure.</p>
-<dl class="field-list simple">
+<span class="sig-prename descclassname"><span class="pre">mdsa_tools.Viz.</span></span><span class="sig-name descname"><span class="pre">visualize_reduction</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">embedding_coordinates</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cbar_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">color_mappings</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">savepath</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'/Users/luis/Desktop/workspacetwo/docs'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">title</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cmap</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">axis_one_label</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">axis_two_label</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cbar_label</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gridvisible</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">color_palette</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mdsa_tools.Viz.visualize_reduction" title="Link to this definition"></a></dt>
+<dd><p>Plot a 2-D embedding (e.g., PCA/UMAP) as a scatter with optional coloring and colorbar,
+and save the figure to disk.</p>
+<dl class="field-list">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><dl class="simple">
-<dt><strong>embedding_coordinates</strong><span class="classifier">array-like of shape (n_samples, 2)</span></dt><dd><p>Two-column array of embedding coordinates (e.g., PCA/UMAP).</p>
+<dd class="field-odd"><dl>
+<dt><strong>embedding_coordinates</strong><span class="classifier">array-like of shape (n_samples, 2)</span></dt><dd><p>The 2D coordinates to plot.</p>
 </dd>
-<dt><strong>color_mappings</strong><span class="classifier">array-like of shape (n_samples,) or None, default=None</span></dt><dd><p>If provided and non-empty, treated as categorical and a discrete colorbar is drawn.
-If None/empty, uses an index-based gradient with a continuous colorbar.</p>
+<dt><strong>cbar_type</strong><span class="classifier">{‘discrete’, ‘continuous’} or None, default=None</span></dt><dd><p>Desired colorbar behavior. If None, defaults to ‘discrete’.
+When ‘discrete’ is selected but the number of unique values in <cite>color_mappings</cite>
+is large (&gt;= 250), the function automatically falls back to a continuous colorbar.</p>
 </dd>
-<dt><strong>savepath</strong><span class="classifier">str, default=os.getcwd()</span></dt><dd><p>Full output path <strong>including filename</strong> (no extension added automatically).</p>
+<dt><strong>color_mappings</strong><span class="classifier">array-like of shape (n_samples,) or None, default=None</span></dt><dd><p>Values used to color points.
+- If provided (non-empty) and treated as <em>categorical</em> (i.e., <cite>cbar_type=’discrete’</cite></p>
+<blockquote>
+<div><p>and &lt; 250 unique values), a discrete colorbar is drawn.</p>
+</div></blockquote>
+<ul class="simple">
+<li><p>If provided but either <cite>cbar_type=’continuous’</cite> or &gt;= 250 unique values,
+a continuous colorbar is drawn.</p></li>
+<li><p>If None or empty, points are colored by their index (0..n_samples-1)
+with a continuous colorbar.</p></li>
+</ul>
+</dd>
+<dt><strong>savepath</strong><span class="classifier">str, default=os.getcwd()</span></dt><dd><p>Full output path <strong>including filename</strong>. No extension is appended automatically.
+The figure is saved at 500 DPI.</p>
 </dd>
 <dt><strong>title</strong><span class="classifier">str or None, default=’Dimensional Reduction of Systems’</span></dt><dd><p>Figure title.</p>
 </dd>
-<dt><strong>cmap</strong><span class="classifier">str or matplotlib.colors.Colormap or None, default=cm.magma_r</span></dt><dd><p>Colormap for points and colorbar.</p>
+<dt><strong>cmap</strong><span class="classifier">str or matplotlib.colors.Colormap or sequence, default=cm.magma_r</span></dt><dd><p>Base colormap. If a sequence is passed, it is converted to a Colormap.
+Ignored when <cite>color_palette</cite> is provided.</p>
 </dd>
 <dt><strong>axis_one_label</strong><span class="classifier">str or None, default=’Embedding Space Axis 1’</span></dt><dd><p>X-axis label.</p>
 </dd>
@@ -660,7 +673,17 @@ If None/empty, uses an index-based gradient with a continuous colorbar.</p>
 </dd>
 <dt><strong>cbar_label</strong><span class="classifier">str or None, default=’Value’</span></dt><dd><p>Colorbar label.</p>
 </dd>
-<dt><strong>gridvisible</strong><span class="classifier">bool, default=False</span></dt><dd><p>Whether to show a background grid.</p>
+<dt><strong>gridvisible</strong><span class="classifier">bool, default=False</span></dt><dd><p>If True, show a background grid.</p>
+</dd>
+<dt><strong>color_palette</strong><span class="classifier">sequence of color specs or matplotlib.colors.Colormap, default=None</span></dt><dd><p>User-supplied palette that overrides <cite>cmap</cite>.
+- With categorical coloring: builds a ListedColormap from the sequence.
+- With continuous coloring or when <cite>color_mappings</cite> is None: builds a</p>
+<blockquote>
+<div><p>LinearSegmentedColormap from the sequence.</p>
+</div></blockquote>
+<ul class="simple">
+<li><p>If a Colormap object is supplied, it is used directly.</p></li>
+</ul>
 </dd>
 </dl>
 </dd>
@@ -672,7 +695,12 @@ If None/empty, uses an index-based gradient with a continuous colorbar.</p>
 </dd>
 </dl>
 <p class="rubric">Notes</p>
-<p>Axes spines are hidden; <cite>set_ticks</cite> is called to coarsen ticks on wide ranges.</p>
+<ul class="simple">
+<li><p>Figure size is 16×12 inches at 300 DPI (saved at 500 DPI).</p></li>
+<li><p>Axes spines are hidden; tick density is coarsened via <cite>set_ticks</cite>.</p></li>
+<li><p>Automatically switches from discrete to continuous colorbar when
+unique categories &gt;= 250 to keep the legend readable.</p></li>
+</ul>
 </dd></dl>
 
 </section>

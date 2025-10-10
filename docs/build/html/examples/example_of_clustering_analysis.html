@@ -25,8 +25,8 @@
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="MDcircos (PCA-weighted contacts)" href="circos_style_visualization.html" />
-    <link rel="prev" title="Examples" href="../examples.html" /> 
+    <link rel="next" title="Replicate maps (discrete H-bond labels)" href="hbond_replicate_maps.html" />
+    <link rel="prev" title="Cohesion over time (sliding &amp; shrinking windows)" href="rmsd_example.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -49,8 +49,14 @@
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul class="current">
+<li class="toctree-l1"><a class="reference external" href="https://github.com/zeper-eng/mdsa-tools">GitHub</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../api.html">mdsa-tools Python API</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="../examples.html">Examples</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="circos_style_visualization.html">MDcircos (PCA-weighted contacts)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="data_generation_workflow.html">Data generation (H-bond matrices)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="import_from_cpptraj.html">cpptraj (series) → residue×residue H-bond matrices</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Contourplots.html">Contours on PCA/UMAP embeddings</a></li>
+<li class="toctree-l2"><a class="reference internal" href="rmsd_example.html">Cohesion over time (sliding &amp; shrinking windows)</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Feature matrix &amp; exploratory clustering</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#what-you-get">What you get</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#quickstart">Quickstart</a></li>
@@ -59,10 +65,8 @@
 <li class="toctree-l3"><a class="reference internal" href="#see-also">See also</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="circos_style_visualization.html">MDcircos (PCA-weighted contacts)</a></li>
-<li class="toctree-l2"><a class="reference internal" href="data_generation_workflow.html">Data generation (H-bond matrices)</a></li>
-<li class="toctree-l2"><a class="reference internal" href="import_from_cpptraj.html">cpptraj (series) → residue×residue H-bond matrices</a></li>
 <li class="toctree-l2"><a class="reference internal" href="hbond_replicate_maps.html">Replicate maps (discrete H-bond labels)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="umap_example.html">UMAP embeddings (per-frame labelling)</a></li>
 </ul>
 </li>
 </ul>
@@ -110,7 +114,7 @@ elbow/silhouette score plots and the <strong>optimal K</strong> by each criterio
 <section id="quickstart">
 <h2>Quickstart<a class="headerlink" href="#quickstart" title="Link to this heading"></a></h2>
 <p>Minimal example using two previously generated systems (<code class="docutils literal notranslate"><span class="pre">.npy</span></code> arrays created by
-<code class="xref py py-class docutils literal notranslate"><span class="pre">mdsa_tools.Data_gen_hbond.TrajectoryProcessor</span></code> or <a class="reference internal" href="../_autosummary/mdsa_tools.Cpptraj_import.html#module-mdsa_tools.Cpptraj_import" title="mdsa_tools.Cpptraj_import"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mdsa_tools.Cpptraj_import</span></code></a>).</p>
+<a class="reference internal" href="../_autosummary/mdsa_tools.Data_gen_hbond.html#mdsa_tools.Data_gen_hbond.TrajectoryProcessor" title="mdsa_tools.Data_gen_hbond.TrajectoryProcessor"><code class="xref py py-class docutils literal notranslate"><span class="pre">mdsa_tools.Data_gen_hbond.TrajectoryProcessor</span></code></a> or <a class="reference internal" href="../_autosummary/mdsa_tools.Cpptraj_import.html#module-mdsa_tools.Cpptraj_import" title="mdsa_tools.Cpptraj_import"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mdsa_tools.Cpptraj_import</span></code></a>).</p>
 <p>If you are unfamiliar with making these, see <a class="reference internal" href="data_generation_workflow.html#datagen"><span class="std std-ref">Data generation (H-bond matrices)</span></a>.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
@@ -131,7 +135,7 @@ elbow/silhouette score plots and the <strong>optimal K</strong> by each criterio
 <span class="c1">#########################################</span>
 <span class="c1"># System-level K-means sweep (elbow &amp; silhouette)</span>
 <span class="c1">#########################################</span>
-<span class="n">k_labels_sil</span><span class="p">,</span> <span class="n">k_labels_elbow</span><span class="p">,</span> <span class="n">centers_sil</span><span class="p">,</span> <span class="n">centers_elbow</span> <span class="o">=</span> <span class="n">SA</span><span class="o">.</span><span class="n">cluster_system_level</span><span class="p">(</span>
+<span class="n">k_labels_sil</span><span class="p">,</span> <span class="n">k_labels_elbow</span><span class="p">,</span> <span class="n">centers_sil</span><span class="p">,</span> <span class="n">centers_elbow</span> <span class="o">=</span> <span class="n">SA</span><span class="o">.</span><span class="n">perform_kmeans</span><span class="p">(</span>
     <span class="n">outfile_path</span><span class="o">=</span><span class="s2">&quot;/path/to/output/syskmeans/&quot;</span><span class="p">,</span>
     <span class="n">max_clusters</span><span class="o">=</span><span class="mi">25</span>
 <span class="p">)</span>
@@ -176,7 +180,7 @@ when preprocessing changes.</p></li>
 <section id="where-this-fits">
 <h2>Where this fits<a class="headerlink" href="#where-this-fits" title="Link to this heading"></a></h2>
 <ul class="simple">
-<li><p>Generate adjacency arrays with <code class="xref py py-class docutils literal notranslate"><span class="pre">mdsa_tools.Data_gen_hbond.TrajectoryProcessor</span></code>
+<li><p>Generate adjacency arrays with <a class="reference internal" href="../_autosummary/mdsa_tools.Data_gen_hbond.html#mdsa_tools.Data_gen_hbond.TrajectoryProcessor" title="mdsa_tools.Data_gen_hbond.TrajectoryProcessor"><code class="xref py py-class docutils literal notranslate"><span class="pre">mdsa_tools.Data_gen_hbond.TrajectoryProcessor</span></code></a>
 (or build from cpptraj via <a class="reference internal" href="../_autosummary/mdsa_tools.Cpptraj_import.html#module-mdsa_tools.Cpptraj_import" title="mdsa_tools.Cpptraj_import"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mdsa_tools.Cpptraj_import</span></code></a>), then run clustering here.</p></li>
 <li><p>After clustering:
 - Explore embeddings and replicate maps with <a class="reference internal" href="../_autosummary/mdsa_tools.Viz.html#module-mdsa_tools.Viz" title="mdsa_tools.Viz"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mdsa_tools.Viz</span></code></a>.</p></li>
@@ -187,7 +191,7 @@ when preprocessing changes.</p></li>
 <ul class="simple">
 <li><p><a class="reference internal" href="../_autosummary/mdsa_tools.Data_gen_hbond.html#module-mdsa_tools.Data_gen_hbond" title="mdsa_tools.Data_gen_hbond"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mdsa_tools.Data_gen_hbond</span></code></a> — build per-frame H-bond adjacency matrices.</p></li>
 <li><p><a class="reference internal" href="../_autosummary/mdsa_tools.Cpptraj_import.html#module-mdsa_tools.Cpptraj_import" title="mdsa_tools.Cpptraj_import"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mdsa_tools.Cpptraj_import</span></code></a> — construct the same matrices from cpptraj series tables.</p></li>
-<li><p><a class="reference internal" href="../_autosummary/mdsa_tools.Analysis.html#mdsa_tools.Analysis.systems_analysis.cluster_system_level" title="mdsa_tools.Analysis.systems_analysis.cluster_system_level"><code class="xref py py-meth docutils literal notranslate"><span class="pre">mdsa_tools.Analysis.systems_analysis.cluster_system_level()</span></code></a> — K-sweep with elbow/silhouette.</p></li>
+<li><p><a class="reference internal" href="../_autosummary/mdsa_tools.Analysis.html#mdsa_tools.Analysis.systems_analysis.perform_kmeans" title="mdsa_tools.Analysis.systems_analysis.perform_kmeans"><code class="xref py py-meth docutils literal notranslate"><span class="pre">mdsa_tools.Analysis.systems_analysis.perform_kmeans()</span></code></a> — K-sweep with elbow/silhouette.</p></li>
 <li><p><a class="reference internal" href="../_autosummary/mdsa_tools.Analysis.html#mdsa_tools.Analysis.systems_analysis.reduce_systems_representations" title="mdsa_tools.Analysis.systems_analysis.reduce_systems_representations"><code class="xref py py-meth docutils literal notranslate"><span class="pre">mdsa_tools.Analysis.systems_analysis.reduce_systems_representations()</span></code></a> — PCA/UMAP embeddings.</p></li>
 <li><p><a class="reference internal" href="../_autosummary/mdsa_tools.Analysis.html#mdsa_tools.Analysis.systems_analysis.cluster_embeddingspace" title="mdsa_tools.Analysis.systems_analysis.cluster_embeddingspace"><code class="xref py py-meth docutils literal notranslate"><span class="pre">mdsa_tools.Analysis.systems_analysis.cluster_embeddingspace()</span></code></a> — clustering in embedding space.</p></li>
 </ul>
@@ -198,8 +202,8 @@ when preprocessing changes.</p></li>
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="../examples.html" class="btn btn-neutral float-left" title="Examples" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="circos_style_visualization.html" class="btn btn-neutral float-right" title="MDcircos (PCA-weighted contacts)" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="rmsd_example.html" class="btn btn-neutral float-left" title="Cohesion over time (sliding &amp; shrinking windows)" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="hbond_replicate_maps.html" class="btn btn-neutral float-right" title="Replicate maps (discrete H-bond labels)" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

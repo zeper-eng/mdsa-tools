@@ -24,7 +24,7 @@
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Feature matrix &amp; exploratory clustering" href="examples/example_of_clustering_analysis.html" />
+    <link rel="next" title="MDcircos (PCA-weighted contacts)" href="examples/circos_style_visualization.html" />
     <link rel="prev" title="mdsa_tools.Viz" href="_autosummary/mdsa_tools.Viz.html" /> 
 </head>
 
@@ -48,13 +48,17 @@
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul class="current">
+<li class="toctree-l1"><a class="reference external" href="https://github.com/zeper-eng/mdsa-tools">GitHub</a></li>
 <li class="toctree-l1"><a class="reference internal" href="api.html">mdsa-tools Python API</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Examples</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="examples/example_of_clustering_analysis.html">Feature matrix &amp; exploratory clustering</a></li>
 <li class="toctree-l2"><a class="reference internal" href="examples/circos_style_visualization.html">MDcircos (PCA-weighted contacts)</a></li>
 <li class="toctree-l2"><a class="reference internal" href="examples/data_generation_workflow.html">Data generation (H-bond matrices)</a></li>
 <li class="toctree-l2"><a class="reference internal" href="examples/import_from_cpptraj.html">cpptraj (series) → residue×residue H-bond matrices</a></li>
+<li class="toctree-l2"><a class="reference internal" href="examples/Contourplots.html">Contours on PCA/UMAP embeddings</a></li>
+<li class="toctree-l2"><a class="reference internal" href="examples/rmsd_example.html">Cohesion over time (sliding &amp; shrinking windows)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="examples/example_of_clustering_analysis.html">Feature matrix &amp; exploratory clustering</a></li>
 <li class="toctree-l2"><a class="reference internal" href="examples/hbond_replicate_maps.html">Replicate maps (discrete H-bond labels)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="examples/umap_example.html">UMAP embeddings (per-frame labelling)</a></li>
 </ul>
 </li>
 </ul>
@@ -88,18 +92,7 @@
 how to use <strong>mdsa-tools</strong> for clustering, visualization, and
 analysis of molecular dynamics data.</p>
 <div class="sd-container-fluid sd-sphinx-override sd-mb-4 full-width docutils">
-<div class="sd-row sd-row-cols-5 sd-row-cols-xs-5 sd-row-cols-sm-5 sd-row-cols-md-5 sd-row-cols-lg-5 sd-g-3 sd-g-xs-3 sd-g-sm-3 sd-g-md-3 sd-g-lg-3 docutils">
-<div class="sd-col sd-d-flex-row docutils">
-<div class="sd-card sd-sphinx-override sd-w-100 sd-shadow-lg sd-card-hover sd-text-center docutils">
-<div class="sd-card-header docutils">
-<p class="sd-card-text"><strong>Clustering and Dim-Red Examples</strong></p>
-</div>
-<div class="sd-card-body docutils">
-<a class="reference internal image-reference" href="_images/analysis_pipeline.png"><img alt="Example of clustering analysis" class="align-center" src="_images/analysis_pipeline.png" style="width: 100%;" />
-</a>
-</div>
-<a class="sd-stretched-link sd-hide-link-text reference internal" href="examples/example_of_clustering_analysis.html"><span class="doc">Feature matrix &amp; exploratory clustering</span></a></div>
-</div>
+<div class="sd-row sd-row-cols-4 sd-row-cols-xs-4 sd-row-cols-sm-4 sd-row-cols-md-4 sd-row-cols-lg-4 sd-g-3 sd-g-xs-3 sd-g-sm-3 sd-g-md-3 sd-g-lg-3 docutils">
 <div class="sd-col sd-d-flex-row docutils">
 <div class="sd-card sd-sphinx-override sd-w-100 sd-shadow-lg sd-card-hover sd-text-center docutils">
 <div class="sd-card-header docutils">
@@ -136,68 +129,57 @@ analysis of molecular dynamics data.</p>
 <div class="sd-col sd-d-flex-row docutils">
 <div class="sd-card sd-sphinx-override sd-w-100 sd-shadow-lg sd-card-hover sd-text-center docutils">
 <div class="sd-card-header docutils">
-<p class="sd-card-text"><strong>Exploratory MSM (from embeddings)</strong></p>
+<p class="sd-card-text"><strong>Contourplots</strong></p>
 </div>
 <div class="sd-card-body docutils">
-<a class="reference internal image-reference" href="_images/msmhelper.png"><img alt="KMeans visualization" class="align-center" src="_images/msmhelper.png" style="width: 100%;" />
+<a class="reference internal image-reference" href="_images/test_one.png"><img alt="Example systems" class="align-center" src="_images/test_one.png" style="width: 100%;" />
 </a>
 </div>
-<a class="sd-stretched-link sd-hide-link-text reference internal" href="examples/MSM_Example.html"><span class="doc">MSM (embedding-space kinetics from embeddings)</span></a></div>
+<a class="sd-stretched-link sd-hide-link-text reference internal" href="examples/Contourplots.html"><span class="doc">Contours on PCA/UMAP embeddings</span></a></div>
 </div>
 <div class="sd-col sd-d-flex-row docutils">
 <div class="sd-card sd-sphinx-override sd-w-100 sd-shadow-lg sd-card-hover sd-text-center docutils">
 <div class="sd-card-header docutils">
-<p class="sd-card-text"><strong>Example Systems</strong></p>
+<p class="sd-card-text"><strong>Cohesion (RMSD) Analysis</strong></p>
 </div>
 <div class="sd-card-body docutils">
-<a class="reference internal image-reference" href="../../resources/example_systems.png"><img alt="Example systems" class="align-center" src="../../resources/example_systems.png" style="width: 100%;" />
+<a class="reference internal image-reference" href="_images/rmsd_example.png"><img alt="Filler card 7" class="align-center" src="_images/rmsd_example.png" style="width: 100%;" />
 </a>
 </div>
-<a class="sd-stretched-link sd-hide-link-text reference internal" href="examples/example_systems.html"><span class="doc">&lt;no title&gt;</span></a></div>
+<a class="sd-stretched-link sd-hide-link-text reference internal" href="examples/rmsd_example.html"><span class="doc">Cohesion over time (sliding &amp; shrinking windows)</span></a></div>
 </div>
 <div class="sd-col sd-d-flex-row docutils">
-<div class="sd-card sd-sphinx-override sd-w-100 sd-shadow-lg sd-text-center docutils">
+<div class="sd-card sd-sphinx-override sd-w-100 sd-shadow-lg sd-card-hover sd-text-center docutils">
 <div class="sd-card-header docutils">
-<p class="sd-card-text"><strong>Filler 7</strong></p>
+<p class="sd-card-text"><strong>Clustering and Dim-Red Examples</strong></p>
 </div>
 <div class="sd-card-body docutils">
-<a class="reference internal image-reference" href="../../resources/placeholder.png"><img alt="Filler card 7" class="align-center" src="../../resources/placeholder.png" style="width: 100%;" />
+<a class="reference internal image-reference" href="_images/analysis_pipeline.png"><img alt="Example of clustering analysis" class="align-center" src="_images/analysis_pipeline.png" style="width: 100%;" />
 </a>
 </div>
-</div>
+<a class="sd-stretched-link sd-hide-link-text reference internal" href="examples/example_of_clustering_analysis.html"><span class="doc">Feature matrix &amp; exploratory clustering</span></a></div>
 </div>
 <div class="sd-col sd-d-flex-row docutils">
-<div class="sd-card sd-sphinx-override sd-w-100 sd-shadow-lg sd-text-center docutils">
+<div class="sd-card sd-sphinx-override sd-w-100 sd-shadow-lg sd-card-hover sd-text-center docutils">
 <div class="sd-card-header docutils">
-<p class="sd-card-text"><strong>Filler 8</strong></p>
+<p class="sd-card-text"><strong>Hbond Replicate Maps</strong></p>
 </div>
 <div class="sd-card-body docutils">
-<a class="reference internal image-reference" href="../../resources/placeholder.png"><img alt="Filler card 8" class="align-center" src="../../resources/placeholder.png" style="width: 100%;" />
+<a class="reference internal image-reference" href="_images/Hbond_Replicate_Map.png"><img alt="Filler card 8" class="align-center" src="_images/Hbond_Replicate_Map.png" style="width: 100%;" />
 </a>
 </div>
-</div>
+<a class="sd-stretched-link sd-hide-link-text reference internal" href="examples/hbond_replicate_maps.html"><span class="doc">Replicate maps (discrete H-bond labels)</span></a></div>
 </div>
 <div class="sd-col sd-d-flex-row docutils">
-<div class="sd-card sd-sphinx-override sd-w-100 sd-shadow-lg sd-text-center docutils">
+<div class="sd-card sd-sphinx-override sd-w-100 sd-shadow-lg sd-card-hover sd-text-center docutils">
 <div class="sd-card-header docutils">
-<p class="sd-card-text"><strong>Filler 9</strong></p>
+<p class="sd-card-text"><strong>UMAP embedding visualization example</strong></p>
 </div>
 <div class="sd-card-body docutils">
-<a class="reference internal image-reference" href="../../resources/placeholder.png"><img alt="Filler card 9" class="align-center" src="../../resources/placeholder.png" style="width: 100%;" />
+<a class="reference internal image-reference" href="_images/UMAP-img.png"><img alt="Filler card 9" class="align-center" src="_images/UMAP-img.png" style="width: 100%;" />
 </a>
 </div>
-</div>
-</div>
-<div class="sd-col sd-d-flex-row docutils">
-<div class="sd-card sd-sphinx-override sd-w-100 sd-shadow-lg sd-text-center docutils">
-<div class="sd-card-header docutils">
-<p class="sd-card-text"><strong>Filler 10</strong></p>
-</div>
-<div class="sd-card-body docutils">
-<a class="reference internal image-reference" href="../../resources/placeholder.png"><img alt="Filler card 10" class="align-center" src="../../resources/placeholder.png" style="width: 100%;" />
-</a>
-</div>
-</div>
+<a class="sd-stretched-link sd-hide-link-text reference internal" href="examples/umap_example.html"><span class="doc">UMAP embeddings (per-frame labelling)</span></a></div>
 </div>
 </div>
 </div>
@@ -210,7 +192,7 @@ analysis of molecular dynamics data.</p>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="_autosummary/mdsa_tools.Viz.html" class="btn btn-neutral float-left" title="mdsa_tools.Viz" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="examples/example_of_clustering_analysis.html" class="btn btn-neutral float-right" title="Feature matrix &amp; exploratory clustering" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="examples/circos_style_visualization.html" class="btn btn-neutral float-right" title="MDcircos (PCA-weighted contacts)" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

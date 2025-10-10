@@ -6,7 +6,7 @@ how to use **mdsa-tools** for clustering, visualization, and
 analysis of molecular dynamics data.
 
 .. grid:: 4 4 4 4
-   :gutter: 3
+   :gutter: 4
    :class-container: full-width 
 
    .. grid-item-card::

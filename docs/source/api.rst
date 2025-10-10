@@ -9,6 +9,6 @@ The API currently consists of five main modules
 
    mdsa_tools.Data_gen_hbond
    mdsa_tools.Analysis
-   mdsa_tools.msm_modeler
+   mdsa_tools.subdomain_explorations
    mdsa_tools.Cpptraj_import
    mdsa_tools.Viz
