@@ -1,6 +1,20 @@
 import numpy as np
 import os
 import pandas as pd
+'''
+Use results of systems analysis to explore potential preferred structural conformations
+
+- Clustering PCA/UMAP embeddings at different target dimensions.
+- Pulling H-bond values via ``systems_analysis.extract_hbond_values()``
+    and using those in replicate maps instead of k-means labels.
+- Cohesion over time, transition matrices, implied timescales.
+
+
+See Also
+--------
+mdsa_tools.Cpptraj_import.cpptraj_hbond_import
+
+'''
 
 class subdomain_explorations:
     """
@@ -329,31 +343,3 @@ class subdomain_explorations:
         self.transition_probability_matrix = final_transition_prob_matrix
         return final_transition_prob_matrix
 
-    def extract_stationary_states(self, final_transition_prob_matrix=None):
-        """
-        Stationary distribution π from the transition matrix.
-
-        Parameters
-        ----------
-        final_transition_prob_matrix : np.ndarray, optional
-            If None, rebuild from stored labels/frame lengths at lag=1.
-
-        Returns
-        -------
-        np.ndarray
-            Stationary distribution (nonnegative, sums to 1).
-        """
-        if final_transition_prob_matrix is None:
-            final_transition_prob_matrix = self.create_transition_probability_matrix()
-
-        T = final_transition_prob_matrix[1:, 1:]
-        eigvals, eigvecs = np.linalg.eig(T.T)
-        print(f"eigenvals:{eigvals},eigvecs:{eigvecs}")
-        idx = np.argmin(np.abs(eigvals - 1))
-        stationary = np.real(eigvecs[:, idx])
-        print(f"idx:{idx},stationary:{stationary}")
-        stationary = stationary / stationary.sum()
-        print(f"stationary:{stationary}")
-        print("Eigenvalues:", eigvals)
-        print("Stationary distribution:", stationary)
-        return stationary
