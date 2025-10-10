@@ -4,8 +4,7 @@ import pandas as pd
 
 class subdomain_explorations:
     """
-    Use results of systems analysis as candidate states for MarkovStateModel
-    kinetics analysis (or foundations of one). This helper supports:
+    Use results of systems analysis to explore potential preferred structural conformations
 
     - Clustering PCA/UMAP embeddings at different target dimensions.
     - Pulling H-bond values via ``systems_analysis.extract_hbond_values()``
