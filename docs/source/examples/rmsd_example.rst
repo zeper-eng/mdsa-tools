@@ -3,7 +3,7 @@
 Cohesion over time (sliding & shrinking windows)
 ================================================
 
-Use :class:`mdsa_tools.msm_modeler.subdomain_explorations` to quantify **cluster cohesion**
+Use :class:`mdsa_tools.subdomain_explorations` to quantify **cluster cohesion**
 over time in a 2-D embedding (PCA/UMAP). We compute per-cluster RMSD to the
 assigned center within moving windows—either **sliding windows** (fixed width,
 hop forward) or **shrinking windows** (drop early frames and keep the tail).
@@ -12,7 +12,7 @@ What you get
 ------------
 - Windowed **RMSD vs. time** per cluster (as ``.csv`` tables).
 - Easy to analyze **line plots** comparing your clusters progressive cohesion score via :func:`mdsa_tools.Viz.rmsd_lineplots`.
-- Hooks to extend into MSM diagnostics (implied timescales, CK test).
+- Hooks to extend into subdomain_explorations diagnostics (implied timescales, CK test).
 
 Quickstart
 ----------
@@ -26,7 +26,7 @@ K-means labels/centers from :meth:`mdsa_tools.Analysis.systems_analysis.*`.
    import pandas as pd
    import matplotlib.cm as cm
 
-   from mdsa_tools.msm_modeler import subdomain_explorations as msm
+   from mdsa_tools.subdomain_explorations import subdomain_explorations as subdomain_explorations
    from mdsa_tools.Viz import rmsd_lineplots
 
    #########################################
@@ -49,7 +49,7 @@ K-means labels/centers from :meth:`mdsa_tools.Analysis.systems_analysis.*`.
    #########################################
    # Build modeller and run windowed cohesion
    #########################################
-   modeller = msm(labels=labels, centers=centers, reduced_coordinates=X, frame_scale=frame_scale)
+   modeller = subdomain_explorations(labels=labels, centers=centers, reduced_coordinates=X, frame_scale=frame_scale)
 
    # Sliding window: fixed-length chunks that hop forward
    sliding_df   = modeller.evaluate_cohesion_slidingwindow(step_size=20)     # window=20 frames
@@ -88,14 +88,13 @@ Notes
 Where this fits
 ---------------
 - After :ref:`full_example` clustering, run cohesion to assess whether your
-  K-means states are kinetically sensible before MSM fitting.
+  K-means states are kinetically sensible before subdomain_explorations fitting.
 - Combine with **replicate maps** (see :mod:`mdsa_tools.Viz`) to visualize
   state usage across replicates in parallel to cohesion trends.
 
 See also
 --------
-- :class:`mdsa_tools.msm_modeler.subdomain_explorations` — cohesion windows, transition matrices,
-  implied timescales, CK test.
+- :class:`mdsa_tools.subdomain_explorations` — cohesion windows, transition matrices,
 - :func:`mdsa_tools.Viz.rmsd_lineplots` — render per-cluster RMSD vs. window.
 - :meth:`mdsa_tools.Analysis.systems_analysis.perform_kmeans` — produce labels/centers.
 - :meth:`mdsa_tools.Analysis.systems_analysis.reduce_systems_representations` — get PCA/UMAP.

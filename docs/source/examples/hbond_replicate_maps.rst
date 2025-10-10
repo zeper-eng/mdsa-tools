@@ -96,7 +96,7 @@ Where this fits
 - After inspecting replicate maps, you can:
   - Perform dimensionality reduction or clustering with :mod:`mdsa_tools.Analysis`.
   - Visualize embeddings or MDcircos contact weights with :mod:`mdsa_tools.Viz`.
-  - Feed features into MSM workflows (see :mod:`mdsa_tools.msm_modeler`).
+  - Feed features into subdomain workflows (see :mod:`mdsa_tools.subdomain_explorations`).
 
 See also
 --------

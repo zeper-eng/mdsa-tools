@@ -90,7 +90,7 @@ Where this fits
 - After identifying key contacts with PCA/MDcircos, you can:
   - Cluster or label states with :mod:`mdsa_tools.Analysis`.
   - Reduce and visualize embeddings with :mod:`mdsa_tools.Viz`.
-  - Feed features into MSM workflows (see :mod:`mdsa_tools.msm_modeler`).
+  - Feed features into subdomain workflows (see :mod:`mdsa_tools.subdomain_explorations`).
 
 See also
 --------

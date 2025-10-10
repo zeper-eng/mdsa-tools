@@ -6,7 +6,7 @@ Data generation (H-bond matrices)
 Use :class:`mdsa_tools.Data_gen_hbond.TrajectoryProcessor` to turn trajectories
 (+ a topology) into per-frame residue×residue hydrogen-bond adjacency matrices.
 These arrays feed directly into the rest of the pipeline (clustering, PCA/UMAP,
-MSM bits).
+subdomain bits).
 
 What you get
 ------------
@@ -75,6 +75,6 @@ Where this fits
 
 See also
 --------
-- :mod:`mdsa_tools.Analysis` — clustering, PCA/UMAP, MSM helpers.
+- :mod:`mdsa_tools.Analysis` — clustering, PCA/UMAP, subdomain helpers.
 - :mod:`mdsa_tools.Viz` — quick plots for embeddings and replicate maps.
 - :mod:`mdsa_tools.Cpptraj_import` — build the same matrices from cpptraj series tables.
