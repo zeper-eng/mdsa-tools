@@ -28,13 +28,16 @@ jobs:
           cat docs/requirements.txt
           python -c "import pkgutil; print('has sphinx_rtd_theme?', pkgutil.find_loader('sphinx_rtd_theme') is not None)"
 
-      - name: Build Sphinx HTML (warnings fail build)
-        run: sphinx-build -b html docs/source docs/_build/html -E -v
+      - name: Build Sphinx HTML (clean + build)
+        run: |
+          cd docs/source
+          rm -rf _build .doctrees .cache **/__pycache__ .ipynb_checkpoints .jupyter_cache generated
+          sphinx-build -b html -E -a -d _build/doctrees . _build/html
+          command -v open >/dev/null 2>&1 && open _build/html/index.html || true
 
       - name: Upload HTML as artifact
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: docs-html
-          path: docs/_build/html
-
+          path: docs/source/_build/html
