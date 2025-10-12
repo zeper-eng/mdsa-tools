@@ -1,4 +1,7 @@
 ## Theese changes are mainly for the pipi releases you can download the most recent version straight from github always
+# [1.1.8]-2025-08-15
+MDAnalysis now provides a third structure to test if the project is actually modular. Moving forward the last full "working"
+release will be on PyPi but our Github releases will match the most recent work as the project moves forward.
 
 # [1.1.7]-2025-08-15
 Many updates to visualization modules, new colorpallete trial feature for reductions, and scope has been reduced for kinetics to simple count matrices and transition probability matrices as well as emphasis on subdomain exploration instead of kinetic.
