@@ -27,7 +27,7 @@ dependencies = [
   "python-circos",
   "requests",
   "MDAnalysisData",
-  "pkg_resources"
+  "setuptools>=68"
 ]
 
 [project.optional-dependencies]
