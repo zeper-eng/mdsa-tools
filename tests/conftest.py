@@ -65,13 +65,13 @@ top_path  = adk.topology
 
 
 @pytest.fixture(scope="session")
-def p53_systems():
+def external_systems():
     tp = TrajectoryProcessor(traj_path, top_path)
     return tp.create_filtered_representations(residues_to_keep=unrestrained_residues)
 
 @pytest.fixture(scope="session")
-def p53_analyzer(p53_systems):
-    sa = systems_analysis([p53_systems])  # wrap in list so API is consistent
+def external_analyzer(external_systems):
+    sa = systems_analysis([external_systems])  # wrap in list so API is consistent
     sa.replicates_to_featurematrix()
     return sa
 
