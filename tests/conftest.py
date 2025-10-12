@@ -56,6 +56,8 @@ def analyzer(analysis_systems):
 Citation for using data provided by MDAnalysis
 Oliver Beckstein, Richard Gowers, Irfan Alibay, Shujie Fan, Lily Wang, & Micaela Matta. 
 (2023). MDAnalysis/MDAnalysisData: 0.9.0 (release-0.9.0). Zenodo. https://doi.org/10.5281/zenodo.10058664
+
+Seyler, Sean; Beckstein, Oliver (2017): Molecular dynamics trajectory for benchmarking MDAnalysis. figshare. Fileset. doi: 10.6084/m9.figshare.5108170.v1
 '''
 
 from MDAnalysisData import datasets
