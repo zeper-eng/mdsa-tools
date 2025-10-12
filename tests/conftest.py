@@ -50,13 +50,23 @@ def analyzer(analysis_systems):
     return sa
 
 # ----------------------------------------------------------------
-# P53 Analysis Systems (separate from ribosome)
+# MDshare brings in extra Systems (separate from ribosome)
 # ----------------------------------------------------------------
+'''
+Citation for using data provided by MDAnalysis
+Oliver Beckstein, Richard Gowers, Irfan Alibay, Shujie Fan, Lily Wang, & Micaela Matta. 
+(2023). MDAnalysis/MDAnalysisData: 0.9.0 (release-0.9.0). Zenodo. https://doi.org/10.5281/zenodo.10058664
+'''
+
+from MDAnalysisData import datasets
+adk = datasets.fetch_adk_equilibrium()  
+traj_path = adk.trajectory               # .dcd example
+top_path  = adk.topology 
+
+
 @pytest.fixture(scope="session")
 def p53_systems():
-    traj = DATA / "ten_framep53.dcd"
-    top = DATA / "p53_Y220C_PK11000_nowat.prmtop"
-    tp = TrajectoryProcessor(traj, top)
+    tp = TrajectoryProcessor(traj_path, top_path)
     return tp.create_filtered_representations(residues_to_keep=unrestrained_residues)
 
 @pytest.fixture(scope="session")
