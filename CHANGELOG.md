@@ -1,4 +1,10 @@
 ## Theese changes are mainly for the pipi releases you can download the most recent version straight from github always
+# [1.1.9]-2025-08-15
+MDAnalysis now provides a third structure to test if the project is actually modular. Moving forward the last full "working"
+release will be on PyPi but our Github releases will match the most recent work as the project moves forward.
+
+-- identical to 1.1.8 except we needed to include MDAnalysis it as a requirement --
+
 # [1.1.8]-2025-08-15
 MDAnalysis now provides a third structure to test if the project is actually modular. Moving forward the last full "working"
 release will be on PyPi but our Github releases will match the most recent work as the project moves forward.

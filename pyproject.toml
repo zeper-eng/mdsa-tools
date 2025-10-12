@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "mdsa-tools"
-version = "1.1.8"
+version = "1.1.9"
 description = "The Weir Labs H-bond Systems Analyses modules!"
 readme = "README.md"
 requires-python = ">=3.9"
@@ -25,7 +25,8 @@ dependencies = [
   "mdtraj<=1.10.3",
   "umap-learn",
   "python-circos",
-  "requests"
+  "requests",
+  "MDAnalysisData"
 ]
 
 [project.optional-dependencies]
