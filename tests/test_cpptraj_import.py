@@ -10,8 +10,6 @@ def test_general_usecasewithexamples(importer):
     E = n * (n - 1) // 2
     assert edge_vectors.shape == (n_frames, E)
 
-
-
 def test_extract_headers_parses_pairs(tmp_path):
     # Header + one data row (cpptraj-style)
     text = "#Frame HB_1@N_2@O HB_2@N_3@O HB_2@N_2@O\n0  1 0 1\n"

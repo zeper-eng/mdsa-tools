@@ -120,6 +120,11 @@ def importer(request):
     residues = [95,230,232,234,235,236,237,238,239,240,241,242,243,244,245,246]
     return cpptraj_hbond_import(datfile, top, residues)
 
+@pytest.fixture(scope="session", params=CPPTRAJ_CASES, ids=["GCU"])
+def alternatefeaturematrix(importer):
+    feature_matrix = importer.iterate_frames()
+    return feature_matrix
+
 
 
 # ----------------------------------------------------------------
