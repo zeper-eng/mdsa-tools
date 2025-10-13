@@ -29,12 +29,17 @@ def test_edge_listcreation(importer):
     lookuptable=importer.lookup_table_from_edgelist()
     assert edge_list.shape[0] == int((lookuptable[1:,1:].shape[0]*(lookuptable[1:,1:].shape[0]-1))/2)
 
-def test_edge_listcreation(importer):
-    #test that lookup table is indeed about the same size 
-    edge_list=importer.edgelist_single_frame()
+def test_Lookuptable_creation(importer):
+    #test that the indexes we are using in the lookup table are the same as the ones we bring in
     lookuptable=importer.lookup_table_from_edgelist()
-    assert edge_list.shape[0] == int((lookuptable[1:,1:].shape[0]*(lookuptable[1:,1:].shape[0]-1))/2)
+    assert lookuptable[0,1:].tolist() == importer.res_of_interest
+    assert lookuptable[1:,0].tolist() == importer.res_of_interest
 
+def test_Lookuptable_creation(importer):
+    #test that the indexes we are using in the lookup table are the same as the ones we bring in
+    lookuptable=importer.lookup_table_from_edgelist()
+    assert lookuptable[0,1:].tolist() == importer.res_of_interest
+    assert lookuptable[1:,0].tolist() == importer.res_of_interest
 
 
 

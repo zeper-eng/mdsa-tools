@@ -81,12 +81,6 @@ def test_perform_kmeans_k_path(tmp_path, analyzer):
     assert labels.shape[0] == Fm.shape[0]
     assert centers.shape[0] == 2
 
-def test_perform_kmeans_k_path_again(tmp_path, analyzer):
-    # same as above, but using a different variable name to avoid duplicate test id
-    X = analyzer.feature_matrix
-    labels, centers = analyzer.perform_kmeans(outfile_path=str(tmp_path) + os.sep, data=X, k=2)
-    assert labels.shape[0] == X.shape[0]
-    assert centers.shape[0] == 2
 
 def test_create_pearsontest_for_kmeans_distributions_shape(analyzer):
     # quick check on the Pearson distance table produced from tiny, separable clusters
