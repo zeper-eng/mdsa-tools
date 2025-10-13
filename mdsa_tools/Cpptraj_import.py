@@ -330,8 +330,10 @@ if __name__ == '__main__':
     test_trajectory = cpptraj_hbond_import(filepath=traj,topology=topology,res_of_interest=residues)
 
     feature_matrix=test_trajectory.iterate_frames()
+    print(feature_matrix)
+    print(feature_matrix.shape)
     
     from mdsa_tools.Analysis import systems_analysis
 
     Analyzer=systems_analysis(precomputed_feature_matrix=feature_matrix,res_indexes_for_precomputedmatrix=residues)
-    
+
