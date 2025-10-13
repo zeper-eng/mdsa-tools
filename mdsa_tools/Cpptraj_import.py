@@ -67,7 +67,9 @@ class cpptraj_hbond_import():
     -----
     This class assumes a header where the first field is `#Frame` followed by
     columns named like `<prefix>_<res1>@<atom1>_<res2>@<atom2>`.
+
     '''
+
     def __init__(self,filepath,topology,res_of_interest):
         '''Initialize the loader and parse header + data.
 
@@ -267,6 +269,7 @@ class cpptraj_hbond_import():
         -----
    
         '''
+
         data=data if data is not None else self.data
         headers=headers if headers is not None else self.residuelevel_indices
         
@@ -326,7 +329,8 @@ if __name__ == '__main__':
     residues = [95,230,232,234,235,236,237,238,239,240,241,242,243,244,245,246]
     test_trajectory = cpptraj_hbond_import(filepath=traj,topology=topology,res_of_interest=residues)
 
-    all_edge_lists=test_trajectory.iterate_frames()
-    print(all_edge_lists)
-    print(all_edge_lists.shape)
-    os._exit(0)
+    feature_matrix=test_trajectory.iterate_frames()
+    
+    from mdsa_tools.Analysis import systems_analysis
+
+    Analyzer=systems_analysis(precomputed_feature_matrix=feature_matrix,res_indexes_for_precomputedmatrix=residues)

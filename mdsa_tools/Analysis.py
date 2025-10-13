@@ -69,7 +69,10 @@ class systems_analysis:
       (flattening, reduction, clustering) for downstream use.
     '''
     
-    def __init__(self,systems_representations=None,replicate_distribution=None):
+    def __init__(self,systems_representations=None,
+                 replicate_distribution=None,
+                 precomputed_feature_matrix=None,
+                 res_indexes_for_precomputedmatrix=None):
         '''
         Initialize the analysis container.
 
@@ -79,21 +82,39 @@ class systems_analysis:
             List of system arrays, each shaped ``(n_frames, n_residues, n_residues)``.
         replicate_distribution : array-like of int or None, optional
             Optional frame-level indexing/labels for downstream bookkeeping.
+        Precomputed_feature_matrix : array-like of int or None, optional
+            Optional frame-level indexing/labels for downstream bookkeeping.
 
         Returns
         -------
         None
+        
         '''
         
-        self.num_systems=len(systems_representations) #this is useful later on for when we are doing system_specific operations
-        self.systems_representations=systems_representations
-        self.indexes = systems_representations[0][0, 0, 1:] #bc list then 3d array
-        self.feature_matrix=None
+        
+        if systems_representations is not None:
+            self.num_systems=len(systems_representations) #this is useful later on for when we are doing system_specific operations
+            self.systems_representations=systems_representations
+            self.indexes = systems_representations[0][0, 0, 1:] #bc list then 3d array
+            if replicate_distribution is None:
+                self.replicate_distribution=np.arange(0,systems_representations[0].shape[0])
+        
+
+        if precomputed_feature_matrix is not None:
+            self.feature_matrix = precomputed_feature_matrix
+            
+            self.indexes = res_indexes_for_precomputedmatrix #bc list then 3d array
+
+            if replicate_distribution is None:
+                self.replicate_distribution=np.arange(0,self.feature_matrix.shape[0])
+
+        if precomputed_feature_matrix is None:
+            self.feature_matrix = None
+
+
         if replicate_distribution is not None:
             self.replicate_distribution=replicate_distribution
-            
-        if replicate_distribution is None:
-            self.replicate_distribution=np.arange(0,systems_representations[0].shape[0])
+      
         
         return
 
