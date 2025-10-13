@@ -92,4 +92,52 @@ def test_create_pearsontest_for_kmeans_distributions_shape(analyzer):
     assert len(df) == 1  # only one pair of clusters to compare
 
 
+# ------------------------------------------------------------
+# Precomputed analyzer: uses alternatefeaturematrix from importer
+# ------------------------------------------------------------
 
+def test_precomputed_feature_matrix_shape(precomputed_analyzer, importer):
+    """Same as original shape test but on the precomputed path."""
+    fm = precomputed_analyzer.feature_matrix
+    assert fm.ndim == 2 and fm.shape[0] > 0 and fm.shape[1] > 0
+
+    # Columns must be nC2 for the exact residues used by the importer
+    n = len(importer.res_of_interest)
+    E = n * (n - 1) // 2
+    assert fm.shape[1] == E
+
+
+def test_precomputed_proper_PCA_reduction_output(precomputed_analyzer):
+    X_pca, weights, var_ratio = precomputed_analyzer.reduce_systems_representations(method="PCA")
+    assert X_pca.shape[0] == precomputed_analyzer.feature_matrix.shape[0]
+    assert isinstance(var_ratio, np.ndarray) and var_ratio.shape[0] == 2
+    assert weights.shape[1] == precomputed_analyzer.feature_matrix.shape[1]
+
+
+def test_precomputed_proper_UMAP_reduction_output(precomputed_analyzer):
+    emb = precomputed_analyzer.reduce_systems_representations(method="UMAP", n_neighbors=5)
+    assert emb.shape[0] == precomputed_analyzer.feature_matrix.shape[0]
+    assert emb.shape[1] == 2
+
+
+def test_precomputed_system_clustering_fixed_k(precomputed_analyzer, tmp_path):
+    X = precomputed_analyzer.feature_matrix
+    labels, centers = precomputed_analyzer.perform_kmeans(outfile_path=str(tmp_path) + "/", data=X, k=2)
+    assert labels.shape[0] == X.shape[0]
+    assert centers.shape == (2, X.shape[1])
+
+
+def test_precomputed_pca_ranked_weights(precomputed_analyzer, importer):
+    precomputed_analyzer.reduce_systems_representations(method="PCA")
+    df = precomputed_analyzer.create_PCA_ranked_weights()
+    # columns present
+    for col in ["Comparisons", "PC1_Weights", "PC2_Weights", "PC1_magnitude", "PC2_magnitude"]:
+        assert col in df.columns
+    # sizes
+    features = precomputed_analyzer.feature_matrix.shape[1]
+    assert df.shape[0] == features
+    # magnitudes non-negative
+    assert (df["PC1_magnitude"].values >= 0).all()
+    assert (df["PC2_magnitude"].values >= 0).all()
+    # comparison label format
+    assert df["Comparisons"].str.contains(r"^\d+-\d+$").all()

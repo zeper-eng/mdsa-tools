@@ -7,6 +7,7 @@ On standard workstations, we recommend down-sampling or masking datasets before 
 For AMBER users we would also recommend the CPPTRAJ_IMPORT module which can import the results of the hbond command
 in series form and maps atomic hbond counts to the residue level.
 
+*IMPORTANT* NOTE is that this module expects your 
 
 See Also
 --------
@@ -57,6 +58,7 @@ class TrajectoryProcessor():
 
     Notes
     -----
+
     Unless the file is in a trajectory format that includes its topology information please include it as its seperate argument
     ``top`` or else it will throw an error.
 

@@ -69,7 +69,7 @@ top_path  = adk.topology
 @pytest.fixture(scope="session")
 def external_systems():
     tp = TrajectoryProcessor(traj_path, top_path)
-    return tp.create_filtered_representations(residues_to_keep=unrestrained_residues)
+    return tp.create_system_representations()
 
 @pytest.fixture(scope="session")
 def external_analyzer(external_systems):
@@ -125,6 +125,17 @@ def alternatefeaturematrix(importer):
     feature_matrix = importer.iterate_frames()
     return feature_matrix
 
+@pytest.fixture(scope="session")
+def precomputed_analyzer(alternatefeaturematrix, importer):
+    """
+    Build an analyzer directly from the precomputed feature matrix produced
+    by the cpptraj importer, using the same residue index ordering.
+    """
+    sa = systems_analysis(
+        precomputed_feature_matrix=alternatefeaturematrix,
+        res_indexes_for_precomputedmatrix=importer.res_of_interest
+    )
+    return sa
 
 
 # ----------------------------------------------------------------

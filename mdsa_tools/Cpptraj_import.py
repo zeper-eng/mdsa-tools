@@ -334,3 +334,4 @@ if __name__ == '__main__':
     from mdsa_tools.Analysis import systems_analysis
 
     Analyzer=systems_analysis(precomputed_feature_matrix=feature_matrix,res_indexes_for_precomputedmatrix=residues)
+    

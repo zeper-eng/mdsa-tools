@@ -111,13 +111,12 @@ class systems_analysis:
         if precomputed_feature_matrix is None:
             self.feature_matrix = None
 
-
+    
         if replicate_distribution is not None:
             self.replicate_distribution=replicate_distribution
       
         
         return
-
 
     #pre-processing
     def replicates_to_featurematrix(self,arrays=None)->np.ndarray:
