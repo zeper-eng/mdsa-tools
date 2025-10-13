@@ -275,7 +275,11 @@ class cpptraj_hbond_import():
 
 
         all_edge_lists = []
+        labels = lookuptable[0, :]       # resSeq 
+        lab2pos = {lab: i for i, lab in enumerate(labels)}  # make dictionary matching index to label
+        
 
+        #iterate through lines of whatever table is loaded
         for linenumber in range(data.shape[0]):
             
             current_values=data[linenumber,:]
@@ -283,10 +287,13 @@ class cpptraj_hbond_import():
 
             for i in range(current_values.shape[0]):
                 current_comparison = headers[i]
-                print(current_comparison)
-                x_cord=np.where(lookuptable[0,:]==current_comparison[0])
-                y_cord=np.where(lookuptable[:,0]==current_comparison[1])
-    
+
+                
+
+                y_cord=lab2pos[current_comparison[0]]
+                x_cord=lab2pos[current_comparison[1]]
+                
+          
 
                 current_index = lookuptable[x_cord, y_cord]
                 
@@ -298,7 +305,7 @@ class cpptraj_hbond_import():
             all_edge_lists.append(frame_edgelist)
             
         all_edge_lists = np.vstack(all_edge_lists)
-        print(lookuptable)
+       
         return all_edge_lists
           
 
@@ -307,7 +314,6 @@ if __name__ == '__main__':
     from mdsa_tools.Data_gen_hbond import TrajectoryProcessor as tp
     import numpy as np
     import os
-    from mdsa_tools.Convenience import unrestrained_residues
 
     topology = '../PDBs/5JUP_N2_GCU_nowat.prmtop'
     traj = '../PDBs/Break_On_Fake_Cpptraj_Data.dat' 
@@ -320,6 +326,7 @@ if __name__ == '__main__':
     residues = [95,230,232,234,235,236,237,238,239,240,241,242,243,244,245,246]
     test_trajectory = cpptraj_hbond_import(filepath=traj,topology=topology,res_of_interest=residues)
 
-    test_trajectory.iterate_frames()
-
+    all_edge_lists=test_trajectory.iterate_frames()
+    print(all_edge_lists)
+    print(all_edge_lists.shape)
     os._exit(0)
