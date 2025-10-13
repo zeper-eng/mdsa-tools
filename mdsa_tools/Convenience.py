@@ -51,6 +51,7 @@ unrestrained_residues = [
     res for res in range(1, 495) if res not in restrained_residues
 ]
 
+
 #--------------------------------------------------------------------------------------------------
 #Indexes for the decoding center of the ribosome 
 #   Note: they are 1 indexed while mdtraj is generally 0 indexed

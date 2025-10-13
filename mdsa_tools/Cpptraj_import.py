@@ -68,15 +68,36 @@ class cpptraj_hbond_import():
     This class assumes a header where the first field is `#Frame` followed by
     columns named like `<prefix>_<res1>@<atom1>_<res2>@<atom2>`.
     '''
-    def __init__(self,filepath,topology):
-        
-        self.indices=self.extract_headers(filepath)
-        self.data=np.loadtxt(filepath, skiprows=1, usecols=range(1, len(self.indices)+1), dtype=int)
+    def __init__(self,filepath,topology,res_of_interest):
+        '''Initialize the loader and parse header + data.
+
+        Parameters
+        ----------
+        filepath : str or pathlib.Path
+        Path to the cpptraj `hbond ... out <file> series` table.
+        topology : str or pathlib.Path
+        Path to a topology readable by MDTraj (e.g., AMBER `prmtop`).
+
+        Returns
+        -------
+        None
+        '''
+
+        self.filepath=filepath
+        self.residuelevel_indices=self.extract_headers(filepath=filepath)
+        self.data=np.loadtxt(filepath, skiprows=1, usecols=range(1, len(self.residuelevel_indices)+1), dtype=int)
+        self.res_of_interest=res_of_interest
         self.topology = md.load_topology(topology) 
+        
+        if res_of_interest is not None:
+            sel = self.topology.select('resSeq ' + ' '.join(map(str, sorted(res_of_interest))))
+            subtop = self.topology.subset(sel)   # new Topology with only wanted residues
+            self.topology = subtop               # keep using the sliced topology
+        
 
         return
      
-    def extract_headers(self,filepath):
+    def extract_headers(self,filepath=None):
         '''Parse the cpptraj hydrogen-bond header to get residue–residue pairs.
 
         This reads only the first line of a cpptraj `hbond ... out <file> series`
@@ -125,7 +146,7 @@ class cpptraj_hbond_import():
             indices = obj.extract_headers("hbonds.dat")
             # indices == [(12, 34), (12, 35), (25, 30)]
         '''
-        filepath = filepath if filepath is not None else None
+        filepath = filepath if filepath is not None else self.filepath
 
         lines=[]
         indices=[]
@@ -141,170 +162,164 @@ class cpptraj_hbond_import():
                 
         return indices
 
-    def create_cpptraj_attributes(self,data,topology,granularity=None):
-            '''Create a template array for per-frame residue adjacency matrices.
-
-            Parameters
-            ----------
-            data : np.ndarray, shape=(n_frames, n_pairs)
-                The loaded cpptraj series table values (without the `#Frame` column).
-            topology : str or mdtraj.Topology
-                Path to a topology file, or an existing `mdtraj.Topology`. If `None`,
-                uses `self.topology`.
-            granularity : {'residue'}, optional
-                Level of coarse-graining for the template. Only 'residue' is currently
-                supported; other values are reserved for future use.
-
-            Returns
-            -------
-            template_array : np.ndarray, shape=(n_frames, n_res+1, n_res+1)
-                A zero-initialized array containing one residue×residue matrix per
-                frame. The first row and first column (index 0) store 1-based residue
-                indices for convenience; the submatrix `[1:, 1:]` is the numeric
-                adjacency that will be filled by `create_systems_rep`.
-
-            Examples
-            --------
-            >>> template = obj.create_cpptraj_attributes(obj.data, obj.topology)
-            >>> template.shape
-            (n_frames, n_res+1, n_res+1)
-
-            Notes
-            -----
-            We materialize a single reusable data structure (the "template") and
-            fill it later for efficiency. Diagonals are initialized to 0; indexing
-            labels are stored in row/column 0.
-            '''
-
-            granularity = granularity if granularity is not None else 'residue'
-
-            #Make atom to residue dictionary 
-
-            #Create adjacency matrix, set first row and column as residue indices, and multiply to match the number of frames
-            
-            topology = md.load_topology(topology) if topology is not None else self.topology
-
-            if granularity == 'residue':
-
-                indexes=[residue.resSeq+1 for residue in topology.residues]
-                empty_array = np.zeros(shape=(len(indexes)+1,len(indexes)+1)) 
-
-                empty_array[0,1:]=indexes
-                empty_array[1:,0]=indexes
-
-                template_array=np.repeat(empty_array[np.newaxis,:, :], data.shape[0], axis=0)
-
-                return template_array
-            
-    def create_systems_rep(self,data=None,topology=None,indices=None):
-        '''Fill a residue×residue H-bond matrix series from cpptraj columns.
+    def edgelist_single_frame(self,topology=None,granularity=None):
+        '''Create an upper‑triangle residue–residue edge template for one frame.
 
         Parameters
         ----------
-        data : np.ndarray, shape=(n_frames, n_pairs), optional
-            If provided, use this series matrix; otherwise uses `self.data`.
-        topology : mdtraj.Topology or str, optional
-            Topology or path to topology; if `None`, uses `self.topology`.
-        indices : list of tuple of int, optional
-            Residue index pairs `(res1, res2)` (1-based) in column order;
-            if `None`, uses `self.indices`.
+        topology : mdtraj.Topology or str or pathlib.Path or None, optional
+        Topology object or path. If ``None``, uses ``self.topology``.
+        granularity : {'residue'}, optional
+        Placeholder for future atom‑ or group‑level variants. Only residue‑
+        level edges are constructed at the moment.
 
         Returns
         -------
-        systems : np.ndarray, shape=(n_frames, n_res+1, n_res+1)
-            A time series of residue-level adjacency matrices. Row/column 0 hold
-            1-based residue indices; the numeric adjacency is in `[1:, 1:]`.
+        np.ndarray of int, shape (E, 2)
+        Each row is a pair ``(i, j)`` with ``i < j`` using 0‑based MDTraj
+        residue indices. The set corresponds to the upper triangle of an
+        ``n_residues × n_residues`` matrix.
 
         Notes
         -----
-        * Self-contacts (where `res1 == res2`) are skipped and left as zeros.
-        * Each column in `data` is placed at `[res1-1, res2-1]` for all frames.
-        * This function does not symmetrize; if directionality matters for your
-          definition, you may post-process the result.
+        Use :meth:`lookup_table_from_edgelist` to convert ``(i, j)`` pairs to
+        contiguous row indices for vectorized time‑series storage.
 
-        Examples
-        --------
-        >>> systems = obj.create_systems_rep()
-        >>> systems.shape
-        (n_frames, n_res+1, n_res+1)
         '''
+
         topology = topology if topology is not None else self.topology
-        data = data if data is not None else self.data
-        indices = indices if indices is not None else self.indices
 
-        template_array=self.create_cpptraj_attributes(data,topology)
+        granularity = granularity if granularity is not None else 'residue'
 
-        iterator=0
+        #Make atom to residue dictionary 
 
-        for col in data.T: #simply transpose so we are going column wise instead
-            current_pair=indices[iterator]
-
-            if current_pair[0]!=current_pair[1]:
-                template_array[:,current_pair[0]-1,current_pair[1]-1]=col
-
-            iterator+=1
+        #Create adjacency matrix, set first row and column as residue indices, and multiply to match the number of frames
         
-        return template_array
+        row_indexes, column_indexes = np.triu_indices(topology.n_residues, k=1)
+
+        # 1-based residue labels (since your original indexing is 1..N)
+        edge_table = np.column_stack([row_indexes, column_indexes])   # shape (E, 3)
+        
+        return edge_table
     
+    def lookup_table_from_edgelist(self,edge_list_template=None):
+        '''Build a fast ``(i, j) → row`` lookup for the edge template.
+
+        Parameters
+        ----------
+        edge_list_template : np.ndarray of int or None, shape (E, 2)
+        Output of :meth:`edgelist_single_frame`. If ``None``, a template is
+        generated from the current topology.
+
+        Returns
+        -------
+        np.ndarray of int, shape (n_residues, n_residues)
+        Dense table ``pair2row`` where ``pair2row[i, j]`` gives the row index
+        into the edge list for pair ``(i, j)`` (0‑based). Symmetric with
+        diagonal set to ``-1`` as a sentinel for "no mapping".
+        '''
+
+        edge_list_template=edge_list_template if edge_list_template is not None else self.edgelist_single_frame()
+        #print(edge_list_template.shape)
+        #print(edge_list_template)
+        #grab residue indexes as int bc we need int
+        res1 = edge_list_template[:, 0].astype(np.int32)
+        res2 = edge_list_template[:, 1].astype(np.int32)
+        idx = np.arange(res1.size)
+
+        #we can now initiate a table of empty -1s and then fill in the row index for pairwise comparisons so we can easily grab row indexes for comparisons
+        #it really does not mean much we used -1, just decent convention for missing value, NAN, zeroes etc would be the same but since we are dealing
+        #with indexes -1 is a nice simple flag for grabbing things
+        pair2row = -np.ones((self.topology.n_residues+1, self.topology.n_residues+1), dtype=np.int32)
+        pair2row[0,0]=0
+        #print(self.res_of_interest)
+        pair2row[0,1:]=self.res_of_interest
+        pair2row[1:,0]=self.res_of_interest
+
+        #pulling out just data
+        subset=pair2row[1:,1:]
+        subset[res1, res2] = idx
+        subset[res2, res1] = idx  # undirected
+
+        #adding it back in
+        pair2row[1:,1:]=subset
+
+        
+        return pair2row
+
+    def iterate_frames(self,data=None,headers=None):
+        '''Map each frame's series values onto an edge‑vector scaffold.
+
+        Parameters
+        ----------
+        data : np.ndarray or None, shape (n_frames, n_pairs)
+        Integer/binary cpptraj series. Defaults to ``self.data``.
+        headers : list[tuple[int, int]] or None
+        Header residue pairs `(res1, res2)` (1‑based). Defaults to
+        ``self.residuelevel_indices``.
+
+        Returns
+        -------
+        None
+
+
+        Notes
+        -----
+   
+        '''
+        data=data if data is not None else self.data
+        headers=headers if headers is not None else self.residuelevel_indices
+        
+        lookuptable = self.lookup_table_from_edgelist()
+        edge_list_size = int((lookuptable[1:,1:].shape[0]*(lookuptable[1:,1:].shape[0]-1))/2)
+
+
+        all_edge_lists = []
+
+        for linenumber in range(data.shape[0]):
+            
+            current_values=data[linenumber,:]
+            frame_edgelist=np.zeros(edge_list_size,dtype=int)
+
+            for i in range(current_values.shape[0]):
+                current_comparison = headers[i]
+                print(current_comparison)
+                x_cord=np.where(lookuptable[0,:]==current_comparison[0])
+                y_cord=np.where(lookuptable[:,0]==current_comparison[1])
+    
+
+                current_index = lookuptable[x_cord, y_cord]
+                
+                current_value = current_values[i]
+
+                if current_value>0:
+                    frame_edgelist[current_index]+=current_value
+            
+            all_edge_lists.append(frame_edgelist)
+            
+        all_edge_lists = np.vstack(all_edge_lists)
+        print(lookuptable)
+        return all_edge_lists
+          
 
 if __name__ == '__main__':
 
-        
     from mdsa_tools.Data_gen_hbond import TrajectoryProcessor as tp
     import numpy as np
     import os
     from mdsa_tools.Convenience import unrestrained_residues
 
     topology = '../PDBs/5JUP_N2_GCU_nowat.prmtop'
-    traj = '../PDBs/CCU_GCU_10frames.mdcrd' 
-
-    test_trajectory = tp(trajectory_path=traj,topology_path=topology)
+    traj = '../PDBs/Break_On_Fake_Cpptraj_Data.dat' 
 
 
-    print("succesfully loaded current PDB from test")
+
+    # a) By 0-based residue index (MDTraj's "resid")
+    #residues=['resid 12 13 14 15 22 23 24 25 26 27 28 29 30 45 46 47 48 49 50 64 65 66 67 68 69 70 71 72 74 75 87 88 89 90 91 92 93 94 95 96 97 98 99 100 101 102 103 121 122 123 124 125 126 127 128 129 130 131 132 133 134 135 136 137 138 139 163 164 165 166 167 168 169 170 171 172 173 174 183 184 185 186 187 188 189 190 191 192 193 194 196 197 221 222 229 230 231 232 233 234 235 236 237 238 239 240 241 242 243 244 245 255 256 257 258 259']
+    #residues=[13,14,15,16,23,24,25,26,27,28,29,30,31,46,47,48,49,50,51,65,66,67,68,69,70,71,72,73,75,76,88,89,90,91,92,93,94,95,96,97,98,99,100,101,102,103,104,122,123,124,125,126,127,128,129,130,131,132,133,134,135,136,137,138,139,140,141,164,165,166,167,168,169,170,171,172,173,174,175,184,185,186,187,188,189,190,191,192,193,194,195,197,198,222,223,230,231,232,233,234,235,236,237,238,239,240,241,242,243,244,245,246,256,257,258,259,260,261,262,263,264,265,266,267,268,269,288,289,320,321,322,323,324,325,326,327,328,329,330,346,347,348,349,350,351,352,353,354,355,356,357,358,359,360,361,362,370,371,372,373,374,375,376,377,378,379,380,381,382,383,384,385,386,387,388,389,401,402,403,404,405,406,407,408,409,410,411,412,413,414,415,420,421,422,423,424,425,426,427,428,429,430,444,445,446,447,448,449,450,451,452,461,462,463,464,465,466,467,468,480,481,482,483,484,485,486,487,488,489]
+    residues = [95,230,232,234,235,236,237,238,239,240,241,242,243,244,245,246]
+    test_trajectory = cpptraj_hbond_import(filepath=traj,topology=topology,res_of_interest=residues)
+
+    test_trajectory.iterate_frames()
 
     os._exit(0)
-
-    test_atomic_system=test_trajectory.create_system_representations(test_trajectory.trajectory,granularity='atom')
-    print(test_atomic_system.shape)
-
-    test_atomic_system_no_indexes=test_atomic_system[0,1:,1:]
-    print(test_atomic_system_no_indexes[test_atomic_system_no_indexes!=0])
-
-    print('test running just the datagen file')
-
-
-    #########################################
-    #In house test with our own trajectories#
-    #########################################
-
-    #load in and test trajectory
-    system_one_topology = '../PDBs/5JUP_N2_CGU_nowat.prmtop'
-    system_one_trajectory = './CCUGCU_G34_full.mdcrd' 
-    system_two_topology = '../PDBs/5JUP_N2_GCU_nowat.prmtop'
-    system_two_trajectory = './CCUCGU_G34_full.mdcrd' 
-
-    print('run one')
-    test_trajectory_one = tp(trajectory_path=system_one_trajectory,topology_path=system_one_topology)
-    print("tp made")
-    test_system_one_ = test_trajectory_one.create_filtered_representations(residues_to_keep=unrestrained_residues)
-    print("systems made")
-    np.save('./full_sampling_GCU',test_system_one_)
-    print(" made")
-
-
-    del test_trajectory_one, test_system_one_ 
-
-    test_trajectory_two = tp(trajectory_path=system_two_trajectory,topology_path=system_two_topology)
-    print("tp made")
-    test_system_two_ = test_trajectory_two.create_filtered_representations(residues_to_keep=unrestrained_residues)
-    print("systems made")
-    np.save('./full_sampling_CGU',test_system_two_)
-    print(" made")
-
-
-    #now that its loaded in try to make object
-    print("intializing creation made")
-    print("finished creation")
-
-    del test_trajectory_two, test_system_two_ 
