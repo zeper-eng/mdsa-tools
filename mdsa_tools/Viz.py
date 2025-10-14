@@ -314,7 +314,7 @@ def replicatemap_from_labels(labels, frame_list,
         plt.ylabel(ylabel)
 
     plt.tight_layout()
-    plt.savefig(f'{savepath}_replicate_map.png', dpi=800)
+    plt.savefig(f'{savepath}_replicate_map.png', dpi=600)
     plt.close()
     return
 
@@ -360,7 +360,7 @@ def plot_sillohette_scores(cluster_range, silhouette_scores, outfile_path=None,
     plt.title(title if title is not None else 'Silhouette Score for optimal K')
     plt.legend()
     plt.grid(True)
-    plt.savefig(outfile_path + 'sillohuette_plot', dpi=300)
+    plt.savefig(outfile_path + 'sillohuette_plot', dpi=600)
     plt.close()
     return optimal_k_sil
 
@@ -403,7 +403,7 @@ def plot_elbow_scores(cluster_range, inertia_scores, outfile_path=None,
     plt.title(title if title is not None else 'Elbow Method for Optimal k')
     plt.legend()
     plt.grid(True)
-    plt.savefig(outfile_path + 'elbow_plot', dpi=300)
+    plt.savefig(outfile_path + 'elbow_plot', dpi=600)
     plt.close()
 
     return optimal_k
@@ -586,7 +586,7 @@ def mdcircos_graph(empty_circle, residue_dict, savepath=os.getcwd()+'mdcircos_gr
         lw = width_norm[key] * scale_factor
         empty_circle.chord_plot(arc1, arc2, linewidth=lw, facecolor=color, edgecolor=color)
 
-    empty_circle.figure.savefig(savepath + ".png", dpi=300, bbox_inches="tight")
+    empty_circle.figure.savefig(savepath + ".png", dpi=600, bbox_inches="tight")
 
     # Separate colorbar
     fig_cb, ax_cb = plt.subplots(figsize=(1.5, 4))
@@ -597,7 +597,7 @@ def mdcircos_graph(empty_circle, residue_dict, savepath=os.getcwd()+'mdcircos_gr
     cbar.set_ticks(ticks)
     cbar.set_ticklabels([f"{t:.2f}" for t in ticks])
     cbar.set_label("Directional Difference")
-    fig_cb.savefig(savepath + "_colorbar.png", dpi=300, bbox_inches="tight")
+    fig_cb.savefig(savepath + "_colorbar.png", dpi=600, bbox_inches="tight")
     plt.close(fig_cb)
 
 def extract_properties_from_weightsdf(pca_table):
@@ -811,7 +811,7 @@ def visualize_reduction(embedding_coordinates,
         'color': 'black',
     }
 
-    fig = plt.figure(figsize=(16, 12), dpi=300)
+    fig = plt.figure(figsize=(16, 12), dpi=600)
     ax = plt.gca()
 
     if color_mappings is not None:
@@ -845,7 +845,7 @@ def visualize_reduction(embedding_coordinates,
     ax.tick_params(axis='y', colors='black')
 
     plt.tight_layout()
-    plt.savefig(savepath, dpi=500)
+    plt.savefig(savepath, dpi=600)
     plt.close()
     return
 
@@ -936,7 +936,7 @@ def rmsd_lineplots(pandasdf=None, title='RMSD plot',
     plt.xlabel(xlab)
     plt.ylabel(ylab)
     plt.title(title)
-    plt.savefig(outfilepath + '_rmsdlineplot', dpi=800)
+    plt.savefig(outfilepath + '_rmsdlineplot', dpi=600)
     plt.close()
     return
 
@@ -1007,7 +1007,7 @@ def contour_embedding_space(outfile_path, embeddingspace_coordinates, levels=10,
         plt.ylabel(ylabel)
 
     plt.grid(visible=gridvisible)
-    plt.savefig(outfile_path, dpi=800)
+    plt.savefig(outfile_path, dpi=600)
     plt.close()
     return
 
