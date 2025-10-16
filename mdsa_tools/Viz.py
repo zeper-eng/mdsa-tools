@@ -33,7 +33,7 @@ import pandas as pd
 
 # Miscellaneous tools
 def add_continuous_colorbar(scatter, labels, cbar_label=None, ax=None, cmap=None,
-                            extend="neither", format=None):
+                            extend="neither", format=None, dpi=600):
     """
     Add a continuous colorbar to a scatter plot.
 
@@ -62,6 +62,9 @@ def add_continuous_colorbar(scatter, labels, cbar_label=None, ax=None, cmap=None
 
     format : str or matplotlib.ticker.Formatter or None, default=None
         Formatting for colorbar tick labels.
+
+    dpi : int, default=600
+        Unused in this helper (kept for API consistency with plotting functions).
 
     Returns
     -------
@@ -113,7 +116,7 @@ def add_continuous_colorbar(scatter, labels, cbar_label=None, ax=None, cmap=None
         cbar.set_label(cbar_label, fontsize=10)
     return cbar
 
-def add_discrete_colorbar(scatter, labels, cbar_label=None, ax=None, cmap=None):
+def add_discrete_colorbar(scatter, labels, cbar_label=None, ax=None, cmap=None, dpi=600):
     """
     Add a discrete (categorical) colorbar to a scatter plot.
 
@@ -136,6 +139,9 @@ def add_discrete_colorbar(scatter, labels, cbar_label=None, ax=None, cmap=None):
 
     cmap : str or matplotlib.colors.Colormap or None, default=None
         Colormap name or object. Defaults to `cm.inferno`.
+
+    dpi : int, default=600
+        Unused in this helper (kept for API consistency with plotting functions).
 
     Returns
     -------
@@ -176,7 +182,7 @@ def add_discrete_colorbar(scatter, labels, cbar_label=None, ax=None, cmap=None):
     cbar.set_ticklabels([str(u) for u in uniques])
     return cbar
 
-def set_ticks(ax=None):
+def set_ticks(ax=None, dpi=600):
     """
     Set x and y ticks for an axis depending on range.
 
@@ -187,6 +193,9 @@ def set_ticks(ax=None):
     ----------
     ax : matplotlib.axes.Axes or None, default=None
         Axis to apply tick settings. Defaults to the current axis.
+
+    dpi : int, default=600
+        Unused in this helper (kept for API consistency with plotting functions).
 
     Returns
     -------
@@ -211,7 +220,8 @@ def replicatemap_from_labels(labels, frame_list,
                              title=None,
                              xlabel=None, ylabel=None,
                              cbar_label=None,
-                             cmap=None) -> None:
+                             cmap=None,
+                             dpi=600) -> None:
     """
     Plot a "replicate × frame" map of discrete labels and save to disk.
 
@@ -241,6 +251,9 @@ def replicatemap_from_labels(labels, frame_list,
 
     cmap : str or matplotlib.colors.Colormap or None, default=None
         Colormap for the label values. Defaults to ``cm.magma_r``.
+
+    dpi : int, default=600
+        Dots-per-inch used when saving the figure.
 
     Returns
     -------
@@ -292,9 +305,9 @@ def replicatemap_from_labels(labels, frame_list,
 
     # Choose colorbar style
     if np.unique(final_coordinates).shape[0] >= 1000:
-        add_continuous_colorbar(scatter, final_coordinates[:, 2], cbar_label, plt.gca(), cmap=cmap)
+        add_continuous_colorbar(scatter, final_coordinates[:, 2], cbar_label, plt.gca(), cmap=cmap, dpi=dpi)
     else:
-        add_discrete_colorbar(scatter, final_coordinates[:, 2], cbar_label, plt.gca(), cmap=cmap)
+        add_discrete_colorbar(scatter, final_coordinates[:, 2], cbar_label, plt.gca(), cmap=cmap, dpi=dpi)
 
     # Style
     plt.grid(visible=False)
@@ -314,13 +327,13 @@ def replicatemap_from_labels(labels, frame_list,
         plt.ylabel(ylabel)
 
     plt.tight_layout()
-    plt.savefig(f'{savepath}_replicate_map.png', dpi=600)
+    plt.savefig(f'{savepath}_replicate_map.png', dpi=dpi)
     plt.close()
     return
 
 # K-means Cross-validation metrics
 def plot_sillohette_scores(cluster_range, silhouette_scores, outfile_path=None,
-                           title=None, xlabel=None, ylabel=None):
+                           title=None, xlabel=None, ylabel=None, dpi=600):
     """
     Plot silhouette scores over k, mark the maximum, and save.
 
@@ -338,6 +351,9 @@ def plot_sillohette_scores(cluster_range, silhouette_scores, outfile_path=None,
 
     title, xlabel, ylabel : str or None
         Optional figure/axis labels.
+
+    dpi : int, default=600
+        Dots-per-inch used when saving the figure.
 
     Returns
     -------
@@ -360,12 +376,12 @@ def plot_sillohette_scores(cluster_range, silhouette_scores, outfile_path=None,
     plt.title(title if title is not None else 'Silhouette Score for optimal K')
     plt.legend()
     plt.grid(True)
-    plt.savefig(outfile_path + 'sillohuette_plot', dpi=600)
+    plt.savefig(outfile_path + 'sillohuette_plot', dpi=dpi)
     plt.close()
     return optimal_k_sil
 
 def plot_elbow_scores(cluster_range, inertia_scores, outfile_path=None,
-                      title=None, xlabel=None, ylabel=None):
+                      title=None, xlabel=None, ylabel=None, dpi=600):
     """
     Plot inertia over k, estimate the elbow via the second derivative, and save.
 
@@ -383,6 +399,9 @@ def plot_elbow_scores(cluster_range, inertia_scores, outfile_path=None,
 
     title, xlabel, ylabel : str or None
         Optional figure/axis labels.
+
+    dpi : int, default=600
+        Dots-per-inch used when saving the figure.
 
     Returns
     -------
@@ -403,13 +422,13 @@ def plot_elbow_scores(cluster_range, inertia_scores, outfile_path=None,
     plt.title(title if title is not None else 'Elbow Method for Optimal k')
     plt.legend()
     plt.grid(True)
-    plt.savefig(outfile_path + 'elbow_plot', dpi=600)
+    plt.savefig(outfile_path + 'elbow_plot', dpi=dpi)
     plt.close()
 
     return optimal_k
 
 # Circos plots
-def get_Circos_coordinates(residue, gcircle):
+def get_Circos_coordinates(residue, gcircle, dpi=600):
     """
     Create chord endpoints anchored at the middle of a residue arc.
 
@@ -421,6 +440,9 @@ def get_Circos_coordinates(residue, gcircle):
 
     gcircle : py.Gcircle
         A PyCircos `Gcircle` object that already contains arcs.
+
+    dpi : int, default=600
+        Unused in this helper (kept for API consistency with plotting functions).
 
     Returns
     -------
@@ -444,7 +466,7 @@ def get_Circos_coordinates(residue, gcircle):
     raxis_position = 550
     return (residue, mid_position, mid_position, raxis_position)
 
-def make_MDCircos_object(residue_indexes):
+def make_MDCircos_object(residue_indexes, dpi=600):
     """
     Build a PyCircos `Gcircle` with arcs for the provided residues.
 
@@ -455,6 +477,9 @@ def make_MDCircos_object(residue_indexes):
     ----------
     residue_indexes : list of (str or int)
         Residue identifiers to add as arcs. Stored as strings internally.
+
+    dpi : int, default=600
+        Unused here (figure dpi is not altered to avoid changing behavior).
 
     Returns
     -------
@@ -511,7 +536,7 @@ def make_MDCircos_object(residue_indexes):
     return circle
 
 def mdcircos_graph(empty_circle, residue_dict, savepath=os.getcwd()+'mdcircos_graph',
-                   scale_factor=5, colormap=cm.magma_r):
+                   scale_factor=5, colormap=cm.magma_r, dpi=600):
     """
     Draw chords on a PyCircos circle from pairwise weights and save images.
 
@@ -538,6 +563,9 @@ def mdcircos_graph(empty_circle, residue_dict, savepath=os.getcwd()+'mdcircos_gr
 
     colormap : str or matplotlib.colors.Colormap, default=cm.magma_r
         Colormap used for chord colors and the separate colorbar.
+
+    dpi : int, default=600
+        Dots-per-inch used when saving the figures.
 
     Returns
     -------
@@ -580,13 +608,13 @@ def mdcircos_graph(empty_circle, residue_dict, savepath=os.getcwd()+'mdcircos_gr
         if value == 0:
             continue
         res1, res2 = key.split('-')
-        arc1 = get_Circos_coordinates(res1, empty_circle)
-        arc2 = get_Circos_coordinates(res2, empty_circle)
+        arc1 = get_Circos_coordinates(res1, empty_circle, dpi=dpi)
+        arc2 = get_Circos_coordinates(res2, empty_circle, dpi=dpi)
         color = hex_color_map[key]
         lw = width_norm[key] * scale_factor
         empty_circle.chord_plot(arc1, arc2, linewidth=lw, facecolor=color, edgecolor=color)
 
-    empty_circle.figure.savefig(savepath + ".png", dpi=600, bbox_inches="tight")
+    empty_circle.figure.savefig(savepath + ".png", dpi=dpi, bbox_inches="tight")
 
     # Separate colorbar
     fig_cb, ax_cb = plt.subplots(figsize=(1.5, 4))
@@ -597,10 +625,10 @@ def mdcircos_graph(empty_circle, residue_dict, savepath=os.getcwd()+'mdcircos_gr
     cbar.set_ticks(ticks)
     cbar.set_ticklabels([f"{t:.2f}" for t in ticks])
     cbar.set_label("Directional Difference")
-    fig_cb.savefig(savepath + "_colorbar.png", dpi=600, bbox_inches="tight")
+    fig_cb.savefig(savepath + "_colorbar.png", dpi=dpi, bbox_inches="tight")
     plt.close(fig_cb)
 
-def extract_properties_from_weightsdf(pca_table):
+def extract_properties_from_weightsdf(pca_table, dpi=600):
     """
     Parse a Systems Analysis weights table into residue IDs and per-PC weight mappings.
 
@@ -611,6 +639,9 @@ def extract_properties_from_weightsdf(pca_table):
         - 'Comparisons' : str, residue pair keys like ``'i-j'``.
         - 'PC1_magnitude' : float
         - 'PC2_magnitude' : float
+
+    dpi : int, default=600
+        Unused in this helper (kept for API consistency with plotting functions).
 
     Returns
     -------
@@ -635,7 +666,7 @@ def extract_properties_from_weightsdf(pca_table):
     PC2_weight_dict = pca_table.set_index('Comparisons')['PC2_magnitude'].to_dict()
     return residues, PC1_weight_dict, PC2_weight_dict
 
-def create_MDcircos_from_weightsdf(PCA_ranked_weights, outfilepath=None):
+def create_MDcircos_from_weightsdf(PCA_ranked_weights, outfilepath=None, dpi=600):
     """
     Create and save MD-circos diagrams for PC1 and PC2 magnitudes from a weights table.
 
@@ -651,6 +682,9 @@ def create_MDcircos_from_weightsdf(PCA_ranked_weights, outfilepath=None):
             - 'PC2_magnitudeviz'
         before adding file extensions.
 
+    dpi : int, default=600
+        Dots-per-inch used when saving the generated figures.
+
     Returns
     -------
     None
@@ -663,11 +697,11 @@ def create_MDcircos_from_weightsdf(PCA_ranked_weights, outfilepath=None):
     """
     outfilepath = outfilepath if outfilepath is not None else os.getcwd()
     
-    res_indexes, PC1_magnitude_dict, PC2_magnitude_dict = extract_properties_from_weightsdf(PCA_ranked_weights)
-    pc1_circos_object = make_MDCircos_object(res_indexes)
-    pc2_circos_object = make_MDCircos_object(res_indexes)
-    mdcircos_graph(pc1_circos_object, PC1_magnitude_dict, outfilepath + 'PC1_magnitudeviz')
-    mdcircos_graph(pc2_circos_object, PC2_magnitude_dict, outfilepath + 'PC2_magnitudeviz')
+    res_indexes, PC1_magnitude_dict, PC2_magnitude_dict = extract_properties_from_weightsdf(PCA_ranked_weights, dpi=dpi)
+    pc1_circos_object = make_MDCircos_object(res_indexes, dpi=dpi)
+    pc2_circos_object = make_MDCircos_object(res_indexes, dpi=dpi)
+    mdcircos_graph(pc1_circos_object, PC1_magnitude_dict, outfilepath + 'PC1_magnitudeviz', dpi=dpi)
+    mdcircos_graph(pc2_circos_object, PC2_magnitude_dict, outfilepath + 'PC2_magnitudeviz', dpi=dpi)
     return
 
 # Embedding-space visualizations
@@ -675,6 +709,7 @@ def create_2d_color_mappings(
     labels=([80] * 20) + ([160] * 10),
     colors_list=('purple', 'orange', 'green', 'yellow', 'blue',
                  'red', 'pink', 'cyan', 'grey', 'brown'),
+    dpi=600,
 ):
     """
     Produce a list of colors for 2-D scatter points given discrete labels.
@@ -687,6 +722,9 @@ def create_2d_color_mappings(
     colors_list : sequence of str, default=('purple','orange','green','yellow',
                                             'blue','red','pink','cyan','grey','brown')
         Palette to cycle through for unique labels.
+
+    dpi : int, default=600
+        Unused in this helper (kept for API consistency with plotting functions).
 
     Returns
     -------
@@ -716,7 +754,8 @@ def visualize_reduction(embedding_coordinates,
                         axis_two_label=None,
                         cbar_label=None,
                         gridvisible=False,
-                        color_palette=None):
+                        color_palette=None,
+                        dpi=600):
     """
     Plot a 2-D embedding (e.g., PCA/UMAP) as a scatter with optional coloring and colorbar,
     and save the figure to disk.
@@ -770,6 +809,9 @@ def visualize_reduction(embedding_coordinates,
           LinearSegmentedColormap from the sequence.
         - If a Colormap object is supplied, it is used directly.
 
+    dpi : int, default=600
+        Dots-per-inch used for the created figure and when saving.
+
     Returns
     -------
     None
@@ -811,19 +853,19 @@ def visualize_reduction(embedding_coordinates,
         'color': 'black',
     }
 
-    fig = plt.figure(figsize=(16, 12), dpi=600)
+    fig = plt.figure(figsize=(16, 12), dpi=dpi)
     ax = plt.gca()
 
     if color_mappings is not None:
         if cbar_type == 'discrete' and len(np.unique(color_mappings)) < 250:
             scatter = ax.scatter(embedding_coordinates[:, 0], embedding_coordinates[:, 1],
                                 c=color_mappings, cmap=cmap, alpha=0.6)
-            add_discrete_colorbar(scatter, color_mappings, cbar_label, plt.gca(), cmap=cmap)
+            add_discrete_colorbar(scatter, color_mappings, cbar_label, plt.gca(), cmap=cmap, dpi=dpi)
         
         if cbar_type == 'discrete' and len(np.unique(color_mappings)) > 250:
             scatter = ax.scatter(embedding_coordinates[:, 0], embedding_coordinates[:, 1],
                                 c=color_mappings, cmap=cmap, alpha=0.6)
-            add_continuous_colorbar(scatter, color_mappings, cbar_label, plt.gca(), cmap=cmap)
+            add_continuous_colorbar(scatter, color_mappings, cbar_label, plt.gca(), cmap=cmap, dpi=dpi)
 
     if color_mappings is None:#default for no colormaps is values
         if cbar_type == 'discrete':
@@ -831,13 +873,13 @@ def visualize_reduction(embedding_coordinates,
         values = np.arange(embedding_coordinates.shape[0])
         scatter = ax.scatter(embedding_coordinates[:, 0], embedding_coordinates[:, 1],
                              c=values, cmap=cmap, alpha=0.6)
-        add_continuous_colorbar(scatter, values, cbar_label, plt.gca(), cmap=cmap)
+        add_continuous_colorbar(scatter, values, cbar_label, plt.gca(), cmap=cmap, dpi=dpi)
 
     for spine in ax.spines.values():
         spine.set_visible(False)
 
     ax.grid(visible=gridvisible)
-    set_ticks(ax=plt.gca())
+    set_ticks(ax=plt.gca(), dpi=dpi)
     ax.set_title(title, fontdict=labels_font_dict)
     ax.set_xlabel(axis_one_label, fontdict=labels_font_dict)
     ax.set_ylabel(axis_two_label, fontdict=labels_font_dict)
@@ -845,7 +887,7 @@ def visualize_reduction(embedding_coordinates,
     ax.tick_params(axis='y', colors='black')
 
     plt.tight_layout()
-    plt.savefig(savepath, dpi=600)
+    plt.savefig(savepath, dpi=dpi)
     plt.close()
     return
 
@@ -859,7 +901,8 @@ def rmsd_lineplots(pandasdf=None, title='RMSD plot',
                    cmap=cm.inferno_r,
                    cmap_is_colormap=True,
                    legendtitle='Cluster',
-                   outfilepath=os.getcwd()):
+                   outfilepath=os.getcwd(),
+                   dpi=600):
     """
     Create a grouped line plot of RMSD (or similar metric) over a window variable.
 
@@ -897,6 +940,9 @@ def rmsd_lineplots(pandasdf=None, title='RMSD plot',
 
     outfilepath : str, default=os.getcwd()
         Output *prefix* for the saved figure. The function appends ``'_rmsdlineplot'``.
+
+    dpi : int, default=600
+        Dots-per-inch used when saving the figure.
 
     Returns
     -------
@@ -936,13 +982,13 @@ def rmsd_lineplots(pandasdf=None, title='RMSD plot',
     plt.xlabel(xlab)
     plt.ylabel(ylab)
     plt.title(title)
-    plt.savefig(outfilepath + '_rmsdlineplot', dpi=600)
+    plt.savefig(outfilepath + '_rmsdlineplot', dpi=dpi)
     plt.close()
     return
 
 # Contour plots
 def contour_embedding_space(outfile_path, embeddingspace_coordinates, levels=10, thresh=0, bw_adjust=.5,
-                            title=None, xlabel=None, ylabel=None, gridvisible=False):
+                            title=None, xlabel=None, ylabel=None, gridvisible=False, dpi=600):
     """
     Plot a density contour map over 2-D embedding coordinates and save to disk.
 
@@ -971,6 +1017,9 @@ def contour_embedding_space(outfile_path, embeddingspace_coordinates, levels=10,
 
     gridvisible : bool, default=False
         Whether to show the background grid.
+
+    dpi : int, default=600
+        Dots-per-inch used when saving the figure.
 
     Returns
     -------
@@ -1007,7 +1056,6 @@ def contour_embedding_space(outfile_path, embeddingspace_coordinates, levels=10,
         plt.ylabel(ylabel)
 
     plt.grid(visible=gridvisible)
-    plt.savefig(outfile_path, dpi=600)
+    plt.savefig(outfile_path, dpi=dpi)
     plt.close()
     return
-
