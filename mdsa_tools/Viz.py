@@ -427,6 +427,39 @@ def plot_elbow_scores(cluster_range, inertia_scores, outfile_path=None,
 
     return optimal_k
 
+# Dim reduction cross-validation metrics
+def bubble_grid_manifoldlearning(UMAP_opt_dataframe):
+    '''
+    Parameters
+    ----------
+
+
+
+
+    Returns
+    -------
+
+
+
+
+    Notes
+    -----
+
+
+
+    Examples
+    --------
+
+    '''
+
+    scatter=plt.scatter(x=UMAP_opt_dataframe[['n_neighbors']],y=[['min_dist']],sizes=[['r_normalized_for_bubbles']],c=[['pearson_r']])
+    add_discrete_colorbar(scatter,labels=UMAP_opt_dataframe['pearson_r'],ax=plt.gca(),cmap=cm.magma_r)
+
+    
+
+
+    return
+
 # Circos plots
 def get_Circos_coordinates(residue, gcircle, dpi=600):
     """

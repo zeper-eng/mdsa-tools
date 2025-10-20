@@ -428,68 +428,60 @@ class systems_analysis:
 
         return candidate_states_per_system
     
-    def pairwise_index_table(self,feature_matrix=None):
-        '''Create an upper-triangle sample–sample index template for pairwise
-        comparisons among all samples in a feature matrix.
+    def pairwise_index_table(self, feature_matrix=None):
+        '''Build an upper-triangle index table for all unique sample–sample pairs.
 
         Parameters
         ----------
         feature_matrix : np.ndarray or None, shape (m, n), optional
-            Per-frame or per-sample feature matrix where rows correspond to samples
-            (e.g., frames or systems) and columns correspond to features
-            (e.g., residue-pair metrics). If ``None``, uses ``self.feature_matrix``.
+            Per-sample feature matrix where rows are samples (frames/systems) and
+            columns are features. If ``None``, uses ``self.feature_matrix``.
 
         Returns
         -------
         index_table : np.ndarray of int, shape (E, 2)
-            Array of integer pairs ``(i, j)`` with ``i < j``, corresponding to the
-            upper triangle of an ``m × m`` pairwise comparison matrix. Each row
-            identifies a unique sample–sample combination suitable for constructing
-            distance, similarity, or adjacency matrices without redundant symmetric
-            entries.
+            Each row is a pair ``(i, j)`` with ``i < j``, enumerating the upper
+            triangle of the implicit ``m × m`` pairwise matrix. Here
+            ``E = m(m-1)/2``.
 
         Notes
         -----
-        * The returned table is equivalent to the output of
-        ``np.triu_indices(m, k=1)`` transposed into paired coordinates.
-        * Use :meth:`lookup_table_from_edgelist` to convert ``(i, j)`` pairs into
-        contiguous row indices for vectorized downstream analyses.
-        * This structure generalizes residue–residue edge templates to any
-        sample–sample comparison context (e.g., distance matrices, correlation
-        maps).
-
-        Examples
-        --------
-        >>> X = np.random.rand(4, 10)  # 4 samples × 10 features
-        >>> sa = systems_analysis(precomputed_feature_matrix=X)
-        >>> pairs = sa.pairwise_index_table()
-        >>> pairs.shape
-        (6, 2)
-        >>> pairs
-        array([[0, 1],
-            [0, 2],
-            [0, 3],
-            [1, 2],
-            [1, 3],
-            [2, 3]])
+        * Equivalent to ``np.column_stack(np.triu_indices(m, k=1))``.
+        * Useful as a consistent template for distance/similarity calculations and
+        for aligning pairwise quantities across spaces (feature vs. embedding).
         '''
+    
 
         feature_matrix=feature_matrix if feature_matrix is not None else self.feature_matrix
-
-        #Make atom to residue dictionary 
-
-        #Create adjacency matrix, set first row and column as residue indices, and multiply to match the number of frames
         
         row_indexes, column_indexes = np.triu_indices(feature_matrix.shape[0], k=1)
 
-        # 1-based residue labels (since original indexing is 1..N)
         index_table = np.column_stack([row_indexes, column_indexes])   # shape (E, 3)
         
         return index_table
 
     def pairwise_distances_allsamples(self,featurematrix=None):
-        '''Unfortunately with our very large matrices we can only speed up so much because using tricks like broadasting doesnt help since
-        we cant really load everything into ram.
+        '''
+        Compute Euclidean distances for all unique sample pairs.
+
+        Parameters
+        ----------
+        featurematrix : np.ndarray or None, shape (m, n), optional
+            Per-sample feature matrix (rows = samples). If ``None``, uses
+            ``self.feature_matrix``.
+
+        Returns
+        -------
+        np.ndarray, shape (E,)
+            One distance per unique pair ``(i, j)`` with ``i < j``, ordered to
+            match :meth:`pairwise_index_table`.
+
+        Notes
+        -----
+        * Uses direct vectorized indexing on the upper-triangle pair list.
+        * Result aligns with the output of :meth:`pairwise_index_table`, so you can
+        compare distance vectors across different coordinate spaces.
+
         '''
 
         featurematrix = featurematrix if featurematrix is not None else self.feature_matrix
@@ -504,22 +496,31 @@ class systems_analysis:
 
     def pearson_corellation_coefficient_embeddingvsfeaturespace(self,featurespace_coordinates=None,embeddingspace_coordinates=None):
         '''
+        Pearson r between feature-space and embedding-space pairwise distances.
+
         Parameters
         ----------
-        featurespace_coordinates:numpy.ndarray,shape=(n_frames,n_unique_pairwisecomparisons)
-            The coordinates of the original dataset in feature space pre-reduction.
-
-        Embeddingspace_coordinates:numpy.ndarray,shape=(n_frames,n_reduced_dimensions)
-            The coordinates of the original dataset now reduced to your desired number of features or dimensions.
-             
-        
+        featurespace_coordinates : np.ndarray or None, shape (m, p), optional
+            Original high-D coordinates (rows = samples). If ``None``,
+            ``self.replicates_to_featurematrix()`` is called and
+            ``self.feature_matrix`` is used.
+        embeddingspace_coordinates : np.ndarray or None, shape (m, q), optional
+            Reduced (low-D) embedding coordinates corresponding to the same
+            samples/rows. If ``None``, computes a PCA embedding via
+            :meth:`reduce_systems_representations(method='PCA')`.
 
         Returns
         -------
-       
-        
+        float
+            Pearson correlation coefficient ``r`` in ``[-1, 1]`` computed between
+            the two mega-vectors of pairwise distances (same pair order).
+
         Notes
         -----
+        * The two distance vectors are constructed with
+        :meth:`pairwise_distances_allsamples` so their pair ordering matches.
+        * High values (e.g., ``r ~ 1``) indicate strong linear preservation of
+        pairwise distances up to an affine transform.
        
         
         '''
@@ -538,62 +539,74 @@ class systems_analysis:
     
         return r
     
-    def perform_optimized_UMAP(self, max_neighbors=None, min_neighbors=None, stepsize=None):
+    def perform_optimized_UMAP(self, max_neighbors=None, min_neighbors=None, stepsize=None, min_dist_values=None):
         '''
-        Sweep UMAP neighborhood sizes and compute Pearson correlation between
-        pairwise distances in feature space and in the corresponding UMAP
-        embeddings.
+        Sweep UMAP ``n_neighbors`` **and** ``min_dist`` and compute Pearson r between
+        pairwise distances in feature space and in the corresponding UMAP embeddings.
 
         Parameters
         ----------
-        max_neighbors : int
-            Upper bound (exclusive) for UMAP ``n_neighbors``. The sweep will stop
-            before this value.
-        min_neighbors : int
-            Lower bound (inclusive) for UMAP ``n_neighbors``. The sweep will start
-            at this value.
-        stepsize : int
-            Step size for advancing ``n_neighbors`` through the sweep.
+        max_neighbors : int or None, optional
+            Exclusive upper bound for the sweep of ``n_neighbors``. Default ``100``.
+        min_neighbors : int or None, optional
+            Inclusive lower bound for the sweep of ``n_neighbors``. Default ``10``.
+        stepsize : int or None, optional
+            Increment between successive ``n_neighbors`` values. Default ``10``.
+        min_dist_values : array-like of float or None, optional
+            Set of ``min_dist`` values (in ``[0, 1]``) to try for each ``n_neighbors``.
+            If ``None``, uses ``(0.1, 0.4, 0.7, 1.0)``.
 
         Returns
         -------
         pandas.DataFrame
-            Table with one row per ``n_neighbors`` value, containing:
-            - ``n_neighbors`` : the UMAP neighborhood size tested
-            - ``pearson_r``   : Pearson correlation coefficient between the two
-            mega-vectors of pairwise distances (feature space vs. embedding)
-            - ``r01_for_bubbles`` : convenience rescaling of ``pearson_r`` to
-            ``[0, 1]`` via ``(r + 1) / 2`` for bubble plots
+            One row per (``n_neighbors``, ``min_dist``) combination with:
+            - ``n_neighbors`` : int
+            - ``min_dist``    : float
+            - ``pearson_r``   : float
+            - ``r01_for_bubbles`` : float in ``[0,1]`` = ``(r + 1) / 2``
 
         Notes
         -----
-        * Assumes ``self.feature_matrix`` has already been prepared
-        (e.g., via ``self.replicates_to_featurematrix()``).
-        * Uses the same pair ordering (upper triangle) for both spaces so the two
-        distance vectors are aligned.
-        * ``r01_for_bubbles`` is only for visualization; the metric is ``pearson_r``.
+        * Uses the same upper-triangle pair ordering in both spaces.
+        * ``r01_for_bubbles`` is a visualization helper; ``pearson_r`` is the metric.
+        
         '''
 
+        max_neighbors  = max_neighbors  if max_neighbors  is not None else 100
+        min_neighbors  = min_neighbors  if min_neighbors  is not None else 10
+        stepsize       = stepsize       if stepsize       is not None else 10
+        min_dist_values = min_dist_values if min_dist_values is not None else (0.1, 0.4, 0.7, 1.0)
 
-        max_neighbors=max_neighbors if max_neighbors is not None else 100        
-        min_neighbors=min_neighbors if min_neighbors is not None else 10
-        stepsize=stepsize if stepsize is not None else 10         
+        # ensure valid array and clip to [0,1]
+        min_dist_values = np.clip(np.asarray(min_dist_values, dtype=float), 0.0, 1.0)
 
         n_neighbors = np.arange(min_neighbors, max_neighbors, stepsize, dtype=int)
+
+        nn_list = []
+        md_list = []
         corellation_coefficients = []
 
         for i in n_neighbors:
-            embedding_coordinates = self.reduce_systems_representations(method='UMAP', n_neighbors=int(i))
-            r = self.pearson_corellation_coefficient_embeddingvsfeaturespace(self.feature_matrix, embedding_coordinates)
-            corellation_coefficients.append(r)
+            for j in min_dist_values:  # nested sweep over min_dist for each n_neighbors
+                embedding_coordinates = self.reduce_systems_representations(
+                    method='UMAP', n_neighbors=i, min_dist=j
+                )
+                r = self.pearson_corellation_coefficient_embeddingvsfeaturespace(
+                    self.feature_matrix, embedding_coordinates
+                )
+                nn_list.append(int(i))
+                md_list.append(float(j))
+                corellation_coefficients.append(r)
 
         df = pd.DataFrame({
-            "n_neighbors": n_neighbors,
-            "pearson_r": corellation_coefficients,
-            "r01_for_bubbles": (np.array(corellation_coefficients) + 1.0) / 2.0,
+            "n_neighbors": nn_list,
+            "min_dist": md_list,
+            "pearson_r": np.round(corellation_coefficients,2),
+            "r01_for_bubbles": np.round(100 * ((np.array(corellation_coefficients) + 1.0) / 2.0),2),
         })
 
         return df
+
 
     def create_pearsontest_for_kmeans_distributions(self,labels,coordinates,cluster_centers):
         '''
@@ -739,7 +752,6 @@ class systems_analysis:
         return dataframe
 
 
-    #Algorithm wrappers 
     #Algorithm wrappers 
     def perform_clust_opt(self, outfile_path, max_clusters=None, data=None, k=None):
         """Sweep K for KMeans and pick “best” K by silhouette and elbow, or fit a single K.
@@ -898,7 +910,23 @@ class systems_analysis:
 
 if __name__ == '__main__':
 
+    redone_CCU_GCU_fulltraj=np.load('/Users/luis/Downloads/redone_unrestrained_CCU_GCU_Trajectory_array.npy',allow_pickle=True)
+    redone_CCU_CGU_fulltraj=np.load('/Users/luis/Downloads/redone_unrestrained_CCU_CGU_Trajectory_array.npy',allow_pickle=True)
+    systems=[redone_CCU_GCU_fulltraj,redone_CCU_CGU_fulltraj]
 
+    Analyzer = systems_analysis(systems_representations=systems)
+    Analyzer.replicates_to_featurematrix()
+    UMAP_opt_dataframe=Analyzer.perform_optimized_UMAP()
+    print(UMAP_opt_dataframe)
+
+    import matplotlib.pyplot as plt
+    import matplotlib.cm as cm
+    scatter=plt.scatter(x=UMAP_opt_dataframe['n_neighbors'],y=UMAP_opt_dataframe['min_dist'],s=UMAP_opt_dataframe['r01_for_bubbles'],c=UMAP_opt_dataframe['pearson_r'],cmap=cm.magma_r)
+    from mdsa_tools.Viz import add_discrete_colorbar,add_continuous_colorbar
+    add_discrete_colorbar(scatter,labels=UMAP_opt_dataframe['pearson_r'],ax=plt.gca(),cmap=cm.magma_r)
+    plt.show()
+    
+    os._exit(0)
     traj_GCU = "/Users/luis/Desktop/workspacetwo/PDBs/CCU_GCU_10frames.mdcrd"
     top_GCU  = "/Users/luis/Desktop/workspacetwo/PDBs/5JUP_N2_GCU_nowat.prmtop"
 
@@ -914,6 +942,3 @@ if __name__ == '__main__':
     systems_CGU = processor_CGU.create_system_representations()
 
     Analyzer = systems_analysis(systems_representations=[systems_GCU,systems_CGU])
-    Analyzer.replicates_to_featurematrix()
-    df=Analyzer.perform_optimized_UMAP()
-    print(df)
