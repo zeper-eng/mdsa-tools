@@ -427,22 +427,75 @@ class systems_analysis:
                 candidate_states_per_system.append((optimal_k_elbow_labels, centers_elbow))
 
         return candidate_states_per_system
+    
+    def pairwise_index_table(self,feature_matrix=None):
+        '''Create an upper-triangle sample–sample index template for pairwise
+        comparisons among all samples in a feature matrix.
 
+        Parameters
+        ----------
+        feature_matrix : np.ndarray or None, shape (m, n), optional
+            Per-frame or per-sample feature matrix where rows correspond to samples
+            (e.g., frames or systems) and columns correspond to features
+            (e.g., residue-pair metrics). If ``None``, uses ``self.feature_matrix``.
+
+        Returns
+        -------
+        index_table : np.ndarray of int, shape (E, 2)
+            Array of integer pairs ``(i, j)`` with ``i < j``, corresponding to the
+            upper triangle of an ``m × m`` pairwise comparison matrix. Each row
+            identifies a unique sample–sample combination suitable for constructing
+            distance, similarity, or adjacency matrices without redundant symmetric
+            entries.
+
+        Notes
+        -----
+        * The returned table is equivalent to the output of
+        ``np.triu_indices(m, k=1)`` transposed into paired coordinates.
+        * Use :meth:`lookup_table_from_edgelist` to convert ``(i, j)`` pairs into
+        contiguous row indices for vectorized downstream analyses.
+        * This structure generalizes residue–residue edge templates to any
+        sample–sample comparison context (e.g., distance matrices, correlation
+        maps).
+
+        Examples
+        --------
+        >>> X = np.random.rand(4, 10)  # 4 samples × 10 features
+        >>> sa = systems_analysis(precomputed_feature_matrix=X)
+        >>> pairs = sa.pairwise_index_table()
+        >>> pairs.shape
+        (6, 2)
+        >>> pairs
+        array([[0, 1],
+            [0, 2],
+            [0, 3],
+            [1, 2],
+            [1, 3],
+            [2, 3]])
+        '''
+
+        feature_matrix=feature_matrix if feature_matrix is not None else self.feature_matrix
+
+        #Make atom to residue dictionary 
+
+        #Create adjacency matrix, set first row and column as residue indices, and multiply to match the number of frames
+        
+        row_indexes, column_indexes = np.triu_indices(feature_matrix.shape[0], k=1)
+
+        # 1-based residue labels (since original indexing is 1..N)
+        index_table = np.column_stack([row_indexes, column_indexes])   # shape (E, 3)
+        
+        return index_table
+    
     def pairwise_distances_allsamples(self,featurematrix=None):
         '''Unfortunately with our very large matrices we can only speed up so much because using tricks like broadasting doesnt help since
         we cant really load everything into ram.
         '''
 
         featurematrix = featurematrix if featurematrix is not None else self.feature_matrix
+        index_table=self.pairwise_index_table(featurematrix)
         
-        distances=[]
-        for i in featurematrix:
-            for j in featurematrix:
-                distance = np.linalg.norm(i - j)
-                distances.append(distance)
-        distances=np.array(distances)
-        print(distances.shape)
-                
+        print(index_table.shape)     
 
         return
 
