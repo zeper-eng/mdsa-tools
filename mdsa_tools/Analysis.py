@@ -910,23 +910,6 @@ class systems_analysis:
 
 if __name__ == '__main__':
 
-    redone_CCU_GCU_fulltraj=np.load('/Users/luis/Downloads/redone_unrestrained_CCU_GCU_Trajectory_array.npy',allow_pickle=True)
-    redone_CCU_CGU_fulltraj=np.load('/Users/luis/Downloads/redone_unrestrained_CCU_CGU_Trajectory_array.npy',allow_pickle=True)
-    systems=[redone_CCU_GCU_fulltraj,redone_CCU_CGU_fulltraj]
-
-    Analyzer = systems_analysis(systems_representations=systems)
-    Analyzer.replicates_to_featurematrix()
-    UMAP_opt_dataframe=Analyzer.perform_optimized_UMAP()
-    print(UMAP_opt_dataframe)
-
-    import matplotlib.pyplot as plt
-    import matplotlib.cm as cm
-    scatter=plt.scatter(x=UMAP_opt_dataframe['n_neighbors'],y=UMAP_opt_dataframe['min_dist'],s=UMAP_opt_dataframe['r01_for_bubbles'],c=UMAP_opt_dataframe['pearson_r'],cmap=cm.magma_r)
-    from mdsa_tools.Viz import add_discrete_colorbar,add_continuous_colorbar
-    add_discrete_colorbar(scatter,labels=UMAP_opt_dataframe['pearson_r'],ax=plt.gca(),cmap=cm.magma_r)
-    plt.show()
-    
-    os._exit(0)
     traj_GCU = "/Users/luis/Desktop/workspacetwo/PDBs/CCU_GCU_10frames.mdcrd"
     top_GCU  = "/Users/luis/Desktop/workspacetwo/PDBs/5JUP_N2_GCU_nowat.prmtop"
 
@@ -942,3 +925,14 @@ if __name__ == '__main__':
     systems_CGU = processor_CGU.create_system_representations()
 
     Analyzer = systems_analysis(systems_representations=[systems_GCU,systems_CGU])
+    Analyzer.replicates_to_featurematrix()
+    UMAP_opt_dataframe=Analyzer.perform_optimized_UMAP()
+    print(UMAP_opt_dataframe)
+
+    import matplotlib.pyplot as plt
+    import matplotlib.cm as cm
+    scatter=plt.scatter(x=UMAP_opt_dataframe['n_neighbors'],y=UMAP_opt_dataframe['min_dist'],s=UMAP_opt_dataframe['r01_for_bubbles'],c=UMAP_opt_dataframe['pearson_r'],cmap=cm.magma_r)
+    from mdsa_tools.Viz import add_discrete_colorbar,add_continuous_colorbar
+    add_discrete_colorbar(scatter,labels=UMAP_opt_dataframe['pearson_r'],ax=plt.gca(),cmap=cm.magma_r)
+    plt.show()
+    
