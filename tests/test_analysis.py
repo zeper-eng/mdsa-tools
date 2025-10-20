@@ -141,3 +141,11 @@ def test_precomputed_pca_ranked_weights(precomputed_analyzer, importer):
     assert (df["PC2_magnitude"].values >= 0).all()
     # comparison label format
     assert df["Comparisons"].str.contains(r"^\d+-\d+$").all()
+
+# ------------------------------------------------------------
+# Miscellaneous new tests for various quantifications
+# ------------------------------------------------------------
+
+def test_pearson_corellation_has_similar_dimensions(analyzer):
+
+    return

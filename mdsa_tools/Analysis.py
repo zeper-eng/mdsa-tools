@@ -328,37 +328,42 @@ class systems_analysis:
                                         min_dist=None,
                                         n_neighbors=None):
         '''
-        Reduce the dimensionality of the per-frame feature matrix using PCA or UMAP.
+        Reduce the dimensionality of a per-frame feature matrix using PCA or UMAP.
 
         Parameters
         ----------
-        feature_matrix : np.ndarray or None
-            If provided, use this matrix; otherwise prefer ``self.feature_matrix``.
-            If neither is set, calls ``replicates_to_featurematrix()`` to create it.
-        method : {'PCA','UMAP'}, optional
-            Reduction method. Default ``'PCA'``.
-        n_components : int, optional
-            Target dimensionality (default ``2``).
+        feature_matrix : array-like of shape (n_samples, n_features), optional
+            Matrix to reduce. If omitted, uses ``self.feature_matrix``; if that is
+            not set, calls ``replicates_to_featurematrix()`` to build it.
+        method : {'PCA', 'UMAP'}, default 'PCA'
+            Dimensionality-reduction algorithm.
+        n_components : int, default 2
+            Target embedding dimensionality.
         min_dist : float, optional
-            UMAP parameter controlling cluster tightness (default ``0.5``).
+            UMAP ``min_dist`` hyperparameter controlling how tightly points cluster
+            (smaller ⇒ tighter clusters). Ignored for PCA. Default ``0.5``.
         n_neighbors : int, optional
-            UMAP parameter controlling local vs global structure (default ``900``).
+            UMAP neighborhood size controlling local vs global structure. Ignored
+            for PCA. Default ``900``.
 
         Returns
         -------
         If method == 'PCA':
             (X_pca, weights, explained_variance_ratio_) : tuple
-                ``X_pca`` has shape ``(n_samples, n_components)``.
-                ``weights`` are component loadings (``n_components × n_features``).
-                ``explained_variance_ratio_`` is length ``n_components``.
+                X_pca : ndarray of shape (n_samples, n_components)
+                    PCA scores.
+                weights : ndarray of shape (n_components, n_features)
+                    Component loadings.
+                explained_variance_ratio_ : ndarray of shape (n_components,)
+                    Fraction of variance explained by each principal component.
         If method == 'UMAP':
-            embedding : np.ndarray
-                Shape ``(n_samples, n_components)``.
+            embedding : ndarray of shape (n_samples, n_components)
+                Low-dimensional embedding.
 
         Notes
         -----
         * PCA uses ``sklearn.decomposition.PCA``.
-        * UMAP uses ``umap.UMAP`` with provided parameters.
+        * UMAP uses ``umap.UMAP`` with the provided hyperparameters.
 
         Examples
         --------
@@ -423,8 +428,72 @@ class systems_analysis:
 
         return candidate_states_per_system
 
-    def create_pearsontest_for_kmeans_distributions(self,labels,coordinates,cluster_centers):
+    def pairwise_distances_allsamples(self,featurematrix=None):
+        '''Unfortunately with our very large matrices we can only speed up so much because using tricks like broadasting doesnt help since
+        we cant really load everything into ram.
+        '''
 
+        featurematrix = featurematrix if featurematrix is not None else self.feature_matrix
+        
+        distances=[]
+        for i in featurematrix:
+            for j in featurematrix:
+                distance = np.linalg.norm(i - j)
+                distances.append(distance)
+        distances=np.array(distances)
+        print(distances.shape)
+                
+
+        return
+
+    def pearson_corellation_coefficient_embeddingvsfeaturespace(self,featurespace_coordinates=None,embeddingspace_coordinates=None):
+        '''
+        Parameters
+        ----------
+        featurespace_coordinates:numpy.ndarray,shape=(n_frames,n_unique_pairwisecomparisons)
+            The coordinates of the original dataset in feature space pre-reduction.
+
+        Embeddingspace_coordinates:numpy.ndarray,shape=(n_frames,n_reduced_dimensions)
+            The coordinates of the original dataset now reduced to your desired number of features or dimensions.
+             
+        
+
+        Returns
+        -------
+       
+        
+        Notes
+        -----
+       
+        
+        '''
+        
+        if featurespace_coordinates is None:
+            self.replicates_to_featurematrix() 
+            featurespace_coordinates = self.feature_matrix
+        
+        if embeddingspace_coordinates is None:
+           embeddingspace_coordinates,weights,explained_variance_ratio_ =self.reduce_systems_representations(method='PCA')
+
+
+        final_coordinates=featurespace_coordinates[None,:,:]+embeddingspace_coordinates[:,None,:]
+
+        print(f"featurespace_coordinates shape = {featurespace_coordinates.shape}")
+        print(f"featurespace_coordinates shape = {embeddingspace_coordinates.shape}")
+        print(f"final_coordinates shape = {final_coordinates.shape}")
+        
+
+       
+
+
+
+
+        return
+
+    def create_pearsontest_for_kmeans_distributions(self,labels,coordinates,cluster_centers):
+        '''
+        Depreciated but maintained in codebase for further reference
+        '''
         '''Compute pairwise Pearson correlations between per-cluster distance
         distributions (to their respective KMeans centroids).
 
@@ -724,4 +793,10 @@ class systems_analysis:
 
 if __name__ == '__main__':
 
-    print('testing testing 1 2 3')
+    #Pipeline setup assumed as in: Data Generation
+    redone_CCU_GCU_fulltraj=np.load('/Users/luis/Downloads/redone_unrestrained_CCU_GCU_Trajectory_array.npy',allow_pickle=True)
+    redone_CCU_CGU_fulltraj=np.load('/Users/luis/Downloads/redone_unrestrained_CCU_CGU_Trajectory_array.npy',allow_pickle=True)
+
+    Analyzer = systems_analysis(systems_representations=[redone_CCU_GCU_fulltraj,redone_CCU_CGU_fulltraj])
+    Analyzer.replicates_to_featurematrix()
+    Analyzer.pairwise_distances_allsamples()
