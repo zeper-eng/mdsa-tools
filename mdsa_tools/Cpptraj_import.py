@@ -199,7 +199,7 @@ class cpptraj_hbond_import():
         
         row_indexes, column_indexes = np.triu_indices(topology.n_residues, k=1)
 
-        # 1-based residue labels (since your original indexing is 1..N)
+        # 1-based residue labels (since original indexing is 1..N)
         edge_table = np.column_stack([row_indexes, column_indexes])   # shape (E, 3)
         
         return edge_table
@@ -231,7 +231,7 @@ class cpptraj_hbond_import():
 
         #we can now initiate a table of empty -1s and then fill in the row index for pairwise comparisons so we can easily grab row indexes for comparisons
         #it really does not mean much we used -1, just decent convention for missing value, NAN, zeroes etc would be the same but since we are dealing
-        #with indexes -1 is a nice simple flag for grabbing things
+        #with indexes -1 is a nice simple flag for grabbing thingsok b
         pair2row = -np.ones((self.topology.n_residues+1, self.topology.n_residues+1), dtype=np.int32)
         pair2row[0,0]=0
         #print(self.res_of_interest)
