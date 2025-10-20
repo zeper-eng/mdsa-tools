@@ -486,7 +486,7 @@ class systems_analysis:
         index_table = np.column_stack([row_indexes, column_indexes])   # shape (E, 3)
         
         return index_table
-    
+
     def pairwise_distances_allsamples(self,featurematrix=None):
         '''Unfortunately with our very large matrices we can only speed up so much because using tricks like broadasting doesnt help since
         we cant really load everything into ram.
@@ -495,9 +495,12 @@ class systems_analysis:
         featurematrix = featurematrix if featurematrix is not None else self.feature_matrix
         index_table=self.pairwise_index_table(featurematrix)
         
-        print(index_table.shape)     
+        i_vector=index_table[:,0]
+        j_vector=index_table[:,1]
 
-        return
+        difference_vector=np.linalg.norm(featurematrix[i_vector,:]-featurematrix[j_vector,:],axis=1)
+
+        return difference_vector
 
     def pearson_corellation_coefficient_embeddingvsfeaturespace(self,featurespace_coordinates=None,embeddingspace_coordinates=None):
         '''
@@ -529,19 +532,68 @@ class systems_analysis:
            embeddingspace_coordinates,weights,explained_variance_ratio_ =self.reduce_systems_representations(method='PCA')
 
 
-        final_coordinates=featurespace_coordinates[None,:,:]+embeddingspace_coordinates[:,None,:]
+        featurespace_distances=self.pairwise_distances_allsamples(featurematrix=featurespace_coordinates)
+        embeddingspace_distances=self.pairwise_distances_allsamples(featurematrix=embeddingspace_coordinates)
+        r = np.corrcoef(featurespace_distances, embeddingspace_distances)[0, 1]
+    
+        return r
+    
+    def perform_optimized_UMAP(self, max_neighbors=None, min_neighbors=None, stepsize=None):
+        '''
+        Sweep UMAP neighborhood sizes and compute Pearson correlation between
+        pairwise distances in feature space and in the corresponding UMAP
+        embeddings.
 
-        print(f"featurespace_coordinates shape = {featurespace_coordinates.shape}")
-        print(f"featurespace_coordinates shape = {embeddingspace_coordinates.shape}")
-        print(f"final_coordinates shape = {final_coordinates.shape}")
-        
+        Parameters
+        ----------
+        max_neighbors : int
+            Upper bound (exclusive) for UMAP ``n_neighbors``. The sweep will stop
+            before this value.
+        min_neighbors : int
+            Lower bound (inclusive) for UMAP ``n_neighbors``. The sweep will start
+            at this value.
+        stepsize : int
+            Step size for advancing ``n_neighbors`` through the sweep.
 
-       
+        Returns
+        -------
+        pandas.DataFrame
+            Table with one row per ``n_neighbors`` value, containing:
+            - ``n_neighbors`` : the UMAP neighborhood size tested
+            - ``pearson_r``   : Pearson correlation coefficient between the two
+            mega-vectors of pairwise distances (feature space vs. embedding)
+            - ``r01_for_bubbles`` : convenience rescaling of ``pearson_r`` to
+            ``[0, 1]`` via ``(r + 1) / 2`` for bubble plots
+
+        Notes
+        -----
+        * Assumes ``self.feature_matrix`` has already been prepared
+        (e.g., via ``self.replicates_to_featurematrix()``).
+        * Uses the same pair ordering (upper triangle) for both spaces so the two
+        distance vectors are aligned.
+        * ``r01_for_bubbles`` is only for visualization; the metric is ``pearson_r``.
+        '''
 
 
+        max_neighbors=max_neighbors if max_neighbors is not None else 100        
+        min_neighbors=min_neighbors if min_neighbors is not None else 10
+        stepsize=stepsize if stepsize is not None else 10         
 
+        n_neighbors = np.arange(min_neighbors, max_neighbors, stepsize, dtype=int)
+        corellation_coefficients = []
 
-        return
+        for i in n_neighbors:
+            embedding_coordinates = self.reduce_systems_representations(method='UMAP', n_neighbors=int(i))
+            r = self.pearson_corellation_coefficient_embeddingvsfeaturespace(self.feature_matrix, embedding_coordinates)
+            corellation_coefficients.append(r)
+
+        df = pd.DataFrame({
+            "n_neighbors": n_neighbors,
+            "pearson_r": corellation_coefficients,
+            "r01_for_bubbles": (np.array(corellation_coefficients) + 1.0) / 2.0,
+        })
+
+        return df
 
     def create_pearsontest_for_kmeans_distributions(self,labels,coordinates,cluster_centers):
         '''
@@ -846,10 +898,22 @@ class systems_analysis:
 
 if __name__ == '__main__':
 
-    #Pipeline setup assumed as in: Data Generation
-    redone_CCU_GCU_fulltraj=np.load('/Users/luis/Downloads/redone_unrestrained_CCU_GCU_Trajectory_array.npy',allow_pickle=True)
-    redone_CCU_CGU_fulltraj=np.load('/Users/luis/Downloads/redone_unrestrained_CCU_CGU_Trajectory_array.npy',allow_pickle=True)
 
-    Analyzer = systems_analysis(systems_representations=[redone_CCU_GCU_fulltraj,redone_CCU_CGU_fulltraj])
+    traj_GCU = "/Users/luis/Desktop/workspacetwo/PDBs/CCU_GCU_10frames.mdcrd"
+    top_GCU  = "/Users/luis/Desktop/workspacetwo/PDBs/5JUP_N2_GCU_nowat.prmtop"
+
+    traj_CGU = "/Users/luis/Desktop/workspacetwo/PDBs/CCU_CGU_10frames.mdcrd"
+    top_CGU  = "/Users/luis/Desktop/workspacetwo/PDBs/5JUP_N2_CGU_nowat.prmtop"
+
+    # processors created individually
+    processor_GCU = TrajectoryProcessor(traj_GCU, top_GCU)
+    processor_CGU = TrajectoryProcessor(traj_CGU, top_CGU)
+
+    # systems representations created individually
+    systems_GCU = processor_GCU.create_system_representations()
+    systems_CGU = processor_CGU.create_system_representations()
+
+    Analyzer = systems_analysis(systems_representations=[systems_GCU,systems_CGU])
     Analyzer.replicates_to_featurematrix()
-    Analyzer.pairwise_distances_allsamples()
+    df=Analyzer.perform_optimized_UMAP()
+    print(df)
