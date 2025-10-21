@@ -392,7 +392,7 @@ class systems_analysis:
         if method=='UMAP':
 
             # Initialize UMAP
-            reducer = umap.UMAP(n_components=n_components,n_neighbors=n_neighbors,min_dist=.5)
+            reducer = umap.UMAP(n_components=n_components,n_neighbors=n_neighbors,min_dist=min_dist)
             embedding = reducer.fit_transform(feature_matrix)
 
             return embedding
@@ -539,7 +539,7 @@ class systems_analysis:
     
         return r
     
-    def perform_optimized_UMAP(self, max_neighbors=None, min_neighbors=None, stepsize=None, min_dist_values=None):
+    def perform_optimized_UMAP(self, feature_matrix=None,max_neighbors=None, min_neighbors=None, stepsize=None, min_dist_values=None):
         '''
         Sweep UMAP ``n_neighbors`` **and** ``min_dist`` and compute Pearson r between
         pairwise distances in feature space and in the corresponding UMAP embeddings.
@@ -572,13 +572,12 @@ class systems_analysis:
         
         '''
 
+        feature_matrix=feature_matrix if feature_matrix is not None else self.feature_matrix
         max_neighbors  = max_neighbors  if max_neighbors  is not None else 100
         min_neighbors  = min_neighbors  if min_neighbors  is not None else 10
         stepsize       = stepsize       if stepsize       is not None else 10
         min_dist_values = min_dist_values if min_dist_values is not None else (0.1, 0.4, 0.7, 1.0)
 
-        # ensure valid array and clip to [0,1]
-        min_dist_values = np.clip(np.asarray(min_dist_values, dtype=float), 0.0, 1.0)
 
         n_neighbors = np.arange(min_neighbors, max_neighbors, stepsize, dtype=int)
 
@@ -589,6 +588,7 @@ class systems_analysis:
         for i in n_neighbors:
             for j in min_dist_values:  # nested sweep over min_dist for each n_neighbors
                 embedding_coordinates = self.reduce_systems_representations(
+                    feature_matrix=feature_matrix,
                     method='UMAP', n_neighbors=i, min_dist=j
                 )
                 r = self.pearson_corellation_coefficient_embeddingvsfeaturespace(
@@ -606,7 +606,6 @@ class systems_analysis:
         })
 
         return df
-
 
     def create_pearsontest_for_kmeans_distributions(self,labels,coordinates,cluster_centers):
         '''
