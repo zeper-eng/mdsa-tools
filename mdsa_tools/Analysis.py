@@ -507,9 +507,6 @@ class systems_analysis:
             DX2 = feature_space_coordinates_rownorms[i] + feature_space_coordinates_rownorms[i+1:] - 2.0 * dotX
             DY2 = embedding_space_coordinates_rownorms[i] + embedding_space_coordinates_rownorms[i+1:] - 2.0 * dotY
 
-            # clamp tiny negatives, then take sqrt of Euclidean distances
-            np.maximum(DX2, 0.0, out=DX2)
-            np.maximum(DY2, 0.0, out=DY2)
             DX = np.sqrt(DX2, dtype=np.float64)
             DY = np.sqrt(DY2, dtype=np.float64)
 
