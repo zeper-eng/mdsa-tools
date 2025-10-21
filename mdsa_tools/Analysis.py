@@ -591,11 +591,12 @@ class systems_analysis:
                 md_list.append(float(j))
                 corellation_coefficients.append(r)
 
+        corellation_coefficients=np.array(corellation_coefficients)
         df = pd.DataFrame({
             "n_neighbors": nn_list,
             "min_dist": md_list,
-            "pearson_r": corellation_coefficients,
-            "r01_for_bubbles": np.round(100 * ((np.array(corellation_coefficients) + 1.0) / 2.0),2),
+            "pearson_r": np.round(corellation_coefficients,2),
+            "bubble_size": np.interp(corellation_coefficients, (corellation_coefficients.min(), corellation_coefficients.max()), (80, 400)),
         })
 
         return df
@@ -844,7 +845,10 @@ if __name__ == '__main__':
     UMAP_opt_dataframe=Analyzer.perform_optimized_UMAP()
     
     from mdsa_tools.Viz import bubble_grid_manifoldlearning
-    bubble_grid_manifoldlearning(UMAP_opt_dataframe,savepath='./small')
+    import colorcet as cc
+    palette = cc.glasbey[:UMAP_opt_dataframe.shape[0]]
+    bubble_grid_manifoldlearning(UMAP_opt_dataframe=UMAP_opt_dataframe,savepath='./small',color_palette=palette)
+
     print(UMAP_opt_dataframe)
     os._exit(0)
 
@@ -878,5 +882,5 @@ if __name__ == '__main__':
 
 
     from mdsa_tools.Viz import bubble_grid_manifoldlearning
-    bubble_grid_manifoldlearning(UMAP_opt_dataframe,savepath='./Big')
+    bubble_grid_manifoldlearning(UMAP_opt_dataframe=UMAP_opt_dataframe,savepath='./Big',color_palette=palette)
     

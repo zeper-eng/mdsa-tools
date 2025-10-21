@@ -160,7 +160,6 @@ def add_discrete_colorbar(scatter, labels, cbar_label=None, ax=None, cmap=None, 
     uniques, label_ids = np.unique(labels, return_inverse=True)
     N = len(uniques)
 
-    cmap = cmap if cmap is not None else cm.inferno
     bounds = np.arange(-0.5, N + 0.5, 1)
     norm = BoundaryNorm(bounds, cmap.N)
 
@@ -213,6 +212,15 @@ def set_ticks(ax=None, dpi=600):
     if ymax - ymin > 100:
         ax.set_yticks(np.arange(np.floor(ymin), np.ceil(ymax) + 1, 10))
     return
+
+def _as_colormap(seq_or_cmap, categorical=True):
+        if isinstance(seq_or_cmap, mcolors.Colormap):
+            return seq_or_cmap
+        # treat lists/tuples/arrays of colors as a user palette
+        seq = list(seq_or_cmap)
+        return (mcolors.ListedColormap(seq)
+                if categorical
+                else mcolors.LinearSegmentedColormap.from_list('custom_palette', seq))
 
 # Replicate maps
 def replicatemap_from_labels(labels, frame_list,
@@ -430,74 +438,81 @@ def plot_elbow_scores(cluster_range, inertia_scores, outfile_path=None,
 # Dim reduction cross-validation metrics
 def bubble_grid_manifoldlearning(UMAP_opt_dataframe,
                                  xlabel=None, ylabel=None, title=None,
-                                 cbar_label=None, cmap=None,savepath=None):
-    '''
+                                 cbar_label=None, cmap=None, color_palette=None,
+                                 savepath=None, dpi=600):
+    """
     Scatter "bubble grid" for a UMAP hyperparameter sweep.
 
     Parameters
     ----------
     UMAP_opt_dataframe : pandas.DataFrame
-        Must contain columns: 'n_neighbors', 'min_dist', 'pearson_r'.
-        Optionally one of: 'r01_for_bubbles' or 'r_normalized_for_bubbles' for marker sizes.
-    xlabel : str or None, optional
-        X-axis label. Default 'N. Neighbors'.
-    ylabel : str or None, optional
-        Y-axis label. Default 'Min Dist'.
-    title : str or None, optional
-        Figure title. Default 'UMAP Hyperparameter Sweep'.
-    cbar_label : str or None, optional
+        Columns required:
+          - 'n_neighbors' (int)
+          - 'min_dist' (float)
+          - 'pearson_r' (float)
+          - 'bubble_size' (float): precomputed marker areas (points^2) to use for s=.
+    xlabel, ylabel, title : str or None
+        Axis/title labels. Defaults: 'N. Neighbors', 'Min Dist', 'UMAP Hyperparameter Sweep'.
+    cbar_label : str or None
         Colorbar label. Default 'Pearson r'.
-    cmap : matplotlib colormap or None, optional
-        Colormap for 'pearson_r'. Default cm.magma_r.
-    savepath: str,default=os.getcwd()
-        path to where you would like to save your plot
+    cmap : matplotlib Colormap or sequence or None
+        Base colormap for coloring by 'pearson_r'. Default is cm.magma_r.
+        If a sequence (list/tuple/ndarray) is provided, it is converted to a
+        colormap. Ignored if `color_palette` is provided.
+    color_palette : sequence or matplotlib Colormap, optional
+        Simple override for `cmap`. If given a list/tuple/array of colors,
+        a colormap is constructed from it; if given a Colormap, it is used directly.
+    savepath : str or None
+        Full path (including filename) to save the figure. Defaults to cwd.
+    dpi : int
+        Dots-per-inch for saving (default 600).
 
     Returns
     -------
     None
-        Draws the scatter plot on the current axes.
+    """
 
-    Notes
-    -----
-    Marker color encodes 'pearson_r'. Marker size uses the normalized
-    bubble column if present; otherwise falls back to (pearson_r+1)/2.
-    '''
 
-    cmap = cmap if cmap is not None else cm.magma_r
+    # Defaults
+    # color_palette overrides cmap; also support passing sequences via `cmap`
+    if color_palette is not None:
+        cmap = _as_colormap(color_palette)
+    elif color_palette is None:
+        cmap = cmap if cmap is not None else cm.magma_r
+
     xlabel = xlabel if xlabel is not None else 'N. Neighbors'
     ylabel = ylabel if ylabel is not None else 'Min Dist'
     title  = title  if title  is not None else 'UMAP Hyperparameter Sweep'
     cbar_label = cbar_label if cbar_label is not None else 'Pearson r'
     savepath = savepath if savepath is not None else os.getcwd()
-
-
-
+    
 
     scatter = plt.scatter(
         x=UMAP_opt_dataframe['n_neighbors'],
         y=UMAP_opt_dataframe['min_dist'],
-        s=UMAP_opt_dataframe['r01_for_bubbles'],
+        s=UMAP_opt_dataframe['bubble_size'],
         c=UMAP_opt_dataframe['pearson_r'],
         cmap=cmap
     )
 
+    # exact ticks from the data
     xlvls = np.sort(UMAP_opt_dataframe['n_neighbors'].unique())
     ylvls = np.sort(UMAP_opt_dataframe['min_dist'].unique())
-
     ax = plt.gca()
     ax.set_xticks(xlvls)
     ax.set_yticks(ylvls)
 
-    add_discrete_colorbar(scatter, labels=UMAP_opt_dataframe['pearson_r'],
-                          ax=plt.gca(), cmap=cmap, cbar_label=cbar_label)
+    # your existing discrete colorbar helper
+    add_discrete_colorbar(scatter,
+                          labels=UMAP_opt_dataframe['pearson_r'],
+                          ax=ax, cmap=cmap, cbar_label=cbar_label)
 
-    ax = plt.gca()
     ax.set_xlabel(xlabel)
     ax.set_ylabel(ylabel)
     ax.set_title(title)
-    plt.savefig(savepath)
-    plt.close()
 
+    plt.savefig(savepath, dpi=dpi, bbox_inches='tight')
+    plt.close()
     return
 
 # Circos plots
@@ -901,14 +916,7 @@ def visualize_reduction(embedding_coordinates,
     is_categorical = color_mappings is not None and len(color_mappings) > 0
     cbar_type=cbar_type if cbar_type is not None else 'discrete'
 
-    def _as_colormap(seq_or_cmap, categorical):
-        if isinstance(seq_or_cmap, mcolors.Colormap):
-            return seq_or_cmap
-        # treat lists/tuples/arrays of colors as a user palette
-        seq = list(seq_or_cmap)
-        return (mcolors.ListedColormap(seq)
-                if categorical
-                else mcolors.LinearSegmentedColormap.from_list('custom_palette', seq))
+    
 
     # If user supplies a dedicated palette, it overrides cmap
     if color_palette is not None:
