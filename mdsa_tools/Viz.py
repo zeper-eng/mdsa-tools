@@ -428,35 +428,67 @@ def plot_elbow_scores(cluster_range, inertia_scores, outfile_path=None,
     return optimal_k
 
 # Dim reduction cross-validation metrics
-def bubble_grid_manifoldlearning(UMAP_opt_dataframe):
+def bubble_grid_manifoldlearning(UMAP_opt_dataframe,
+                                 xlabel=None, ylabel=None, title=None,
+                                 cbar_label=None, cmap=None,savepath=None):
     '''
+    Scatter "bubble grid" for a UMAP hyperparameter sweep.
+
     Parameters
     ----------
-
-
-
+    UMAP_opt_dataframe : pandas.DataFrame
+        Must contain columns: 'n_neighbors', 'min_dist', 'pearson_r'.
+        Optionally one of: 'r01_for_bubbles' or 'r_normalized_for_bubbles' for marker sizes.
+    xlabel : str or None, optional
+        X-axis label. Default 'N. Neighbors'.
+    ylabel : str or None, optional
+        Y-axis label. Default 'Min Dist'.
+    title : str or None, optional
+        Figure title. Default 'UMAP Hyperparameter Sweep'.
+    cbar_label : str or None, optional
+        Colorbar label. Default 'Pearson r'.
+    cmap : matplotlib colormap or None, optional
+        Colormap for 'pearson_r'. Default cm.magma_r.
+    savepath: str,default=os.getcwd()
+        path to where you would like to save your plot
 
     Returns
     -------
-
-
-
+    None
+        Draws the scatter plot on the current axes.
 
     Notes
     -----
-
-
-
-    Examples
-    --------
-
+    Marker color encodes 'pearson_r'. Marker size uses the normalized
+    bubble column if present; otherwise falls back to (pearson_r+1)/2.
     '''
 
-    scatter=plt.scatter(x=UMAP_opt_dataframe[['n_neighbors']],y=[['min_dist']],sizes=[['r_normalized_for_bubbles']],c=[['pearson_r']])
-    add_discrete_colorbar(scatter,labels=UMAP_opt_dataframe['pearson_r'],ax=plt.gca(),cmap=cm.magma_r)
+    cmap = cmap if cmap is not None else cm.magma_r
+    xlabel = xlabel if xlabel is not None else 'N. Neighbors'
+    ylabel = ylabel if ylabel is not None else 'Min Dist'
+    title  = title  if title  is not None else 'UMAP Hyperparameter Sweep'
+    cbar_label = cbar_label if cbar_label is not None else 'Pearson r'
+    savepath = savepath if savepath is not None else os.getcwd()
 
-    
 
+
+
+    scatter = plt.scatter(
+        x=UMAP_opt_dataframe['n_neighbors'],
+        y=UMAP_opt_dataframe['min_dist'],
+        s=UMAP_opt_dataframe['r01_for_bubbles'],
+        c=UMAP_opt_dataframe['pearson_r'],
+        cmap=cmap
+    )
+
+    add_discrete_colorbar(scatter, labels=UMAP_opt_dataframe['pearson_r'],
+                          ax=plt.gca(), cmap=cmap, cbar_label=cbar_label)
+
+    ax = plt.gca()
+    ax.set_xlabel(xlabel)
+    ax.set_ylabel(ylabel)
+    ax.set_title(title)
+    plt.savefig(savepath)
 
     return
 
