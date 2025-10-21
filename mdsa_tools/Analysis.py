@@ -526,8 +526,6 @@ class systems_analysis:
 
         return r
 
-    
-    
     def perform_optimized_UMAP(self, feature_matrix=None,max_neighbors=None, min_neighbors=None, stepsize=None, min_dist_values=None,fancy_indexing=None):
         '''
         Grid-search UMAP over n_neighbors and min_dist, and for each embedding
@@ -596,7 +594,7 @@ class systems_analysis:
         df = pd.DataFrame({
             "n_neighbors": nn_list,
             "min_dist": md_list,
-            "pearson_r": np.round(corellation_coefficients,2),
+            "pearson_r": corellation_coefficients,
             "r01_for_bubbles": np.round(100 * ((np.array(corellation_coefficients) + 1.0) / 2.0),2),
         })
 
@@ -844,10 +842,11 @@ if __name__ == '__main__':
     Analyzer = systems_analysis(systems_representations=[systems_GCU,systems_CGU])
     Analyzer.replicates_to_feature_matrix()
     UMAP_opt_dataframe=Analyzer.perform_optimized_UMAP()
-            
+    
     from mdsa_tools.Viz import bubble_grid_manifoldlearning
     bubble_grid_manifoldlearning(UMAP_opt_dataframe,savepath='./small')
-
+    print(UMAP_opt_dataframe)
+    os._exit(0)
 
     #
     #big case

@@ -481,6 +481,13 @@ def bubble_grid_manifoldlearning(UMAP_opt_dataframe,
         cmap=cmap
     )
 
+    xlvls = np.sort(UMAP_opt_dataframe['n_neighbors'].unique())
+    ylvls = np.sort(UMAP_opt_dataframe['min_dist'].unique())
+
+    ax = plt.gca()
+    ax.set_xticks(xlvls)
+    ax.set_yticks(ylvls)
+
     add_discrete_colorbar(scatter, labels=UMAP_opt_dataframe['pearson_r'],
                           ax=plt.gca(), cmap=cmap, cbar_label=cbar_label)
 
