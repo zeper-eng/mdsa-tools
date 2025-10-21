@@ -489,6 +489,7 @@ def bubble_grid_manifoldlearning(UMAP_opt_dataframe,
     ax.set_ylabel(ylabel)
     ax.set_title(title)
     plt.savefig(savepath)
+    plt.close()
 
     return
 

@@ -57,7 +57,7 @@ class systems_analysis:
         Derived from ``systems_representations[0][0, 0, 1:]``. These are used to
         label residue–residue comparisons when generating feature names.
     feature_matrix : np.ndarray or None
-        Cached 2D feature matrix produced by ``replicates_to_featurematrix``.
+        Cached 2D feature matrix produced by ``replicates_to_feature_matrix``.
     replicate_distribution : np.ndarray
         Distribution vector set from the provided argument or default.
 
@@ -119,7 +119,7 @@ class systems_analysis:
         return
 
     #pre-processing
-    def replicates_to_featurematrix(self,arrays=None)->np.ndarray:
+    def replicates_to_feature_matrix(self,arrays=None)->np.ndarray:
         """Construct a flattened, per-frame feature matrix from one or more
         systems of residue×residue adjacency matrices.
 
@@ -149,7 +149,7 @@ class systems_analysis:
         Examples
         --------
         >>> arrays = [sys1, sys2]  # each (n_frames, n_res, n_res)
-        >>> X = sa.replicates_to_featurematrix(arrays)  # doctest: +SKIP
+        >>> X = sa.replicates_to_feature_matrix(arrays)  # doctest: +SKIP
         """
         arrays = arrays if arrays is not None else self.systems_representations
         
@@ -334,7 +334,7 @@ class systems_analysis:
         ----------
         feature_matrix : array-like of shape (n_samples, n_features), optional
             Matrix to reduce. If omitted, uses ``self.feature_matrix``; if that is
-            not set, calls ``replicates_to_featurematrix()`` to build it.
+            not set, calls ``replicates_to_feature_matrix()`` to build it.
         method : {'PCA', 'UMAP'}, default 'PCA'
             Dimensionality-reduction algorithm.
         n_components : int, default 2
@@ -376,7 +376,7 @@ class systems_analysis:
         if self.feature_matrix is not None:
             feature_matrix=self.feature_matrix
         if self.feature_matrix is None:
-            self.replicates_to_featurematrix()
+            self.replicates_to_feature_matrix()
             feature_matrix=self.feature_matrix
 
         n_components=n_components if n_components is not None else 2
@@ -428,148 +428,144 @@ class systems_analysis:
 
         return candidate_states_per_system
     
-    def pairwise_index_table(self, feature_matrix=None):
-        '''Build an upper-triangle index table for all unique sample–sample pairs.
+    '''two seperate approaches here
+    -First we could use pairwise_index_table to build a fancy indexing approach that takes advantage of our current work
+    -Problematically this means we have to store theese massive arrays in memory so we also have an contiguous () version '''
 
-        Parameters
-        ----------
-        feature_matrix : np.ndarray or None, shape (m, n), optional
-            Per-sample feature matrix where rows are samples (frames/systems) and
-            columns are features. If ``None``, uses ``self.feature_matrix``.
-
-        Returns
-        -------
-        index_table : np.ndarray of int, shape (E, 2)
-            Each row is a pair ``(i, j)`` with ``i < j``, enumerating the upper
-            triangle of the implicit ``m × m`` pairwise matrix. Here
-            ``E = m(m-1)/2``.
-
-        Notes
-        -----
-        * Equivalent to ``np.column_stack(np.triu_indices(m, k=1))``.
-        * Useful as a consistent template for distance/similarity calculations and
-        for aligning pairwise quantities across spaces (feature vs. embedding).
-        '''
     
-
-        feature_matrix=feature_matrix if feature_matrix is not None else self.feature_matrix
-        
-        row_indexes, column_indexes = np.triu_indices(feature_matrix.shape[0], k=1)
-
-        index_table = np.column_stack([row_indexes, column_indexes])   # shape (E, 3)
-        
-        return index_table
-
-    def pairwise_distances_allsamples(self,featurematrix=None):
+    def pearson_sums_only(self,feature_space_coordinates=None,embedding_space_coordinates=None):
         '''
-        Compute Euclidean distances for all unique sample pairs.
+        Compute Pearson r between ALL within-space pairwise Euclidean distances
+        of feature space (X) and embedding space (Y) **without** materializing the
+        O(n^2) distance vectors. We stream the five totals needed for Pearson.
 
         Parameters
         ----------
-        featurematrix : np.ndarray or None, shape (m, n), optional
-            Per-sample feature matrix (rows = samples). If ``None``, uses
-            ``self.feature_matrix``.
-
-        Returns
-        -------
-        np.ndarray, shape (E,)
-            One distance per unique pair ``(i, j)`` with ``i < j``, ordered to
-            match :meth:`pairwise_index_table`.
-
-        Notes
-        -----
-        * Uses direct vectorized indexing on the upper-triangle pair list.
-        * Result aligns with the output of :meth:`pairwise_index_table`, so you can
-        compare distance vectors across different coordinate spaces.
-
-        '''
-
-        featurematrix = featurematrix if featurematrix is not None else self.feature_matrix
-        index_table=self.pairwise_index_table(featurematrix)
-        
-        i_vector=index_table[:,0]
-        j_vector=index_table[:,1]
-
-        difference_vector=np.linalg.norm(featurematrix[i_vector,:]-featurematrix[j_vector,:],axis=1)
-
-        return difference_vector
-
-    def pearson_corellation_coefficient_embeddingvsfeaturespace(self,featurespace_coordinates=None,embeddingspace_coordinates=None):
-        '''
-        Pearson r between feature-space and embedding-space pairwise distances.
-
-        Parameters
-        ----------
-        featurespace_coordinates : np.ndarray or None, shape (m, p), optional
-            Original high-D coordinates (rows = samples). If ``None``,
-            ``self.replicates_to_featurematrix()`` is called and
-            ``self.feature_matrix`` is used.
-        embeddingspace_coordinates : np.ndarray or None, shape (m, q), optional
-            Reduced (low-D) embedding coordinates corresponding to the same
-            samples/rows. If ``None``, computes a PCA embedding via
-            :meth:`reduce_systems_representations(method='PCA')`.
+        feature_space_coordinates : np.ndarray or None, shape (n_samples, p)
+            High-D per-sample feature rows. If None, we build self.feature_matrix.
+        embedding_space_coordinates : np.ndarray or None, shape (n_samples, q)
+            Low-D per-sample embedding rows. If None, we build a PCA embedding.
 
         Returns
         -------
         float
-            Pearson correlation coefficient ``r`` in ``[-1, 1]`` computed between
-            the two mega-vectors of pairwise distances (same pair order).
+            Pearson correlation coefficient r in [-1, 1] between pdist(X) and pdist(Y).
 
         Notes
         -----
-        * The two distance vectors are constructed with
-        :meth:`pairwise_distances_allsamples` so their pair ordering matches.
-        * High values (e.g., ``r ~ 1``) indicate strong linear preservation of
-        pairwise distances up to an affine transform.
-       
-        
+        * We iterate over the upper triangle: for each row i, compare to all rows j>i.
+        * Distances are computed via ‖a-b‖² = ‖a‖² + ‖b‖² − 2·(a·b), so we only need
+        squared row norms and a BLAS-backed dot product (Xj @ xi).
+        * We never keep the giant distance vectors, only the 5 running sums.
+
+        Examples
+        --------
+        >>> r = obj.pearson_sums_only(X, Y)  # exact Pearson of pdist(X) vs pdist(Y)
         '''
-        
-        if featurespace_coordinates is None:
-            self.replicates_to_featurematrix() 
-            featurespace_coordinates = self.feature_matrix
-        
-        if embeddingspace_coordinates is None:
-           embeddingspace_coordinates,weights,explained_variance_ratio_ =self.reduce_systems_representations(method='PCA')
 
+        if feature_space_coordinates is None:
+            self.replicates_to_feature_matrix() 
+            feature_space_coordinates = self.feature_matrix
+        
+        if embedding_space_coordinates is None:
+           embedding_space_coordinates,_,_ =self.reduce_systems_representations(method='PCA')
 
-        featurespace_distances=self.pairwise_distances_allsamples(featurematrix=featurespace_coordinates)
-        embeddingspace_distances=self.pairwise_distances_allsamples(featurematrix=embeddingspace_coordinates)
-        r = np.corrcoef(featurespace_distances, embeddingspace_distances)[0, 1]
+        print(f"feature_space_coordinates size: {feature_space_coordinates.shape}\nembedding_space_coordinates size: {embedding_space_coordinates.shape}")
+        
     
+        # row-wise squared norms (‖row‖²) 
+        feature_space_coordinates_rownorms = np.sum(feature_space_coordinates * feature_space_coordinates, axis=1)  # shape (n,)
+        embedding_space_coordinates_rownorms = np.sum(embedding_space_coordinates * embedding_space_coordinates, axis=1)
+
+        print(feature_space_coordinates_rownorms,embedding_space_coordinates_rownorms)
+
+        # Theese are the five totals we need
+        #Sx->i.e. sum of distances_x,
+        #Sy-> sum of distances_y,
+        #Sxx-> sum of squared distances_x
+        #Syy-> sum of squared distances_y
+        #Sxy-> sum of productes of the paired distances (dot product)
+        
+        Sx = Sy = Sxx = Syy = Sxy = 0.0
+        m = 0
+
+        #just incase because testing this as a part of pytest would be hard
+        if feature_space_coordinates.shape[0] != embedding_space_coordinates.shape[0]:
+            raise ValueError(f"Row count mismatch: X has {feature_space_coordinates.shape[0]} samples, Y has {embedding_space_coordinates.shape[0]}.")
+
+        
+        numrows = feature_space_coordinates_rownorms.shape[0]
+
+        for i in range(numrows - 1):
+            
+            xi, yi = feature_space_coordinates[i], embedding_space_coordinates[i]# current row in each space
+            Xj, Yj = feature_space_coordinates[i+1:], embedding_space_coordinates[i+1:]  # all rows j>i (so we are iterating over everything)
+
+            # all dot products x_j·x_i and y_j·y_i at once (vectors of length n-i-1)
+            dotX = Xj @ xi
+            dotY = Yj @ yi
+
+            # squared distances via ‖a-b‖² = ‖a‖² + ‖b‖² − 2 a·b (this is the linalg identity we are taking advantage to not have to actually compute all distances)
+            DX2 = feature_space_coordinates_rownorms[i] + feature_space_coordinates_rownorms[i+1:] - 2.0 * dotX
+            DY2 = embedding_space_coordinates_rownorms[i] + embedding_space_coordinates_rownorms[i+1:] - 2.0 * dotY
+
+            # clamp tiny negatives, then take sqrt of Euclidean distances
+            np.maximum(DX2, 0.0, out=DX2)
+            np.maximum(DY2, 0.0, out=DY2)
+            DX = np.sqrt(DX2, dtype=np.float64)
+            DY = np.sqrt(DY2, dtype=np.float64)
+
+            # update the five sums (this chunk only), then discard DX/DY
+            Sx  += DX.sum();        Sy  += DY.sum()
+            Sxx += (DX*DX).sum();   Syy += (DY*DY).sum()
+            Sxy += (DX*DY).sum()
+            m   += DX.size
+            print(f"row {i} completed")
+
+        # finish: Pearson r from totals without ever loading thoose massive arrays into memory
+        numerator = m*Sxy - Sx*Sy
+        denominator = np.sqrt((m*Sxx - Sx*Sx) * (m*Syy - Sy*Sy))
+        r = float(numerator / denominator) if denominator != 0.0 else np.nan
+
         return r
+
     
-    def perform_optimized_UMAP(self, feature_matrix=None,max_neighbors=None, min_neighbors=None, stepsize=None, min_dist_values=None):
+    
+    def perform_optimized_UMAP(self, feature_matrix=None,max_neighbors=None, min_neighbors=None, stepsize=None, min_dist_values=None,fancy_indexing=None):
         '''
-        Sweep UMAP ``n_neighbors`` **and** ``min_dist`` and compute Pearson r between
-        pairwise distances in feature space and in the corresponding UMAP embeddings.
+        Grid-search UMAP over n_neighbors and min_dist, and for each embedding
+        compute Pearson r between pdist(feature space) and pdist(embedding space).
+        Returns a tidy DataFrame for easy plotting (bubble chart etc.).
 
         Parameters
         ----------
-        max_neighbors : int or None, optional
-            Exclusive upper bound for the sweep of ``n_neighbors``. Default ``100``.
-        min_neighbors : int or None, optional
-            Inclusive lower bound for the sweep of ``n_neighbors``. Default ``10``.
-        stepsize : int or None, optional
-            Increment between successive ``n_neighbors`` values. Default ``10``.
-        min_dist_values : array-like of float or None, optional
-            Set of ``min_dist`` values (in ``[0, 1]``) to try for each ``n_neighbors``.
-            If ``None``, uses ``(0.1, 0.4, 0.7, 1.0)``.
+        feature_matrix : np.ndarray or None, shape (n_samples, n_features)
+            If None, use self.feature_matrix (and build it if needed).
+        max_neighbors : int or None
+            Exclusive upper bound for the neighbors sweep. Default 100.
+        min_neighbors : int or None
+            Inclusive lower bound for the neighbors sweep. Default 10.
+        stepsize : int or None
+            Step between neighbor counts. Default 10 (i.e., 10, 20, 30, ...).
+        min_dist_values : iterable of float or None
+            Set of UMAP min_dist values to try. Default (0.1, 0.4, 0.7, 1.0).
+        fancy_indexing : ignored here (kept for API parity)
+            We now always use the streaming Pearson (no O(n^2) allocations).
 
         Returns
         -------
         pandas.DataFrame
-            One row per (``n_neighbors``, ``min_dist``) combination with:
-            - ``n_neighbors`` : int
-            - ``min_dist``    : float
-            - ``pearson_r``   : float
-            - ``r01_for_bubbles`` : float in ``[0,1]`` = ``(r + 1) / 2``
+            Columns:
+            - n_neighbors  (int)
+            - min_dist     (float)
+            - pearson_r    (float, rounded to 2 decimals)
+            - r01_for_bubbles (float in [0,100]): visual helper = 100*((r+1)/2)
 
         Notes
         -----
-        * Uses the same upper-triangle pair ordering in both spaces.
-        * ``r01_for_bubbles`` is a visualization helper; ``pearson_r`` is the metric.
-        
+        * UMAP embeddings depend on (n_neighbors, min_dist); we loop both.
+        * Pearson is computed with pearson_sums_only (streaming, exact).
+        * r01_for_bubbles maps r∈[-1,1] -> [0,100] for bubble size/color.
         '''
 
         feature_matrix=feature_matrix if feature_matrix is not None else self.feature_matrix
@@ -577,6 +573,7 @@ class systems_analysis:
         min_neighbors  = min_neighbors  if min_neighbors  is not None else 10
         stepsize       = stepsize       if stepsize       is not None else 10
         min_dist_values = min_dist_values if min_dist_values is not None else (0.1, 0.4, 0.7, 1.0)
+        fancy_indexing = fancy_indexing if fancy_indexing is not None else False
 
 
         n_neighbors = np.arange(min_neighbors, max_neighbors, stepsize, dtype=int)
@@ -591,8 +588,9 @@ class systems_analysis:
                     feature_matrix=feature_matrix,
                     method='UMAP', n_neighbors=i, min_dist=j
                 )
-                r = self.pearson_corellation_coefficient_embeddingvsfeaturespace(
-                    self.feature_matrix, embedding_coordinates
+                r = self.pearson_sums_only(
+                    self.feature_matrix,
+                    embedding_space_coordinates=embedding_coordinates,
                 )
                 nn_list.append(int(i))
                 md_list.append(float(j))
@@ -868,7 +866,7 @@ class systems_analysis:
         ----------
         feature_matrix : np.ndarray
             Shape ``(n_samples, n_features)``. Typically produced by
-            ``replicates_to_featurematrix()``.
+            ``replicates_to_feature_matrix()``.
         n : int
             Number of components to retain (default ``2`` in upstream callers).
 
@@ -924,10 +922,42 @@ if __name__ == '__main__':
     systems_CGU = processor_CGU.create_system_representations()
 
     Analyzer = systems_analysis(systems_representations=[systems_GCU,systems_CGU])
-    Analyzer.replicates_to_featurematrix()
+    Analyzer.replicates_to_feature_matrix()
     UMAP_opt_dataframe=Analyzer.perform_optimized_UMAP()
+            
+    from mdsa_tools.Viz import bubble_grid_manifoldlearning
+    bubble_grid_manifoldlearning(UMAP_opt_dataframe,savepath='./small')
+
+
+    #
+    #big case
+    #
+    for _name in [
+    # file paths (tiny, but clear for sanity)
+    "traj_GCU", "top_GCU", "traj_CGU", "top_CGU",
+    # processors
+    "processor_GCU", "processor_CGU",
+    # systems
+    "systems_GCU", "systems_CGU",
+    # analyzer + outputs
+    "Analyzer", "UMAP_opt_dataframe",
+    ]:
+        try:
+            del globals()[_name]
+        except KeyError:
+            pass
+        
+    #Pipeline setup assumed as in: Data Generation
+    redone_CCU_GCU_fulltraj=np.load('/Users/luis/Downloads/redone_unrestrained_CCU_GCU_Trajectory_array.npy',allow_pickle=True)
+    redone_CCU_CGU_fulltraj=np.load('/Users/luis/Downloads/redone_unrestrained_CCU_CGU_Trajectory_array.npy',allow_pickle=True)
+
+    #Just out of curiosity try just gcu
+    all_systems=[redone_CCU_GCU_fulltraj,redone_CCU_CGU_fulltraj]
+    Systems_Analyzer = systems_analysis(systems_representations=all_systems)
+    Systems_Analyzer.replicates_to_feature_matrix()
+    UMAP_opt_dataframe=Systems_Analyzer.perform_optimized_UMAP()
+
 
     from mdsa_tools.Viz import bubble_grid_manifoldlearning
-    bubble_grid_manifoldlearning(UMAP_opt_dataframe)
-    
+    bubble_grid_manifoldlearning(UMAP_opt_dataframe,savepath='./Big')
     
