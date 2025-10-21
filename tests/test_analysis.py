@@ -59,17 +59,17 @@ def test_pca_ranked_weights(analyzer):
 
     return
 
-def test_replicates_to_featurematrix_accepts_single_array(analysis_systems):
+def test_replicates_to_feature_matrix_accepts_single_array(analysis_systems):
     # the method should also work when passed a single array (not a list)
     from mdsa_tools.Analysis import systems_analysis as sas
     single_array = analysis_systems[0]
     analyzer = sas([single_array])
-    Feature_Matrix = analyzer.replicates_to_featurematrix()
+    Feature_Matrix = analyzer.replicates_to_feature_matrix()
     assert np.count_nonzero(Feature_Matrix) > 0  # not all zeros
 
 def test_perform_clust_opt_fixed_k_returns_shapes(tmp_path, analyzer):
     # fixed-k clustering path returns labels (n_samples) and centers (k × n_features)
-    Feature_Matrix = analyzer.replicates_to_featurematrix()
+    Feature_Matrix = analyzer.replicates_to_feature_matrix()
     labels, centers = analyzer.perform_clust_opt(outfile_path=str(tmp_path) + os.sep, data=Feature_Matrix, k=2)
     assert labels.shape[0] == Feature_Matrix.shape[0]
     assert centers.shape == (2, Feature_Matrix.shape[1])
@@ -146,6 +146,15 @@ def test_precomputed_pca_ranked_weights(precomputed_analyzer, importer):
 # Miscellaneous new tests for various quantifications
 # ------------------------------------------------------------
 
-def test_pearson_corellation_has_similar_dimensions(analyzer):
+def test_perform_optimizedUMAP(analyzer):
+    fillerdf=analyzer.perform_optimized_UMAP()
+    expected_cols = {"n_neighbors", "min_dist", "pearson_r", "r01_for_bubbles"}
+
+    #check basic dataframe attributes are true
+    assert expected_cols.issubset(fillerdf.columns)
+    assert fillerdf.shape[1] == 4
+    assert np.issubdtype(fillerdf["n_neighbors"].dtype, np.integer)
+    assert fillerdf["min_dist"].between(0.0, 1.0).all()
+    assert fillerdf["pearson_r"].between(-1.0, 1.0).all()
 
     return

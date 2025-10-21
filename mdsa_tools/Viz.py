@@ -1125,3 +1125,4 @@ def contour_embedding_space(outfile_path, embeddingspace_coordinates, levels=10,
     plt.savefig(outfile_path, dpi=dpi)
     plt.close()
     return
+

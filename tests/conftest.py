@@ -46,7 +46,7 @@ def analysis_systems():
 @pytest.fixture(scope="session")
 def analyzer(analysis_systems):
     sa = systems_analysis(analysis_systems)  # ribosome set
-    sa.replicates_to_featurematrix()
+    sa.replicates_to_feature_matrix()
     return sa
 
 # ----------------------------------------------------------------
@@ -74,7 +74,7 @@ def external_systems():
 @pytest.fixture(scope="session")
 def external_analyzer(external_systems):
     sa = systems_analysis([external_systems])  # wrap in list so API is consistent
-    sa.replicates_to_featurematrix()
+    sa.replicates_to_feature_matrix()
     return sa
 
 # ----------------------------------------------------------------

@@ -155,7 +155,9 @@ def test_extract_properties_from_weightsdf(rankedweights_df):
 
 
 import matplotlib.pyplot as plt
-
+###############################
+#colorbars and other misc#
+###############################
 
 def test_add_continuous_colorbar_runs(emptyplotting_space):
     fig, ax = emptyplotting_space
@@ -187,7 +189,9 @@ def test_create_2d_color_mappings_returns_colors():
     colors = vz.create_2d_color_mappings(labels)
     assert len(colors) == len(labels)
 
-
+################################
+#lineplots contours more circos#
+################################
 def test_rmsd_lineplots(tmp_path,rmsd_df):
     out = tmp_path / "rmsd"
     vz.rmsd_lineplots(rmsd_df, outfilepath=str(out))
@@ -217,3 +221,10 @@ def test_get_Circos_coordinates_and_mdcircos_graph(tmp_path):
    
 
 
+###############################
+#testing bubblewrap           #
+###############################
+
+def test_get_Circos_coordinates_and_mdcircos_graph(tmp_path,analyzer):
+    fillerdf=analyzer.perform_optimized_UMAP()
+    vz.bubble_grid_manifoldlearning(fillerdf,tmp_path)
