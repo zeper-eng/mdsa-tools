@@ -470,14 +470,12 @@ class systems_analysis:
         if embedding_space_coordinates is None:
            embedding_space_coordinates,_,_ =self.reduce_systems_representations(method='PCA')
 
-        print(f"feature_space_coordinates size: {feature_space_coordinates.shape}\nembedding_space_coordinates size: {embedding_space_coordinates.shape}")
         
     
         # row-wise squared norms (‖row‖²) 
         feature_space_coordinates_rownorms = np.sum(feature_space_coordinates * feature_space_coordinates, axis=1)  # shape (n,)
         embedding_space_coordinates_rownorms = np.sum(embedding_space_coordinates * embedding_space_coordinates, axis=1)
 
-        print(feature_space_coordinates_rownorms,embedding_space_coordinates_rownorms)
 
         # Theese are the five totals we need
         #Sx->i.e. sum of distances_x,
@@ -520,7 +518,6 @@ class systems_analysis:
             Sxx += (DX*DX).sum();   Syy += (DY*DY).sum()
             Sxy += (DX*DY).sum()
             m   += DX.size
-            print(f"row {i} completed")
 
         # finish: Pearson r from totals without ever loading thoose massive arrays into memory
         numerator = m*Sxy - Sx*Sy
