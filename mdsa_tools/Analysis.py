@@ -840,13 +840,13 @@ if __name__ == '__main__':
     Analyzer = systems_analysis(systems_representations=[systems_GCU,systems_CGU])
     Analyzer.replicates_to_feature_matrix()
     UMAP_opt_dataframe=Analyzer.perform_optimized_UMAP()
+    print(UMAP_opt_dataframe)
     
     from mdsa_tools.Viz import bubble_grid_manifoldlearning
     import colorcet as cc
-    palette = cc.glasbey[:UMAP_opt_dataframe.shape[0]]
+    palette = cc.glasbey[:np.unique(UMAP_opt_dataframe['pearson_r'].to_numpy()).size]
     bubble_grid_manifoldlearning(UMAP_opt_dataframe=UMAP_opt_dataframe,savepath='./small',color_palette=palette)
 
-    print(UMAP_opt_dataframe)
     os._exit(0)
 
     #
