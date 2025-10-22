@@ -503,10 +503,12 @@ class systems_analysis:
             dotX = Xj @ xi
             dotY = Yj @ yi
 
-            # squared distances via ‖a-b‖² = ‖a‖² + ‖b‖² − 2 a·b (this is the linalg identity we are taking advantage to not have to actually compute all distances)
+            # squared distances via ‖a-b‖² = ‖a‖² + ‖b‖² − 2 a·b (this is the euclidean distance identity we are taking advantage to not have to hold distance vectors in memory)
             DX2 = feature_space_coordinates_rownorms[i] + feature_space_coordinates_rownorms[i+1:] - 2.0 * dotX
             DY2 = embedding_space_coordinates_rownorms[i] + embedding_space_coordinates_rownorms[i+1:] - 2.0 * dotY
 
+            DX2 = np.maximum(DX2, 0.0)
+            DY2 = np.maximum(DY2, 0.0)
             DX = np.sqrt(DX2, dtype=np.float64)
             DY = np.sqrt(DY2, dtype=np.float64)
 
@@ -572,7 +574,7 @@ class systems_analysis:
 
         nn_list = []
         md_list = []
-        correlation_coefficients = []
+        corellation_coefficients = []
 
         for i in n_neighbors:
             for j in min_dist_values:  # nested sweep over min_dist for each n_neighbors
@@ -581,19 +583,19 @@ class systems_analysis:
                     method='UMAP', n_neighbors=i, min_dist=j
                 )
                 r = self.pearson_sums_only(
-                    self.feature_matrix,
+                    feature_matrix,
                     embedding_space_coordinates=embedding_coordinates,
                 )
                 nn_list.append(int(i))
                 md_list.append(float(j))
-                correlation_coefficients.append(r)
+                corellation_coefficients.append(r)
 
-        correlation_coefficients=np.array(correlation_coefficients)
+        corellation_coefficients=np.array(corellation_coefficients)
         df = pd.DataFrame({
             "n_neighbors": nn_list,
             "min_dist": md_list,
-            "pearson_r": np.round(correlation_coefficients,2),
-            "bubble_size": np.interp(correlation_coefficients, (correlation_coefficients.min(), correlation_coefficients.max()), (80, 400)),
+            "pearson_r": np.round(corellation_coefficients,2),
+            "bubble_size": np.interp(corellation_coefficients, (corellation_coefficients.min(), corellation_coefficients.max()), (80, 400)),
         })
 
         return df
