@@ -572,7 +572,7 @@ class systems_analysis:
 
         nn_list = []
         md_list = []
-        corellation_coefficients = []
+        correlation_coefficients = []
 
         for i in n_neighbors:
             for j in min_dist_values:  # nested sweep over min_dist for each n_neighbors
@@ -586,14 +586,14 @@ class systems_analysis:
                 )
                 nn_list.append(int(i))
                 md_list.append(float(j))
-                corellation_coefficients.append(r)
+                correlation_coefficients.append(r)
 
-        corellation_coefficients=np.array(corellation_coefficients)
+        correlation_coefficients=np.array(correlation_coefficients)
         df = pd.DataFrame({
             "n_neighbors": nn_list,
             "min_dist": md_list,
-            "pearson_r": np.round(corellation_coefficients,2),
-            "bubble_size": np.interp(corellation_coefficients, (corellation_coefficients.min(), corellation_coefficients.max()), (80, 400)),
+            "pearson_r": np.round(correlation_coefficients,2),
+            "bubble_size": np.interp(correlation_coefficients, (correlation_coefficients.min(), correlation_coefficients.max()), (80, 400)),
         })
 
         return df
