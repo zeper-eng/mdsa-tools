@@ -507,6 +507,7 @@ class systems_analysis:
             DX2 = feature_space_coordinates_rownorms[i] + feature_space_coordinates_rownorms[i+1:] - 2.0 * dotX
             DY2 = embedding_space_coordinates_rownorms[i] + embedding_space_coordinates_rownorms[i+1:] - 2.0 * dotY
 
+            #need to get rid of tiny negatives here from floating point arithmetic
             DX2 = np.maximum(DX2, 0.0)
             DY2 = np.maximum(DY2, 0.0)
             DX = np.sqrt(DX2, dtype=np.float64)
