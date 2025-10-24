@@ -24,6 +24,7 @@ from sklearn.decomposition import PCA
 import pandas as pd
 import umap
 import os
+from sklearn.manifold import trustworthiness
 
 class systems_analysis:
     '''
@@ -428,11 +429,105 @@ class systems_analysis:
 
         return candidate_states_per_system
     
-    '''two seperate approaches here
-    -First we could use pairwise_index_table to build a fancy indexing approach that takes advantage of our current work
-    -Problematically this means we have to store theese massive arrays in memory so we also have an contiguous () version '''
+    def autocorrelation_function(self,feature_space_coordinates=None,lags=None):
+        '''
+        Parameters
+        ----------
 
-    
+
+
+        Returns
+        -------
+
+
+
+        Notes
+        -----
+
+
+
+        Examples
+        --------
+
+
+        
+        '''
+        lags = lags if lags is not None else [1,2,3,4,5]
+
+        if feature_space_coordinates is None:
+            self.replicates_to_feature_matrix() 
+            feature_space_coordinates = self.feature_matrix
+
+        numrows = feature_space_coordinates.shape[0]
+
+        autocorrelation_at_lags=[]
+        sample_size_at_lags=[]
+
+        for i in lags:
+
+            # Theese are the five totals we need for *THIS* lag
+            #Sx->i.e. sum of distances_x,
+            #Sy-> sum of distances_y,
+            #Sxx-> sum of squared distances_x
+            #Syy-> sum of squared distances_y
+            #Sxy-> sum of productes of the paired distances (dot product)
+            
+            Sx = Sy = Sxx = Syy = Sxy = 0.0
+            m = 0
+            for row_index in range(i,numrows):#we ignore the first autocorellated value
+                current_val=feature_space_coordinates[row_index,:]
+                lagged_val=feature_space_coordinates[row_index-i,:]
+
+                Sx  += lagged_val.sum()                    # Σ x
+                Sy  += current_val.sum()                   # Σ y
+                Sxx += np.dot(lagged_val,  lagged_val)     # Σ x^2
+                Syy += np.dot(current_val, current_val)    # Σ y^2
+                Sxy += np.dot(lagged_val,  current_val)    # Σ x·y
+                m   += feature_space_coordinates.shape[1] #because we used vector operations on everything else
+
+            # finish: Pearson r from totals without ever loading thoose massive arrays into memory
+            numerator = m*Sxy - Sx*Sy
+            denominator = np.sqrt((m*Sxx - Sx*Sx) * (m*Syy - Sy*Sy))
+            r = float(numerator / denominator) if denominator != 0.0 else np.nan
+            autocorrelation_at_lags.append(r)
+            sample_size_at_lags.append(m)
+        
+
+        autocorrelation_at_lags,sample_size_at_lags=np.array(autocorrelation_at_lags),np.array(sample_size_at_lags)
+        sig_r, p, t, df, rcrit=self.t_test_autocorrelation(autocorrelation_at_lags,sample_size_at_lags)
+
+        autocorellation_df=pd.DataFrame({'sig_r':sig_r,
+                     'p':p,
+                     't':t,
+                     'df':df,
+                     'rcrit':rcrit,
+                     'lags':lags})
+
+        return autocorellation_df
+
+    def t_test_autocorrelation(self,results=None,m=None,alpha=None):
+        '''
+        '''
+        alpha=alpha if alpha is not None else .05
+        
+        t = results * np.sqrt((m - 2) / (1 - results**2)) #fit a t distribution
+        degrees_freedom=m-2
+
+        try:
+            from scipy import stats
+            p      = 2.0 * stats.t.sf(np.abs(t), np.maximum(1.0,degrees_freedom))       # two-sided p
+            tcrit  = stats.t.ppf(1 - alpha/2.0, np.maximum(1.0,degrees_freedom))        # |t| threshold
+            rcrit  = tcrit / np.sqrt(tcrit**2 + np.maximum(1.0,degrees_freedom))        # |r| threshold
+        except Exception:
+            # Fisher-z 95% band as fallback/ pretty good approximation and widely
+            from math import erf
+            p      = 2.0 * (1.0 - 0.5 * (1.0 + erf(np.abs(t)/np.sqrt(2.0))))
+            rcrit  = np.tanh(1.96 / np.sqrt(np.maximum(4.0, m - 3)))
+
+        sig_r = np.abs(results) >= rcrit   
+
+        return sig_r, p, t,degrees_freedom, rcrit
+
     def pearson_sums_only(self,feature_space_coordinates=None,embedding_space_coordinates=None):
         '''
         Compute Pearson r between ALL within-space pairwise Euclidean distances
@@ -493,7 +588,7 @@ class systems_analysis:
 
         
         numrows = feature_space_coordinates_rownorms.shape[0]
-
+   
         for i in range(numrows - 1):
             
             xi, yi = feature_space_coordinates[i], embedding_space_coordinates[i]# current row in each space
@@ -525,8 +620,8 @@ class systems_analysis:
         r = float(numerator / denominator) if denominator != 0.0 else np.nan
 
         return r
-
-    def perform_optimized_UMAP(self, feature_matrix=None,max_neighbors=None, min_neighbors=None, stepsize=None, min_dist_values=None,fancy_indexing=None):
+            
+    def perform_optimized_UMAP_global(self, feature_matrix=None,max_neighbors=None, min_neighbors=None, stepsize=None, min_dist_values=None):
         '''
         Grid-search UMAP over n_neighbors and min_dist, and for each embedding
         compute Pearson r between pdist(feature space) and pdist(embedding space).
@@ -544,8 +639,6 @@ class systems_analysis:
             Step between neighbor counts. Default 10 (i.e., 10, 20, 30, ...).
         min_dist_values : iterable of float or None
             Set of UMAP min_dist values to try. Default (0.1, 0.4, 0.7, 1.0).
-        fancy_indexing : ignored here (kept for API parity)
-            We now always use the streaming Pearson (no O(n^2) allocations).
 
         Returns
         -------
@@ -575,7 +668,7 @@ class systems_analysis:
 
         nn_list = []
         md_list = []
-        corellation_coefficients = []
+        correlation_coefficients = []
 
         for i in n_neighbors:
             for j in min_dist_values:  # nested sweep over min_dist for each n_neighbors
@@ -589,18 +682,93 @@ class systems_analysis:
                 )
                 nn_list.append(int(i))
                 md_list.append(float(j))
-                corellation_coefficients.append(r)
+                correlation_coefficients.append(r)
 
-        corellation_coefficients=np.array(corellation_coefficients)
+        correlation_coefficients=np.array(correlation_coefficients)
         df = pd.DataFrame({
             "n_neighbors": nn_list,
             "min_dist": md_list,
-            "pearson_r": np.round(corellation_coefficients,2),
-            "bubble_size": np.interp(corellation_coefficients, (corellation_coefficients.min(), corellation_coefficients.max()), (80, 400)),
+            "pearson_r": np.round(correlation_coefficients,2),
+            "bubble_size": np.interp(np.abs(correlation_coefficients), (np.abs(correlation_coefficients).min(), np.abs(correlation_coefficients).max()), (80, 400))
         })
 
         return df
-       
+    
+    
+    def perform_optimized_UMAP_local(self, feature_matrix=None,max_neighbors=None, min_neighbors=None, stepsize=None, min_dist_values=None,eval_neighbors=None):
+        '''
+        Grid-search UMAP over n_neighbors and min_dist, and for each embedding
+        compute Pearson r between pdist(feature space) and pdist(embedding space).
+        Returns a tidy DataFrame for easy plotting (bubble chart etc.).
+
+        Parameters
+        ----------
+        feature_matrix : np.ndarray or None, shape (n_samples, n_features)
+            If None, use self.feature_matrix (and build it if needed).
+        max_neighbors : int or None
+            Exclusive upper bound for the neighbors sweep. Default 100.
+        min_neighbors : int or None
+            Inclusive lower bound for the neighbors sweep. Default 10.
+        stepsize : int or None
+            Step between neighbor counts. Default 10 (i.e., 10, 20, 30, ...).
+        min_dist_values : iterable of float or None
+            Set of UMAP min_dist values to try. Default (0.1, 0.4, 0.7, 1.0).
+
+        Returns
+        -------
+        pandas.DataFrame
+            Columns:
+            - n_neighbors  (int)
+            - min_dist     (float)
+            - pearson_r    (float, rounded to 2 decimals)
+            - r01_for_bubbles (float in [0,100]): visual helper = 100*((r+1)/2)
+
+        Notes
+        -----
+        * UMAP embeddings depend on (n_neighbors, min_dist); we loop both.
+        * Pearson is computed with pearson_sums_only (streaming, exact).
+        * r01_for_bubbles maps r∈[-1,1] -> [0,100] for bubble size/color.
+        '''
+
+        feature_matrix=feature_matrix if feature_matrix is not None else self.feature_matrix
+        max_neighbors  = max_neighbors  if max_neighbors  is not None else 100
+        min_neighbors  = min_neighbors  if min_neighbors  is not None else 10
+        stepsize       = stepsize       if stepsize       is not None else 10
+        min_dist_values = min_dist_values if min_dist_values is not None else (0.1, 0.4, 0.7, 1.0)
+        eval_neighbors = eval_neighbors if eval_neighbors is not None else 5
+
+
+        n_neighbors = np.arange(min_neighbors, max_neighbors, stepsize, dtype=int)
+
+        nn_list = []
+        md_list = []
+        trusthworthiness_scores = []
+
+        for i in n_neighbors:
+            for j in min_dist_values:  # nested sweep over min_dist for each n_neighbors
+                embedding_coordinates = self.reduce_systems_representations(
+                    feature_matrix=feature_matrix,
+                    method='UMAP', n_neighbors=i, min_dist=j
+                )
+                t = trustworthiness(
+                    X=feature_matrix,
+                    X_embedded=embedding_coordinates,
+                    n_neighbors=eval_neighbors
+                )
+                nn_list.append(int(i))
+                md_list.append(float(j))
+                trusthworthiness_scores.append(t)
+
+        trusthworthiness_scores=np.array(trusthworthiness_scores)
+        df = pd.DataFrame({
+            "n_neighbors": nn_list,
+            "min_dist": md_list,
+            "trusthworthiness_score": np.round(trusthworthiness_scores,2),
+            "bubble_size": np.interp(np.abs(trusthworthiness_scores), (np.abs(trusthworthiness_scores).min(), np.abs(trusthworthiness_scores).max()), (80, 400))
+        })
+
+        return df
+
     def create_PCA_ranked_weights(self,outfile_path=None, weights=None, indexes=None):
         '''Create a ranked table of PCA feature weights for the first two principal components.
 
@@ -842,15 +1010,14 @@ if __name__ == '__main__':
 
     Analyzer = systems_analysis(systems_representations=[systems_GCU,systems_CGU])
     Analyzer.replicates_to_feature_matrix()
-    UMAP_opt_dataframe=Analyzer.perform_optimized_UMAP()
+    UMAP_opt_dataframe=Analyzer.perform_optimized_UMAP_local()
     print(UMAP_opt_dataframe)
     
     from mdsa_tools.Viz import bubble_grid_manifoldlearning
     import colorcet as cc
-    palette = cc.glasbey[:np.unique(UMAP_opt_dataframe['pearson_r'].to_numpy()).size]
+    palette = cc.glasbey[:np.unique(UMAP_opt_dataframe['trusthworthiness_score'].to_numpy()).size]
     bubble_grid_manifoldlearning(UMAP_opt_dataframe=UMAP_opt_dataframe,savepath='./small',color_palette=palette)
 
-    os._exit(0)
 
     #
     #big case
@@ -874,13 +1041,15 @@ if __name__ == '__main__':
     redone_CCU_GCU_fulltraj=np.load('/Users/luis/Downloads/redone_unrestrained_CCU_GCU_Trajectory_array.npy',allow_pickle=True)
     redone_CCU_CGU_fulltraj=np.load('/Users/luis/Downloads/redone_unrestrained_CCU_CGU_Trajectory_array.npy',allow_pickle=True)
 
-    #Just out of curiosity try just gcu
+    
     all_systems=[redone_CCU_GCU_fulltraj,redone_CCU_CGU_fulltraj]
     Systems_Analyzer = systems_analysis(systems_representations=all_systems)
     Systems_Analyzer.replicates_to_feature_matrix()
-    UMAP_opt_dataframe=Systems_Analyzer.perform_optimized_UMAP()
+    
+
+    UMAP_opt_dataframe=Systems_Analyzer.perform_optimized_UMAP_local()
 
 
-    from mdsa_tools.Viz import bubble_grid_manifoldlearning
+    #from mdsa_tools.Viz import bubble_grid_manifoldlearning
     bubble_grid_manifoldlearning(UMAP_opt_dataframe=UMAP_opt_dataframe,savepath='./Big',color_palette=palette)
     
