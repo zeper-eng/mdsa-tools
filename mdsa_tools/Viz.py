@@ -521,6 +521,7 @@ def bubble_grid_manifoldlearning(UMAP_opt_dataframe,
             c=UMAP_opt_dataframe['trusthworthiness_score'],
             cmap=cmap
         )
+        cbar_label='trusthworthiness_score'
 
         xlvls = np.sort(UMAP_opt_dataframe['n_neighbors'].unique())
         ylvls = np.sort(UMAP_opt_dataframe['min_dist'].unique())
