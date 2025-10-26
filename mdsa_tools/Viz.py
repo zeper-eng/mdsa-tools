@@ -436,6 +436,7 @@ def plot_elbow_scores(cluster_range, inertia_scores, outfile_path=None,
     return optimal_k
 
 # Dim reduction cross-validation metrics
+# Dim reduction cross-validation metrics
 def bubble_grid_manifoldlearning(UMAP_opt_dataframe,
                                  xlabel=None, ylabel=None, title=None,
                                  cbar_label=None, cmap=None, color_palette=None,
@@ -494,12 +495,14 @@ def bubble_grid_manifoldlearning(UMAP_opt_dataframe,
             c=UMAP_opt_dataframe['pearson_r'],
             cmap=cmap
         )
+
         # exact ticks from the data
         xlvls = np.sort(UMAP_opt_dataframe['n_neighbors'].unique())
         ylvls = np.sort(UMAP_opt_dataframe['min_dist'].unique())
         ax = plt.gca()
         ax.set_xticks(xlvls)
         ax.set_yticks(ylvls)
+        ax.tick_params(axis='x', labelrotation=90)
 
         # your existing discrete colorbar helper
         add_discrete_colorbar(scatter,
@@ -513,21 +516,23 @@ def bubble_grid_manifoldlearning(UMAP_opt_dataframe,
         plt.savefig(savepath, dpi=dpi, bbox_inches='tight')
         plt.close()
         return
+
     except:
         scatter = plt.scatter(
             x=UMAP_opt_dataframe['n_neighbors'],
             y=UMAP_opt_dataframe['min_dist'],
             s=UMAP_opt_dataframe['bubble_size'],
-            c=UMAP_opt_dataframe['trusthworthiness score'],
+            c=UMAP_opt_dataframe['trustworthiness score'],
             cmap=cmap
         )
-        cbar_label='trusthworthiness score'
+        cbar_label='trustworthiness score'
 
         xlvls = np.sort(UMAP_opt_dataframe['n_neighbors'].unique())
         ylvls = np.sort(UMAP_opt_dataframe['min_dist'].unique())
         ax = plt.gca()
         ax.set_xticks(xlvls)
         ax.set_yticks(ylvls)
+        ax.tick_params(axis='x', labelrotation=90)
 
         # your existing discrete colorbar helper
         add_discrete_colorbar(scatter,
@@ -538,12 +543,12 @@ def bubble_grid_manifoldlearning(UMAP_opt_dataframe,
         ax.set_ylabel(ylabel)
         ax.set_title(title)
 
-        plt.savefig(savepath, dpi=dpi, bbox_inches='tight')
+        plt.savefig(savepath+'_umap_sweep', dpi=dpi, bbox_inches='tight')
         plt.close()
         return
 
 # Circos plots
-def get_Circos_coordinates(residue, gcircle, dpi=600):
+def get_Circos_coordinates(residue, gcircle):
     """
     Create chord endpoints anchored at the middle of a residue arc.
 
@@ -581,7 +586,7 @@ def get_Circos_coordinates(residue, gcircle, dpi=600):
     raxis_position = 550
     return (residue, mid_position, mid_position, raxis_position)
 
-def make_MDCircos_object(residue_indexes, dpi=600):
+def make_MDCircos_object(residue_indexes):
     """
     Build a PyCircos `Gcircle` with arcs for the provided residues.
 
@@ -743,7 +748,7 @@ def mdcircos_graph(empty_circle, residue_dict, savepath=os.getcwd()+'mdcircos_gr
     fig_cb.savefig(savepath + "_colorbar.png", dpi=dpi, bbox_inches="tight")
     plt.close(fig_cb)
 
-def extract_properties_from_weightsdf(pca_table, dpi=600):
+def extract_properties_from_weightsdf(pca_table):
     """
     Parse a Systems Analysis weights table into residue IDs and per-PC weight mappings.
 
@@ -951,6 +956,9 @@ def visualize_reduction(embedding_coordinates,
     # Back-compat: if user passed a list/tuple/ndarray to `cmap`, make it a proper Colormap
     elif isinstance(cmap, (list, tuple, np.ndarray)):
         cmap = _as_colormap(cmap, is_categorical)
+    #no colormap?
+    elif isinstance(cmap, (list, tuple, np.ndarray)):
+        cmap = cm.magma_r
 
 
     labels_font_dict = {
@@ -970,7 +978,7 @@ def visualize_reduction(embedding_coordinates,
                                 c=color_mappings, cmap=cmap, alpha=0.6)
             add_discrete_colorbar(scatter, color_mappings, cbar_label, plt.gca(), cmap=cmap, dpi=dpi)
         
-        if cbar_type == 'discrete' and len(np.unique(color_mappings)) > 250:
+        if cbar_type == 'continous' and len(np.unique(color_mappings)) > 250:
             scatter = ax.scatter(embedding_coordinates[:, 0], embedding_coordinates[:, 1],
                                 c=color_mappings, cmap=cmap, alpha=0.6)
             add_continuous_colorbar(scatter, color_mappings, cbar_label, plt.gca(), cmap=cmap, dpi=dpi)

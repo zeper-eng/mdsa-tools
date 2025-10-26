@@ -661,8 +661,6 @@ class systems_analysis:
         min_neighbors  = min_neighbors  if min_neighbors  is not None else 10
         stepsize       = stepsize       if stepsize       is not None else 10
         min_dist_values = min_dist_values if min_dist_values is not None else (0.1, 0.4, 0.7, 1.0)
-        fancy_indexing = fancy_indexing if fancy_indexing is not None else False
-
 
         n_neighbors = np.arange(min_neighbors, max_neighbors, stepsize, dtype=int)
 
@@ -693,7 +691,6 @@ class systems_analysis:
         })
 
         return df
-    
     
     def perform_optimized_UMAP_local(self, feature_matrix=None,max_neighbors=None, min_neighbors=None, stepsize=None, min_dist_values=None,eval_n=None):
         '''
@@ -999,49 +996,6 @@ class systems_analysis:
 
 if __name__ == '__main__':
 
-    traj_GCU = "/Users/luis/Desktop/workspacetwo/PDBs/CCU_GCU_10frames.mdcrd"
-    top_GCU  = "/Users/luis/Desktop/workspacetwo/PDBs/5JUP_N2_GCU_nowat.prmtop"
-
-    traj_CGU = "/Users/luis/Desktop/workspacetwo/PDBs/CCU_CGU_10frames.mdcrd"
-    top_CGU  = "/Users/luis/Desktop/workspacetwo/PDBs/5JUP_N2_CGU_nowat.prmtop"
-
-    # processors created individually
-    processor_GCU = TrajectoryProcessor(traj_GCU, top_GCU)
-    processor_CGU = TrajectoryProcessor(traj_CGU, top_CGU)
-
-    # systems representations created individually
-    systems_GCU = processor_GCU.create_system_representations()
-    systems_CGU = processor_CGU.create_system_representations()
-
-    Analyzer = systems_analysis(systems_representations=[systems_GCU,systems_CGU])
-    Analyzer.replicates_to_feature_matrix()
-    UMAP_opt_dataframe=Analyzer.perform_optimized_UMAP_local()
-    print(UMAP_opt_dataframe)
-    
-    from mdsa_tools.Viz import bubble_grid_manifoldlearning
-    import colorcet as cc
-    palette = cc.glasbey[:np.unique(UMAP_opt_dataframe['trusthworthiness_score'].to_numpy()).size]
-    bubble_grid_manifoldlearning(UMAP_opt_dataframe=UMAP_opt_dataframe,savepath='./small',color_palette=palette)
-
-
-    #
-    #big case
-    #
-    for _name in [
-    # file paths (tiny, but clear for sanity)
-    "traj_GCU", "top_GCU", "traj_CGU", "top_CGU",
-    # processors
-    "processor_GCU", "processor_CGU",
-    # systems
-    "systems_GCU", "systems_CGU",
-    # analyzer + outputs
-    "Analyzer", "UMAP_opt_dataframe",
-    ]:
-        try:
-            del globals()[_name]
-        except KeyError:
-            pass
-        
     #Pipeline setup assumed as in: Data Generation
     redone_CCU_GCU_fulltraj=np.load('/Users/luis/Downloads/redone_unrestrained_CCU_GCU_Trajectory_array.npy',allow_pickle=True)
     redone_CCU_CGU_fulltraj=np.load('/Users/luis/Downloads/redone_unrestrained_CCU_CGU_Trajectory_array.npy',allow_pickle=True)
@@ -1050,11 +1004,72 @@ if __name__ == '__main__':
     all_systems=[redone_CCU_GCU_fulltraj,redone_CCU_CGU_fulltraj]
     Systems_Analyzer = systems_analysis(systems_representations=all_systems)
     Systems_Analyzer.replicates_to_feature_matrix()
-    
 
-    UMAP_opt_dataframe=Systems_Analyzer.perform_optimized_UMAP_local()
+    Global_UMAP_opt=Systems_Analyzer.reduce_systems_representations(method='UMAP',min_dist=.1,n_neighbors=15)
+    Local_UMAP_opt=Systems_Analyzer.reduce_systems_representations(method='UMAP',min_dist=1.0,n_neighbors=915)
+
+    from mdsa_tools.Viz import visualize_reduction
 
 
-    #from mdsa_tools.Viz import bubble_grid_manifoldlearning
-    bubble_grid_manifoldlearning(UMAP_opt_dataframe=UMAP_opt_dataframe,savepath='./Big',color_palette=palette)
+    #basically a neat helper function for masking our systems the way we want to 
+    def make_replicate_ids(n400=20, n800=10, systems=2):
+        chunks = []
+        cur = 1
+        for _ in range(systems):
+            chunks.append(np.repeat(np.arange(cur, cur + n400, dtype=np.int32), 80))
+            cur += n400
+            chunks.append(np.repeat(np.arange(cur, cur + n800, dtype=np.int32), 160))
+            cur += n800
+        return np.concatenate(chunks)
+
+    replicate_ids = make_replicate_ids()  # 60 uniques, length 6400
+
+
+    time_series_rep_lengths = (list(np.arange(0,80))*20 + list(np.arange(0,160))*10)
+
+    persys_frame_distributions=time_series_rep_lengths*2
+
+    system_labels = 3200*[1] + 3200*[2] 
+
+    import colorcet as cc
+    replicate_palette = cc.glasbey[:60]  # list of hex colors
+
+
+
+
+    visualize_reduction(Global_UMAP_opt,cbar_type='discrete',color_mappings=system_labels,savepath='1_in_50_system_labels',
+    title='1_in_50_system_labels')
+    visualize_reduction(Global_UMAP_opt,cbar_type='discrete',color_mappings=time_series_rep_lengths,savepath='1_in_50_time_series_rep_lengths',
+    title='1_in_50_time_series_rep_lengths')
+    visualize_reduction(Global_UMAP_opt,cbar_type='discrete',color_mappings=replicate_ids,
+    color_palette=replicate_palette,savepath='1_in_50_replicate_palette',
+    title='1_in_50_replicate_palette')
+
+
+    visualize_reduction(Local_UMAP_opt,cbar_type='discrete',color_mappings=system_labels,savepath='1_in_50_system_labels',
+    title='1_in_50_system_labels')
+    visualize_reduction(Local_UMAP_opt,cbar_type='discrete',color_mappings=time_series_rep_lengths,savepath='sa1_in_50_time_series_rep_lengths',
+    title='sa1_in_50_time_series_rep_lengths')
+    visualize_reduction(Local_UMAP_opt,cbar_type='discrete',
+    color_mappings=replicate_ids,savepath='1_in_50_replicate_palette',
+    title='1_in_50_replicate_palette',color_palette=replicate_palette)
+
+
+    #traj_GCU = "/Users/luis/Desktop/workspacetwo/PDBs/CCU_GCU_10frames.mdcrd"
+    #top_GCU  = "/Users/luis/Desktop/workspacetwo/PDBs/5JUP_N2_GCU_nowat.prmtop"
+
+    #traj_CGU = "/Users/luis/Desktop/workspacetwo/PDBs/CCU_CGU_10frames.mdcrd"
+    #top_CGU  = "/Users/luis/Desktop/workspacetwo/PDBs/5JUP_N2_CGU_nowat.prmtop"
+
+    ## processors created individually
+    #processor_GCU = TrajectoryProcessor(traj_GCU, top_GCU)
+    #processor_CGU = TrajectoryProcessor(traj_CGU, top_CGU)
+
+    ## systems representations created individually
+    #systems_GCU = processor_GCU.create_system_representations()
+    #systems_CGU = processor_CGU.create_system_representations()
+
+    #Analyzer = systems_analysis(systems_representations=[systems_GCU,systems_CGU])
+    #Analyzer.replicates_to_feature_matrix()
+
     
