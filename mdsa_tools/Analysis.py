@@ -695,7 +695,7 @@ class systems_analysis:
         return df
     
     
-    def perform_optimized_UMAP_local(self, feature_matrix=None,max_neighbors=None, min_neighbors=None, stepsize=None, min_dist_values=None,eval_neighbors=None):
+    def perform_optimized_UMAP_local(self, feature_matrix=None,max_neighbors=None, min_neighbors=None, stepsize=None, min_dist_values=None,eval_n=None):
         '''
         Grid-search UMAP over n_neighbors and min_dist, and for each embedding
         compute Pearson r between pdist(feature space) and pdist(embedding space).
@@ -735,14 +735,14 @@ class systems_analysis:
         min_neighbors  = min_neighbors  if min_neighbors  is not None else 10
         stepsize       = stepsize       if stepsize       is not None else 10
         min_dist_values = min_dist_values if min_dist_values is not None else (0.1, 0.4, 0.7, 1.0)
-        eval_neighbors = eval_neighbors if eval_neighbors is not None else 5
-
+        eval_n=eval_n if eval_n is not None else 15
 
         n_neighbors = np.arange(min_neighbors, max_neighbors, stepsize, dtype=int)
 
         nn_list = []
         md_list = []
-        trusthworthiness_scores = []
+        trustworthiness_scores = []
+
 
         for i in n_neighbors:
             for j in min_dist_values:  # nested sweep over min_dist for each n_neighbors
@@ -750,21 +750,26 @@ class systems_analysis:
                     feature_matrix=feature_matrix,
                     method='UMAP', n_neighbors=i, min_dist=j
                 )
+
+                from sklearn.manifold import trustworthiness
                 t = trustworthiness(
                     X=feature_matrix,
                     X_embedded=embedding_coordinates,
-                    n_neighbors=eval_neighbors
+                    n_neighbors=eval_n,
+                    metric="euclidean"
                 )
+                
                 nn_list.append(int(i))
                 md_list.append(float(j))
-                trusthworthiness_scores.append(t)
+                trustworthiness_scores.append(t)
 
-        trusthworthiness_scores=np.array(trusthworthiness_scores)
+
+        trustworthiness_scores=np.array(trustworthiness_scores)
         df = pd.DataFrame({
             "n_neighbors": nn_list,
             "min_dist": md_list,
-            "trusthworthiness_score": np.round(trusthworthiness_scores,2),
-            "bubble_size": np.interp(np.abs(trusthworthiness_scores), (np.abs(trusthworthiness_scores).min(), np.abs(trusthworthiness_scores).max()), (80, 400))
+            "trustworthiness score": np.round(trustworthiness_scores,2),
+            "bubble_size": np.interp(np.abs(trustworthiness_scores), (np.abs(trustworthiness_scores).min(), np.abs(trustworthiness_scores).max()), (40, 400))
         })
 
         return df

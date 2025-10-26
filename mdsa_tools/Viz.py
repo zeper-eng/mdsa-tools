@@ -518,10 +518,10 @@ def bubble_grid_manifoldlearning(UMAP_opt_dataframe,
             x=UMAP_opt_dataframe['n_neighbors'],
             y=UMAP_opt_dataframe['min_dist'],
             s=UMAP_opt_dataframe['bubble_size'],
-            c=UMAP_opt_dataframe['trusthworthiness_score'],
+            c=UMAP_opt_dataframe['trusthworthiness score'],
             cmap=cmap
         )
-        cbar_label='trusthworthiness_score'
+        cbar_label='trusthworthiness score'
 
         xlvls = np.sort(UMAP_opt_dataframe['n_neighbors'].unique())
         ylvls = np.sort(UMAP_opt_dataframe['min_dist'].unique())
@@ -531,7 +531,7 @@ def bubble_grid_manifoldlearning(UMAP_opt_dataframe,
 
         # your existing discrete colorbar helper
         add_discrete_colorbar(scatter,
-                            labels=UMAP_opt_dataframe['trusthworthiness_score'],
+                            labels=UMAP_opt_dataframe['trustworthiness score'],
                             ax=ax, cmap=cmap, cbar_label=cbar_label)
 
         ax.set_xlabel(xlabel)
@@ -541,8 +541,6 @@ def bubble_grid_manifoldlearning(UMAP_opt_dataframe,
         plt.savefig(savepath, dpi=dpi, bbox_inches='tight')
         plt.close()
         return
-
-    
 
 # Circos plots
 def get_Circos_coordinates(residue, gcircle, dpi=600):
