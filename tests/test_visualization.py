@@ -225,6 +225,6 @@ def test_get_Circos_coordinates_and_mdcircos_graph(tmp_path):
 #testing bubblewrap           #
 ###############################
 
-def test_get_Circos_coordinates_and_mdcircos_graph(tmp_path,analyzer):
-    fillerdf=analyzer.perform_optimized_UMAP()
+def test_bubbleplots_manifold_learning(tmp_path,analyzer):
+    fillerdf=analyzer.perform_optimized_UMAP_local(max_neighbors=5,min_neighbors=2,eval_n=2)
     vz.bubble_grid_manifoldlearning(fillerdf,tmp_path)

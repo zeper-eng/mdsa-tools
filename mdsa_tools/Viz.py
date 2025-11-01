@@ -153,6 +153,7 @@ def add_discrete_colorbar(scatter, labels, cbar_label=None, ax=None, cmap=None, 
     Sets the scatter's `norm` to a `BoundaryNorm` over integer bins matching
     the number of unique categories so colors align with discrete tick marks.
     """
+    cmap=cmap if cmap is not None else cm.plasma_r
     if ax is None:
         ax = plt.gca()
 
@@ -728,8 +729,8 @@ def mdcircos_graph(empty_circle, residue_dict, savepath=os.getcwd()+'mdcircos_gr
         if value == 0:
             continue
         res1, res2 = key.split('-')
-        arc1 = get_Circos_coordinates(res1, empty_circle, dpi=dpi)
-        arc2 = get_Circos_coordinates(res2, empty_circle, dpi=dpi)
+        arc1 = get_Circos_coordinates(res1, empty_circle)
+        arc2 = get_Circos_coordinates(res2, empty_circle)
         color = hex_color_map[key]
         lw = width_norm[key] * scale_factor
         empty_circle.chord_plot(arc1, arc2, linewidth=lw, facecolor=color, edgecolor=color)
@@ -817,9 +818,9 @@ def create_MDcircos_from_weightsdf(PCA_ranked_weights, outfilepath=None, dpi=600
     """
     outfilepath = outfilepath if outfilepath is not None else os.getcwd()
     
-    res_indexes, PC1_magnitude_dict, PC2_magnitude_dict = extract_properties_from_weightsdf(PCA_ranked_weights, dpi=dpi)
-    pc1_circos_object = make_MDCircos_object(res_indexes, dpi=dpi)
-    pc2_circos_object = make_MDCircos_object(res_indexes, dpi=dpi)
+    res_indexes, PC1_magnitude_dict, PC2_magnitude_dict = extract_properties_from_weightsdf(PCA_ranked_weights)
+    pc1_circos_object = make_MDCircos_object(res_indexes)
+    pc2_circos_object = make_MDCircos_object(res_indexes)
     mdcircos_graph(pc1_circos_object, PC1_magnitude_dict, outfilepath + 'PC1_magnitudeviz', dpi=dpi)
     mdcircos_graph(pc2_circos_object, PC2_magnitude_dict, outfilepath + 'PC2_magnitudeviz', dpi=dpi)
     return

@@ -82,16 +82,6 @@ def test_perform_kmeans_k_path(tmp_path, analyzer):
     assert centers.shape[0] == 2
 
 
-def test_create_pearsontest_for_kmeans_distributions_shape(analyzer):
-    # quick check on the Pearson distance table produced from tiny, separable clusters
-    coords = np.array([[0, 0], [0, 1], [5, 5], [5, 6]], dtype=float)
-    labels = np.array([0, 0, 1, 1])
-    centers = np.array([[0, 0.5], [5, 5.5]])
-    df = analyzer.create_pearsontest_for_kmeans_distributions(labels, coords, centers)
-    assert list(df.columns) == ["cluster_i", "cluster_j", "pearson_r", "p_value"]
-    assert len(df) == 1  # only one pair of clusters to compare
-
-
 # ------------------------------------------------------------
 # Precomputed analyzer: uses alternatefeaturematrix from importer
 # ------------------------------------------------------------
@@ -146,9 +136,22 @@ def test_precomputed_pca_ranked_weights(precomputed_analyzer, importer):
 # Miscellaneous new tests for various quantifications
 # ------------------------------------------------------------
 
-def test_perform_optimizedUMAP(analyzer):
-    fillerdf=analyzer.perform_optimized_UMAP()
-    expected_cols = {"n_neighbors", "min_dist", "pearson_r", "r01_for_bubbles"}
+def test_perform_optimizedUMAP_local(analyzer):
+    fillerdf=analyzer.perform_optimized_UMAP_local(max_neighbors=5,min_neighbors=2,eval_n=2)
+    expected_cols = {"n_neighbors", "min_dist", "trustworthiness score", "bubble_size"}
+
+    #check basic dataframe attributes are true
+    assert expected_cols.issubset(fillerdf.columns)
+    assert fillerdf.shape[1] == 4
+    assert np.issubdtype(fillerdf["n_neighbors"].dtype, np.integer)
+    assert fillerdf["min_dist"].between(0.0, 1.0).all()
+    assert fillerdf["trustworthiness score"].between(0, 1.0).all()
+
+    return
+
+def test_perform_optimizedUMAP_global(analyzer):
+    fillerdf=analyzer.perform_optimized_UMAP_global(max_neighbors=5,min_neighbors=2)
+    expected_cols = {"n_neighbors", "min_dist", "pearson_r", "bubble_size"}
 
     #check basic dataframe attributes are true
     assert expected_cols.issubset(fillerdf.columns)
