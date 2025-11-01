@@ -1,4 +1,4 @@
-# __mdsa-tools__ [![Docs](https://img.shields.io/github/actions/workflow/status/zeper-eng/mdsa-tools/docs.yml?branch=main&label=Docs%20Build&logo=github&logoColor=1E3A8A&labelColor=555555&color=f06292&style=flat)](https://mdsa-tools.readthedocs.io/en/latest/)[![CI](https://github.com/zeper-eng/mdsa-tools/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/zeper-eng/mdsa-tools/actions/workflows/ci.yml)[![DOI](https://zenodo.org/badge/994344998.svg)](https://doi.org/10.5281/zenodo.17195649)
+# __mdsa-tools__ [![Docs](https://img.shields.io/github/actions/workflow/status/zeper-eng/mdsa-tools/docs.yml?branch=main&label=Docs%20Build&logo=github&logoColor=1E3A8A&labelColor=555555&color=f06292&style=flat)](https://mdsa-tools.readthedocs.io/en/latest/)[![CI](https://github.com/zeper-eng/mdsa-tools/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/zeper-eng/mdsa-tools/actions/workflows/ci.yml)
 
 Tools for systems-level analysis of Molecular Dynamics (MD) simulations
 
