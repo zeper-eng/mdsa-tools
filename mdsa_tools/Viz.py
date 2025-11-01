@@ -957,7 +957,7 @@ def visualize_reduction(embedding_coordinates,
     elif isinstance(cmap, (list, tuple, np.ndarray)):
         cmap = _as_colormap(cmap, is_categorical)
     #no colormap?
-    elif isinstance(cmap, (list, tuple, np.ndarray)):
+    elif cmap is None:
         cmap = cm.magma_r
 
 

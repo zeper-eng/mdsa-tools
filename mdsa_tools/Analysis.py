@@ -1027,7 +1027,7 @@ if __name__ == '__main__':
 
     time_series_rep_lengths = (list(np.arange(0,80))*20 + list(np.arange(0,160))*10)
 
-    persys_frame_distributions=time_series_rep_lengths*2
+    time_series_rep_lengths=time_series_rep_lengths*2
 
     system_labels = 3200*[1] + 3200*[2] 
 
@@ -1035,23 +1035,27 @@ if __name__ == '__main__':
     replicate_palette = cc.glasbey[:60]  # list of hex colors
 
 
+    import matplotlib.cm as cm
 
-
-    visualize_reduction(Global_UMAP_opt,cbar_type='discrete',color_mappings=system_labels,savepath='1_in_50_system_labels',
-    title='1_in_50_system_labels')
-    visualize_reduction(Global_UMAP_opt,cbar_type='discrete',color_mappings=time_series_rep_lengths,savepath='1_in_50_time_series_rep_lengths',
+    visualize_reduction(Global_UMAP_opt,cbar_type='discrete',color_mappings=system_labels,savepath='1_in_50_global_system_labels',
+    title='1_in_50_system_labels',cmap=cm.plasma_r)
+    
+    visualize_reduction(Global_UMAP_opt,cbar_type='discrete',color_mappings=time_series_rep_lengths,savepath='1_in_50_global_time_series_rep_lengths',
     title='1_in_50_time_series_rep_lengths')
+    
     visualize_reduction(Global_UMAP_opt,cbar_type='discrete',color_mappings=replicate_ids,
-    color_palette=replicate_palette,savepath='1_in_50_replicate_palette',
+    color_palette=replicate_palette,savepath='1_in_50_global_replicate_palette',
     title='1_in_50_replicate_palette')
 
 
-    visualize_reduction(Local_UMAP_opt,cbar_type='discrete',color_mappings=system_labels,savepath='1_in_50_system_labels',
-    title='1_in_50_system_labels')
-    visualize_reduction(Local_UMAP_opt,cbar_type='discrete',color_mappings=time_series_rep_lengths,savepath='sa1_in_50_time_series_rep_lengths',
+    visualize_reduction(Local_UMAP_opt,cbar_type='discrete',color_mappings=system_labels,savepath='1_in_50_local_system_labels',
+    title='1_in_50_system_labels',cmap=cm.plasma_r)
+
+    visualize_reduction(Local_UMAP_opt,cbar_type='discrete',color_mappings=time_series_rep_lengths,savepath='1_in_50_local_time_series_rep_lengths',
     title='sa1_in_50_time_series_rep_lengths')
+
     visualize_reduction(Local_UMAP_opt,cbar_type='discrete',
-    color_mappings=replicate_ids,savepath='1_in_50_replicate_palette',
+    color_mappings=replicate_ids,savepath='1_in_50_local_replicate_palette',
     title='1_in_50_replicate_palette',color_palette=replicate_palette)
 
 
