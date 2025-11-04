@@ -24,7 +24,6 @@ from sklearn.decomposition import PCA
 import pandas as pd
 import umap
 import os
-from sklearn.manifold import trustworthiness
 
 class systems_analysis:
     '''
