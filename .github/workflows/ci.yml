@@ -18,6 +18,6 @@ jobs:
       - name: Install package + test deps
         run: pip install -e .[test]
       - name: Run tests
-        run: pytest -v --cov=mdsa_tools --cov-report=term-missing --cov-fail-under=60
+        run: pytest -v --cov=mdsa_tools --cov-report=term-missing --cov-fail-under=75
 
   
