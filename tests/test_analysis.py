@@ -2,6 +2,10 @@
 import numpy as np
 import os
 
+# ------------------------------------------------------------
+# Precomputed analyzer: Using our ribosome example
+# ------------------------------------------------------------
+
 def test_feature_matrix_shape(analyzer):
     # sanity: feature matrix exists and has expected number of rows (samples/frames)
     fm = analyzer.feature_matrix
@@ -81,6 +85,81 @@ def test_perform_kmeans_k_path(tmp_path, analyzer):
     assert labels.shape[0] == Fm.shape[0]
     assert centers.shape[0] == 2
 
+# ------------------------------------------------------------
+# Precomputed analyzer: Using our third MDAnalysis system
+# ------------------------------------------------------------
+
+def test_external_feature_matrix_shape(external_analyzer):
+    # sanity: feature matrix exists and has expected number of rows (samples/frames)
+    fm = external_analyzer.feature_matrix
+    assert fm.shape[0] == 10
+
+def test_external_proper_PCA_reduction_output(external_analyzer):
+    # PCA returns coords (same n_samples), component loadings, and explained variance ratio
+    X_pca, weights, var_ratio = external_analyzer.reduce_systems_representations(method="PCA")
+    assert X_pca.shape[0] == external_analyzer.feature_matrix.shape[0]   # same number of rows as input
+    assert isinstance(var_ratio, np.ndarray) and var_ratio.shape[0] == 2  # 2D reduction
+    assert weights.shape[1] == external_analyzer.feature_matrix.shape[1]  # loadings span all features
+
+def test_external_proper_UMAP_reduction_output(external_analyzer):
+    # UMAP returns a 2D embedding with one row per sample
+    umap_coordinates = external_analyzer.reduce_systems_representations(method="UMAP", n_neighbors=5)
+    assert umap_coordinates.shape[0] == external_analyzer.feature_matrix.shape[0]
+    assert umap_coordinates.shape[1] == 2
+
+def test_external_system_clustering(external_analyzer):
+    # k-means wrapper (with silhouette+elbow) returns label vectors and centers for each method
+    optimal_k_silhouette_labels, optimal_k_elbow_labels, centers_silhouette, centers_elbow = external_analyzer.perform_kmeans(max_clusters=5)
+
+    # labels must align with samples
+    assert optimal_k_silhouette_labels.shape[0] == external_analyzer.feature_matrix.shape[0], "silhouette clustering labels dont match n_samples"
+    assert optimal_k_elbow_labels.shape[0] == external_analyzer.feature_matrix.shape[0], "elbow clustering labels dont match n_samples"
+
+    # centers must have same feature dimension as input
+    assert centers_silhouette.shape[1] == external_analyzer.feature_matrix.shape[1], "silhouette cluster centers wrong dimension"
+    assert centers_elbow.shape[1] == external_analyzer.feature_matrix.shape[1], "elbow cluster centers wrong dimension"
+
+    # both strategies should pick ≥2 clusters for this dataset
+    assert centers_silhouette.shape[0] >= 2, "silhouette clustering found too few clusters"
+    assert centers_elbow.shape[0] >= 2, "elbow clustering found too few clusters"
+    
+def test_external_pca_ranked_weights(external_analyzer):
+    # ensures ranked-weights table is well-formed and magnitudes are non-negative
+    external_analyzer.reduce_systems_representations(method='UMAP')  # run one reduction to populate state (if needed)
+    ranked_weights = external_analyzer.create_PCA_ranked_weights()
+    assert ranked_weights.shape[0] == external_analyzer.feature_matrix.shape[1], "incorrect number of comparisons in ranked_weights creation"
+
+    # required columns present
+    for col in ["Comparisons","PC1_Weights","PC2_Weights","PC1_magnitude","PC2_magnitude"]:
+        assert col in ranked_weights.columns
+    
+    features = external_analyzer.feature_matrix.shape[1]
+    # magnitudes are absolute values
+    assert (ranked_weights["PC1_magnitude"].values >= 0).all()
+    assert (ranked_weights["PC2_magnitude"].values >= 0).all()
+    # one weight per feature for each PC
+    assert ranked_weights["PC1_Weights"].shape[0] == features
+    assert ranked_weights["PC2_Weights"].shape[0] == features
+
+    # comparisons formatted like "i-j" (used later by MDCircos)
+    assert ranked_weights["Comparisons"].str.contains(r"^\d+-\d+$").all()
+
+    return
+
+
+def test_external_perform_clust_opt_fixed_k_returns_shapes(tmp_path, external_analyzer):
+    # fixed-k clustering path returns labels (n_samples) and centers (k × n_features)
+    Feature_Matrix = external_analyzer.replicates_to_feature_matrix()
+    labels, centers = external_analyzer.perform_clust_opt(outfile_path=str(tmp_path) + os.sep, data=Feature_Matrix, k=2)
+    assert labels.shape[0] == Feature_Matrix.shape[0]
+    assert centers.shape == (2, Feature_Matrix.shape[1])
+
+def test_external_perform_kmeans_k_path(tmp_path, external_analyzer):
+    # explicit-k kmeans on precomputed feature matrix
+    Fm = external_analyzer.feature_matrix
+    labels, centers = external_analyzer.perform_kmeans(outfile_path=str(tmp_path) + os.sep, data=Fm, k=2)
+    assert labels.shape[0] == Fm.shape[0]
+    assert centers.shape[0] == 2
 
 # ------------------------------------------------------------
 # Precomputed analyzer: uses alternatefeaturematrix from importer

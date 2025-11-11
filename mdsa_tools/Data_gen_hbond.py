@@ -65,20 +65,35 @@ class TrajectoryProcessor():
     """
 
 
-    def __init__(self, trajectory_path,topology_path):
-        
+    def __init__(self, trajectory_path=None,topology_path=None,one_indexed=None,preloaded_trajectory=None):
+        self.one_indexed=one_indexed if one_indexed is not None else True
+
         #load in parameters
-        if topology_path is not None:
-            self.trajectory=md.load(trajectory_path,top=topology_path)
-        elif topology_path is None:
-            self.trajectory=md.load(trajectory_path)
+        if preloaded_trajectory is not None:
+            # Highest priority: if you gave me a trajectory object, just use it
+            self.trajectory = preloaded_trajectory
+            self.topology = self.trajectory.topology
+
+        elif trajectory_path is not None and topology_path is not None:
+            # Both files given
+            self.trajectory = md.load(trajectory_path, top=topology_path)
+            self.topology = self.trajectory.topology
+
+        elif trajectory_path is not None and topology_path is None:
+            # Only trajectory file, topology is inside it (e.g. PDB)
+            self.trajectory = md.load(trajectory_path)
+            self.topology = self.trajectory.topology
+
+        else:
+            raise ValueError(
+                "You must provide either preloaded_trajectory or trajectory_path (with optional topology_path)."
+            )
         
         # setup empty system representation
         # could be done later but I find the explicit definition is more readable
-        self.system_representation=None 
+        self.system_representation= None
         self.filtered_representation=None
         self.feature_matrix=None
-        self.topology = self.trajectory.topology
 
     def create_filtered_representations(self,residues_to_keep,systems_representation=None):
         '''Filters arrray representations to contain only residues of interest
@@ -106,6 +121,7 @@ class TrajectoryProcessor():
 
         
         '''
+
         if systems_representation is not None:
             systems_representation=systems_representation
         if self.system_representation is not None:
@@ -185,16 +201,16 @@ class TrajectoryProcessor():
         trajectory = trajectory if trajectory is not None else self.trajectory
 
         if granularity == 'residue':
-            atom_to_residue,template_array = self.create_attributes(trajectory)
-            trajectory_array = self.Process_trajectory(trajectory=self.trajectory,array_template=template_array,atom_to_residue=atom_to_residue)
+            atom_to_residue,template_array = self.create_attributes(trajectory,one_indexed=self.one_indexed)
+            trajectory_array = self.Process_trajectory(trajectory=self.trajectory,array_template=template_array,atom_to_residue=atom_to_residue,one_indexed=self.one_indexed)
             self.system_representation=trajectory_array
         if granularity == 'atom':
-            template_array = self.create_attributes(trajectory,granularity='atom')
+            template_array = self.create_attributes(trajectory,granularity='atom',one_indexed=self.one_indexed)
             trajectory_array = self.Process_trajectory(trajectory=self.trajectory,array_template=template_array,granularity='atom')
        
         return trajectory_array 
 
-    def create_attributes(self, trajectory,granularity=None) -> Tuple[np.ndarray, Dict]:
+    def create_attributes(self, trajectory,granularity=None,one_indexed=None) -> Tuple[np.ndarray, Dict]:
         '''returns atom to residue dictionary and template array for processing
 
         Parameters
@@ -230,6 +246,7 @@ class TrajectoryProcessor():
         '''
 
         granularity = granularity if granularity is not None else 'residue'
+        one_indexed=one_indexed if one_indexed is not None else self.one_indexed
 
         #Make atom to residue dictionary 
 
@@ -238,11 +255,15 @@ class TrajectoryProcessor():
         trajectory = trajectory if trajectory is not None else self.trajectory
 
         if granularity == 'residue':
-            indexes=[residue.resSeq+1 for residue in trajectory.topology.residues]
-            empty_array = np.zeros(shape=(len(indexes)+1,len(indexes)+1)) 
+            if one_indexed is True:
+                indexes=[residue.resSeq+1 for residue in trajectory.topology.residues]
 
+            if one_indexed is not True:
+                indexes=[residue.resSeq for residue in trajectory.topology.residues]
+
+            empty_array = np.zeros(shape=(len(indexes)+1,len(indexes)+1)) 
             empty_array[0,1:]=indexes
-            empty_array[1:,0]=indexes
+            empty_array[1:,0]=indexes         
 
             template_array=np.repeat(empty_array[np.newaxis,:, :], len(trajectory), axis=0)
             atom_to_residue = {atom.index:atom.residue.resSeq for atom in trajectory.topology.atoms}
@@ -250,7 +271,12 @@ class TrajectoryProcessor():
             return atom_to_residue,template_array
         
         elif granularity == 'atom':
-            indexes=[atom.index+1 for atom in trajectory.topology.atoms]
+            if one_indexed is True:
+                indexes=[atom.index+1 for atom in trajectory.topology.atoms]
+
+            if one_indexed is not True:
+                indexes=[atom.index for atom in trajectory.topology.atoms]
+                
             empty_array = np.zeros(shape=(len(indexes)+1,len(indexes)+1)) 
 
             empty_array[0,1:]=indexes
@@ -259,7 +285,7 @@ class TrajectoryProcessor():
             template_array=np.repeat(empty_array[np.newaxis,:, :], len(trajectory), axis=0)
             return template_array
 
-    def Process_trajectory(self,trajectory,array_template,atom_to_residue=None,granularity=None)->np.ndarray:
+    def Process_trajectory(self,trajectory,array_template,atom_to_residue=None,granularity=None,one_indexed=None)->np.ndarray:
             """Processes an individual frame of template array and fills in hydrogen bonding values.
             
             Parameters
@@ -303,6 +329,7 @@ class TrajectoryProcessor():
             """
             granularity = granularity if granularity is not None else 'residue'
             atom_to_residue = atom_to_residue if atom_to_residue is not None else None
+            one_indexed = one_indexed if one_indexed is not None else self.one_indexed
 
             for frame in range(0,len(trajectory)):
                 #splice our current frame and use axis for indexing
@@ -319,7 +346,11 @@ class TrajectoryProcessor():
 
                     #match atoms to residues and increment in array
                     for i in range(donor_residues.shape[0]):
-                        current_donor,current_acceptor=donor_residues[i]+1,acceptor_residues[i]+1
+                        if one_indexed is False:
+                            current_donor,current_acceptor=donor_residues[i],acceptor_residues[i]
+                        if one_indexed is not False:
+                            current_donor,current_acceptor=donor_residues[i]+1,acceptor_residues[i]+1
+
                         if current_donor != current_acceptor:
                             current_frame[current_donor, current_acceptor] += 1
                             current_frame[current_acceptor, current_donor] += 1

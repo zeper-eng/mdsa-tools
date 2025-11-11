@@ -62,20 +62,26 @@ Seyler, Sean; Beckstein, Oliver (2017): Molecular dynamics trajectory for benchm
 
 from MDAnalysisData import datasets
 adk = datasets.fetch_adk_equilibrium()  
-traj_path = adk.trajectory               # .dcd example
-top_path  = adk.topology 
+adk_traj_path = adk.trajectory            
+adk_top_path  = adk.topology 
 
 
 @pytest.fixture(scope="session")
 def external_systems():
-    tp = TrajectoryProcessor(traj_path, top_path)
-    return tp.create_system_representations()
+    import mdtraj as md
+    full_traj = md.load(adk_traj_path, top=adk_top_path)
+    small_traj = full_traj[:10]  # make an independent copy
+    del full_traj
+
+    tp = TrajectoryProcessor(preloaded_trajectory=small_traj,one_indexed=False)
+    external_systems=tp.create_system_representations()
+    return external_systems
 
 @pytest.fixture(scope="session")
 def external_analyzer(external_systems):
-    sa = systems_analysis([external_systems])  # wrap in list so API is consistent
-    sa.replicates_to_feature_matrix()
-    return sa
+    external_analyzer = systems_analysis([external_systems])  
+    external_analyzer.replicates_to_feature_matrix()
+    return external_analyzer
 
 # ----------------------------------------------------------------
 # Embeddings, Colors, Labels
