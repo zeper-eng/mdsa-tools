@@ -1004,8 +1004,10 @@ if __name__ == '__main__':
     Systems_Analyzer = systems_analysis(systems_representations=all_systems)
     Systems_Analyzer.replicates_to_feature_matrix()
 
+
     Global_UMAP_opt=Systems_Analyzer.reduce_systems_representations(method='UMAP',min_dist=.1,n_neighbors=15)
     Local_UMAP_opt=Systems_Analyzer.reduce_systems_representations(method='UMAP',min_dist=1.0,n_neighbors=915)
+
 
     from mdsa_tools.Viz import visualize_reduction
 
