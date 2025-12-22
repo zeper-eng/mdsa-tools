@@ -42,7 +42,7 @@ class systems_analysis:
         ``(n_frames, n_residues, n_residues)``. The only permitted difference
         across arrays is ``n_frames``; all systems should share the same residue
         dimension. Index metadata are expected in row/column 0.
-    replicate_distribution : array-like of int or None, optional
+    replicate_distribution : array-like of int
         Optional labels or indices describing how frames are distributed
         across replicates/systems. If ``None``, defaults to
         ``np.arange(0, systems_representations[0].shape[0])``.
@@ -56,7 +56,7 @@ class systems_analysis:
     indexes : np.ndarray
         Derived from ``systems_representations[0][0, 0, 1:]``. These are used to
         label residue–residue comparisons when generating feature names.
-    feature_matrix : np.ndarray or None
+    feature_matrix : np.ndarray
         Cached 2D feature matrix produced by ``replicates_to_feature_matrix``.
     replicate_distribution : np.ndarray
         Distribution vector set from the provided argument or default.
@@ -80,9 +80,9 @@ class systems_analysis:
         ----------
         systems_representations : list of np.ndarray
             List of system arrays, each shaped ``(n_frames, n_residues, n_residues)``.
-        replicate_distribution : array-like of int or None, optional
+        replicate_distribution : array-like of int
             Optional frame-level indexing/labels for downstream bookkeeping.
-        Precomputed_feature_matrix : array-like of int or None, optional
+        Precomputed_feature_matrix : array-like of int
             Optional frame-level indexing/labels for downstream bookkeeping.
 
         Returns
@@ -125,7 +125,7 @@ class systems_analysis:
 
         Parameters
         ----------
-        arrays : list of np.ndarray or None
+        arrays : list of np.ndarray
             ``[array_1, ..., array_m]`` where each array has shape
             ``(n_frames, n_residues, n_residues)``. If ``None``, uses
             ``self.systems_representations``.
@@ -134,7 +134,7 @@ class systems_analysis:
         Returns
         -------
         np.ndarray
-            Shape ``(sum(n_frames), n_features)``, where ``n_features`` equals the
+            Shape=``(sum(n_frames), n_features)``, where ``n_features`` equals the
             number of unique residue–residue pairs from the *upper triangle*
             (excluding the diagonal) of the per-frame matrix. Each row corresponds
             to a single frame across all systems.
@@ -187,7 +187,7 @@ class systems_analysis:
         residues : list of int
             Residue indices to retain (e.g., a surface or motif). All pairwise
             combinations among these residues are used.
-        systems_array : np.ndarray or None, shape ``(n_frames, n_res, n_res)``
+        systems_array : np.ndarray, shape=``(n_frames, n_res, n_res)``
             Averaged array or a single 3D trajectory array. If ``None``, all
             systems in ``self.systems_representations`` are concatenated.
         mode : {'sum','average'}, default='sum'
@@ -196,7 +196,7 @@ class systems_analysis:
         Returns
         -------
         np.ndarray
-            Shape ``(n_frames,)`` containing the aggregated value per frame.
+            Shape=``(n_frames,)`` containing the aggregated value per frame.
 
         Notes
         -----
@@ -247,39 +247,39 @@ class systems_analysis:
 
         Parameters
         ----------
-        outfile_path : str or pathlib.Path or None, optional
+        outfile_path : str or pathlib.Path
             Directory where per-K label arrays are saved (via ``np.save``) when
             sweeping K (i.e., when ``k is None``). One file is written per value of K.
             If ``None``, nothing is written to disk. Default is ``None``.
-        max_clusters : int or None, optional
+        max_clusters : int
             Upper bound on the number of clusters to consider when sweeping K.
             Effective only when ``k is None``. The exact K range is determined by
             :meth:`perform_clust_opt` (typically ``2..max_clusters`` inclusive).
             Default is ``10``.
-        data : array-like of shape (n_samples, n_features) or None, optional
+        data : array-like of shape=(n_samples, n_features)
             Feature matrix to cluster. If ``None``, uses ``self.feature_matrix``.
-        k : int or None, optional
+        k : int
             If provided, fit a single KMeans model with exactly ``k`` clusters and
             return its labels and centers. If ``None``, perform a sweep over K and
             return the best solutions under the silhouette and elbow criteria.
 
         Returns
         -------
-        cluster_labels : ndarray of shape (n_samples,), dtype=int
+        cluster_labels : ndarray of shape=(n_samples,), dtype=int
             (Only when ``k`` is not ``None``) Cluster assignment for each sample,
             with labels in ``[0, k-1]``.
-        cluster_centers : ndarray of shape (k, n_features)
+        cluster_centers : ndarray of shape=(k, n_features)
             (Only when ``k`` is not ``None``) Centroids of the fitted model.
-        optimal_k_silhouette_labels : ndarray of shape (n_samples,), dtype=int
+        optimal_k_silhouette_labels : ndarray of shape=(n_samples,), dtype=int
             (Only when ``k`` is ``None``) Labels for the K chosen by the silhouette
             criterion.
-        optimal_k_elbow_labels : ndarray of shape (n_samples,), dtype=int
+        optimal_k_elbow_labels : ndarray of shape=(n_samples,), dtype=int
             (Only when ``k`` is ``None``) Labels for the K chosen by the elbow
             (inertia) criterion.
-        centers_sillohuette : ndarray of shape (k_silhouette, n_features)
+        centers_sillohuette : ndarray of shape=(k_silhouette, n_features)
             (Only when ``k`` is ``None``) Centers corresponding to
             ``optimal_k_silhouette_labels``.
-        centers_elbow : ndarray of shape (k_elbow, n_features)
+        centers_elbow : ndarray of shape=(k_elbow, n_features)
             (Only when ``k`` is ``None``) Centers corresponding to
             ``optimal_k_elbow_labels``.
 
@@ -332,17 +332,17 @@ class systems_analysis:
 
         Parameters
         ----------
-        feature_matrix : array-like of shape (n_samples, n_features), optional
+        feature_matrix : array-like of shape=(n_samples, n_features)
             Matrix to reduce. If omitted, uses ``self.feature_matrix``; if that is
             not set, calls ``replicates_to_feature_matrix()`` to build it.
         method : {'PCA', 'UMAP'}, default 'PCA'
             Dimensionality-reduction algorithm.
         n_components : int, default 2
             Target embedding dimensionality.
-        min_dist : float, optional
+        min_dist : float
             UMAP ``min_dist`` hyperparameter controlling how tightly points cluster
             (smaller ⇒ tighter clusters). Ignored for PCA. Default ``0.5``.
-        n_neighbors : int, optional
+        n_neighbors : int
             UMAP neighborhood size controlling local vs global structure. Ignored
             for PCA. Default ``900``.
 
@@ -350,14 +350,14 @@ class systems_analysis:
         -------
         If method == 'PCA':
             (X_pca, weights, explained_variance_ratio_) : tuple
-                X_pca : ndarray of shape (n_samples, n_components)
+                X_pca : ndarray of shape=(n_samples, n_components)
                     PCA scores.
-                weights : ndarray of shape (n_components, n_features)
+                weights : ndarray of shape=(n_components, n_features)
                     Component loadings.
-                explained_variance_ratio_ : ndarray of shape (n_components,)
+                explained_variance_ratio_ : ndarray of shape=(n_components,)
                     Fraction of variance explained by each principal component.
         If method == 'UMAP':
-            embedding : ndarray of shape (n_samples, n_components)
+            embedding : ndarray of shape=(n_samples, n_components)
                 Low-dimensional embedding.
 
         Notes
@@ -535,9 +535,9 @@ class systems_analysis:
 
         Parameters
         ----------
-        feature_space_coordinates : np.ndarray or None, shape (n_samples, p)
+        feature_space_coordinates : np.ndarray, shape=(n_samples, p)
             High-D per-sample feature rows. If None, we build self.feature_matrix.
-        embedding_space_coordinates : np.ndarray or None, shape (n_samples, q)
+        embedding_space_coordinates : np.ndarray, shape=(n_samples, q)
             Low-D per-sample embedding rows. If None, we build a PCA embedding.
 
         Returns
@@ -567,7 +567,7 @@ class systems_analysis:
         
     
         # row-wise squared norms (‖row‖²) 
-        feature_space_coordinates_rownorms = np.sum(feature_space_coordinates * feature_space_coordinates, axis=1)  # shape (n,)
+        feature_space_coordinates_rownorms = np.sum(feature_space_coordinates * feature_space_coordinates, axis=1)  # shape=(n,)
         embedding_space_coordinates_rownorms = np.sum(embedding_space_coordinates * embedding_space_coordinates, axis=1)
 
 
@@ -628,15 +628,15 @@ class systems_analysis:
 
         Parameters
         ----------
-        feature_matrix : np.ndarray or None, shape (n_samples, n_features)
+        feature_matrix : np.ndarray, shape=(n_samples, n_features)
             If None, use self.feature_matrix (and build it if needed).
-        max_neighbors : int or None
+        max_neighbors : int
             Exclusive upper bound for the neighbors sweep. Default 100.
-        min_neighbors : int or None
+        min_neighbors : int
             Inclusive lower bound for the neighbors sweep. Default 10.
-        stepsize : int or None
+        stepsize : int
             Step between neighbor counts. Default 10 (i.e., 10, 20, 30, ...).
-        min_dist_values : iterable of float or None
+        min_dist_values : iterable of float
             Set of UMAP min_dist values to try. Default (0.1, 0.4, 0.7, 1.0).
 
         Returns
@@ -699,15 +699,15 @@ class systems_analysis:
 
         Parameters
         ----------
-        feature_matrix : np.ndarray or None, shape (n_samples, n_features)
+        feature_matrix : np.ndarray, shape=(n_samples, n_features)
             If None, use self.feature_matrix (and build it if needed).
-        max_neighbors : int or None
+        max_neighbors : int
             Exclusive upper bound for the neighbors sweep. Default 100.
-        min_neighbors : int or None
+        min_neighbors : int
             Inclusive lower bound for the neighbors sweep. Default 10.
-        stepsize : int or None
+        stepsize : int
             Step between neighbor counts. Default 10 (i.e., 10, 20, 30, ...).
-        min_dist_values : iterable of float or None
+        min_dist_values : iterable of float
             Set of UMAP min_dist values to try. Default (0.1, 0.4, 0.7, 1.0).
 
         Returns
@@ -775,13 +775,13 @@ class systems_analysis:
 
         Parameters
         ----------
-        outfile_path : str or pathlib.Path, optional
+        outfile_path : str or pathlib.Path
             Directory where outputs may be written. If ``None``, uses the current working directory.
-        weights : np.ndarray, shape = (n_components, n_features), optional
+        weights : np.ndarray, shape== (n_components, n_features)
             PCA component loadings (rows = components, columns = features). If ``None``, this
             function calls ``reduce_systems_representations()`` to compute PCA (default n=2)
             and uses the returned ``weights``.
-        indexes : array-like of int, optional
+        indexes : array-like of int
             Residue indices used to label pairwise comparisons. If ``None``, uses ``self.indexes``.
             These indices define the order used to generate upper-triangle residue–residue
             comparison labels (e.g., "12-47").
@@ -836,6 +836,89 @@ class systems_analysis:
         
         return dataframe
 
+    def compute_cluster_assignment_schemas(self,centers=None,labels=None,feature_matrix=None,indexes=None):
+        '''
+        Parameters
+        ----------
+        centers : np.ndarray, shape== (n_clusters, n_features)
+            Cluster centers (e.g., from KMeans). If ``None`` (or if ``labels`` is
+            ``None``), centers and labels are obtained from ``perform_clust_opt()``.
+        
+        labels : array-like of int, shape=(n_samples,)
+            Cluster assignment for each sample/frame. 
+        
+        feature_matrix : np.ndarray, shape=(n_samples, n_features)
+            Per-sample feature matrix. If ``None``, uses ``self.feature_matrix``.
+            Features are assumed to correspond to the upper-triangle residue–residue
+            pairs (excluding diagonal), as produced by ``replicates_to_feature_matrix``.
+        
+        indexes : array-like of int
+            Residue indices used to label features. If ``None``, uses ``self.indexes``.
+            Labels are generated as strings ``"i-j"`` in the same order as the
+            upper-triangle feature construction.
+
+        Returns
+        -------
+        pandas.DataFrame
+            Tidy table with one row per (centroid, pair) containing:
+
+            * ``pair``     — residue–residue label ``"i-j"`` (str)
+            * ``count``    — number of samples in that centroid for which this pair
+            was the maximum-contributing feature (int)
+            * ``centroid`` — centroid/cluster id (int)
+
+            The table can be sorted/grouped to retrieve the top pairs per centroid.
+
+        Notes
+        -----
+        * Per-feature contributions are computed as ``(x_j - c_j)**2`` for each
+        feature ``j`` and assigned sample ``x`` relative to its centroid ``c``.
+        * The “dominant pair” for a sample is the feature index with the maximum
+        squared deviation (ties take the first occurrence although for our implementation use case
+        there was not much of an issue).
+  \
+        Examples
+        --------
+        >>> labels, centers = sa.perform_kmeans(k=2)
+        >>> df = sa.compute_cluster_assignment_schemas(centers, labels)
+        >>> df.sort_values(["centroid","count"], ascending=[True, False]) \
+        ...   .groupby("centroid").head(20)  
+        '''
+        feature_matrix = feature_matrix if feature_matrix is not None else self.feature_matrix
+        indexes = indexes if indexes is not None else self.indexes
+        
+        if centers is None or labels is None:
+            labels, _, centers, _=self.perform_clust_opt()
+        
+        #Make some indexes first 
+        triu_idx = np.triu_indices(len(indexes), k=1)
+        comparisons = [f"{str(int(indexes[i]))}-{str(int(indexes[j]))}" for i, j in zip(*triu_idx)]
+        new_matrix = np.column_stack([labels, feature_matrix])
+
+      
+        pandas_dataframes=[]
+        for i in np.unique(labels):
+            assigned_current=new_matrix[new_matrix[:,0]==i]
+            #get rid of the unnecessary first column for analysis
+            assigned_current = assigned_current[:,1:]
+            squared_distances_currentassigned=(assigned_current-centers[i])**2 
+
+            current_centroid_top_pairs = []
+            for j in squared_distances_currentassigned:
+                highest_val=np.max(j)
+                index_of_highest_val=np.where(j==highest_val)[0][0]
+                current_centroid_top_pairs.append(comparisons[index_of_highest_val])
+
+            s = pd.Series(current_centroid_top_pairs, name="pair")
+            counts = s.value_counts()
+            df = counts.reset_index()
+            df.columns = [f"pair", f"count"]
+            df["centroid"] = int(i)
+            pandas_dataframes.append(df)
+        
+        final_df=pd.concat(pandas_dataframes)
+
+        return final_df
 
     #Algorithm wrappers 
     def perform_clust_opt(self, outfile_path, max_clusters=None, data=None, k=None):
@@ -843,34 +926,34 @@ class systems_analysis:
 
         Parameters
         ----------
-        outfile_path : str or pathlib.Path or None
+        outfile_path : str or pathlib.Path
             If provided, per-K label arrays are saved via ``np.save`` as
             ``"<outfile_path>kluster_labels_{K}clust.npy"`` and selection plots
             are delegated to ``mdsa_tools.Viz``. If ``None``, nothing is written
             and elbow selection falls back to a simple heuristic.
-        max_clusters : int, optional
+        max_clusters : int
             Upper bound (inclusive) for the K sweep (default ``10``). The sweep
             runs from ``K=2`` through ``K=max_clusters``.
-        data : np.ndarray or None, shape (n_samples, n_features), optional
+        data : np.ndarray, shape=(n_samples, n_features)
             Feature matrix to cluster. If ``None``, uses ``self.feature_matrix``.
-        k : int or None, optional
+        k : int
             If set, skip the sweep and fit one KMeans at exactly ``k`` clusters.
 
         Returns
         -------
         If ``k`` is None:
-            optimal_k_silhouette_labels : np.ndarray of int, shape (n_samples,)
+            optimal_k_silhouette_labels : np.ndarray of int, shape=(n_samples,)
                 Labels for the silhouette-selected K.
-            optimal_k_elbow_labels : np.ndarray of int, shape (n_samples,)
+            optimal_k_elbow_labels : np.ndarray of int, shape=(n_samples,)
                 Labels for the elbow-selected K.
-            centers_sillohuette : np.ndarray, shape (K_sil, n_features)
+            centers_sillohuette : np.ndarray, shape=(K_sil, n_features)
                 Cluster centers for the silhouette-selected K. (Legacy spelling kept.)
-            centers_elbow : np.ndarray, shape (K_elb, n_features)
+            centers_elbow : np.ndarray, shape=(K_elb, n_features)
                 Cluster centers for the elbow-selected K.
         If ``k`` is not None:
-            cluster_labels : np.ndarray of int, shape (n_samples,)
+            cluster_labels : np.ndarray of int, shape=(n_samples,)
                 Labels from the single KMeans run.
-            cluster_centers : np.ndarray, shape (k, n_features)
+            cluster_centers : np.ndarray, shape=(k, n_features)
                 Cluster centers from the single KMeans run.
 
         Notes
@@ -953,18 +1036,18 @@ class systems_analysis:
         Parameters
         ----------
         feature_matrix : np.ndarray
-            Shape ``(n_samples, n_features)``. Typically produced by
+            Shape=``(n_samples, n_features)``. Typically produced by
             ``replicates_to_feature_matrix()``.
         n : int
             Number of components to retain (default ``2`` in upstream callers).
 
         Returns
         -------
-        X_pca : np.ndarray, shape (n_samples, n)
+        X_pca : np.ndarray, shape=(n_samples, n)
             Transformed coordinates in the principal-component space.
-        weights : np.ndarray, shape (n, n_features)
+        weights : np.ndarray, shape=(n, n_features)
             PCA component loadings (rows = components, columns = original features).
-        explained_variances : np.ndarray, shape (n,)
+        explained_variances : np.ndarray, shape=(n,)
             Fraction of variance explained by each selected component.
 
         Notes
@@ -976,7 +1059,7 @@ class systems_analysis:
         Examples
         --------
         >>> X_pca, W, evr = sa.run_PCA(feature_matrix, 2)  # doctest: +SKIP
-        >>> X_pca.shape                                     # doctest: +SKIP
+        >>> X_pca.shape=                                    # doctest: +SKIP
         (feature_matrix.shape[0], 2)
         '''
 
@@ -986,7 +1069,7 @@ class systems_analysis:
         weights = pca.components_
         explained_variances = pca.explained_variance_ratio_
 
-        print("X_pca shape (new data):",X_pca.shape)
+        print("X_pca shape=(new data):",X_pca.shape)
         print(f"the total explained variance{np.sum(explained_variances)}")
         print(f"the total explained variance of PC's is {explained_variances}")
         print("weights shape:", weights.shape) 
@@ -994,87 +1077,108 @@ class systems_analysis:
         return X_pca,weights,explained_variances
 
 if __name__ == '__main__':
+    test='cluster contributions'
 
-    #Pipeline setup assumed as in: Data Generation
-    redone_CCU_GCU_fulltraj=np.load('/Users/luis/Downloads/redone_unrestrained_CCU_GCU_Trajectory_array.npy',allow_pickle=True)
-    redone_CCU_CGU_fulltraj=np.load('/Users/luis/Downloads/redone_unrestrained_CCU_CGU_Trajectory_array.npy',allow_pickle=True)
+    if test=='cluster contributions':
+        import numpy as np
+        redone_CCU_GCU_fulltraj=np.load('/Users/luis/Downloads/redone_unrestrained_CCU_GCU_Trajectory_array.npy')
+        redone_CCU_CGU_fulltraj=np.load('/Users/luis/Downloads/redone_unrestrained_CCU_CGU_Trajectory_array.npy')
 
-    
-    all_systems=[redone_CCU_GCU_fulltraj,redone_CCU_CGU_fulltraj]
-    Systems_Analyzer = systems_analysis(systems_representations=all_systems)
-    Systems_Analyzer.replicates_to_feature_matrix()
+        from mdsa_tools.Analysis import systems_analysis
 
+        analyzer = systems_analysis([redone_CCU_GCU_fulltraj,redone_CCU_CGU_fulltraj])
+        analyzer.replicates_to_feature_matrix()
+        labels, centers= analyzer.perform_kmeans(k=2)
+        cluster_schema_df=analyzer.compute_cluster_assignment_schemas(centers,labels,feature_matrix=analyzer.feature_matrix,indexes=analyzer.indexes)
 
-    Global_UMAP_opt=Systems_Analyzer.reduce_systems_representations(method='UMAP',min_dist=.1,n_neighbors=15)
-    Local_UMAP_opt=Systems_Analyzer.reduce_systems_representations(method='UMAP',min_dist=1.0,n_neighbors=915)
+        print(cluster_schema_df.sort_values(["centroid", "count"], ascending=[True, False]).groupby("centroid").head(20))
 
+        pass
 
-    from mdsa_tools.Viz import visualize_reduction
+        
 
+    if test=='reductions':
 
-    #basically a neat helper function for masking our systems the way we want to 
-    def make_replicate_ids(n400=20, n800=10, systems=2):
-        chunks = []
-        cur = 1
-        for _ in range(systems):
-            chunks.append(np.repeat(np.arange(cur, cur + n400, dtype=np.int32), 80))
-            cur += n400
-            chunks.append(np.repeat(np.arange(cur, cur + n800, dtype=np.int32), 160))
-            cur += n800
-        return np.concatenate(chunks)
+        #Pipeline setup assumed as in: Data Generation
+        redone_CCU_GCU_fulltraj=np.load('/Users/luis/Downloads/redone_unrestrained_CCU_GCU_Trajectory_array.npy',allow_pickle=True)
+        redone_CCU_CGU_fulltraj=np.load('/Users/luis/Downloads/redone_unrestrained_CCU_CGU_Trajectory_array.npy',allow_pickle=True)
 
-    replicate_ids = make_replicate_ids()  # 60 uniques, length 6400
-
-
-    time_series_rep_lengths = (list(np.arange(0,80))*20 + list(np.arange(0,160))*10)
-
-    time_series_rep_lengths=time_series_rep_lengths*2
-
-    system_labels = 3200*[1] + 3200*[2] 
-
-    import colorcet as cc
-    replicate_palette = cc.glasbey[:60]  # list of hex colors
+        
+        all_systems=[redone_CCU_GCU_fulltraj,redone_CCU_CGU_fulltraj]
+        Systems_Analyzer = systems_analysis(systems_representations=all_systems)
+        Systems_Analyzer.replicates_to_feature_matrix()
 
 
-    import matplotlib.cm as cm
-
-    visualize_reduction(Global_UMAP_opt,cbar_type='discrete',color_mappings=system_labels,savepath='1_in_50_global_system_labels',
-    title='1_in_50_system_labels',cmap=cm.plasma_r)
-    
-    visualize_reduction(Global_UMAP_opt,cbar_type='discrete',color_mappings=time_series_rep_lengths,savepath='1_in_50_global_time_series_rep_lengths',
-    title='1_in_50_time_series_rep_lengths')
-    
-    visualize_reduction(Global_UMAP_opt,cbar_type='discrete',color_mappings=replicate_ids,
-    color_palette=replicate_palette,savepath='1_in_50_global_replicate_palette',
-    title='1_in_50_replicate_palette')
+        Global_UMAP_opt=Systems_Analyzer.reduce_systems_representations(method='UMAP',min_dist=.1,n_neighbors=15)
+        Local_UMAP_opt=Systems_Analyzer.reduce_systems_representations(method='UMAP',min_dist=1.0,n_neighbors=915)
 
 
-    visualize_reduction(Local_UMAP_opt,cbar_type='discrete',color_mappings=system_labels,savepath='1_in_50_local_system_labels',
-    title='1_in_50_system_labels',cmap=cm.plasma_r)
-
-    visualize_reduction(Local_UMAP_opt,cbar_type='discrete',color_mappings=time_series_rep_lengths,savepath='1_in_50_local_time_series_rep_lengths',
-    title='sa1_in_50_time_series_rep_lengths')
-
-    visualize_reduction(Local_UMAP_opt,cbar_type='discrete',
-    color_mappings=replicate_ids,savepath='1_in_50_local_replicate_palette',
-    title='1_in_50_replicate_palette',color_palette=replicate_palette)
+        from mdsa_tools.Viz import visualize_reduction
 
 
-    #traj_GCU = "/Users/luis/Desktop/workspacetwo/PDBs/CCU_GCU_10frames.mdcrd"
-    #top_GCU  = "/Users/luis/Desktop/workspacetwo/PDBs/5JUP_N2_GCU_nowat.prmtop"
+        #basically a neat helper function for masking our systems the way we want to 
+        def make_replicate_ids(n400=20, n800=10, systems=2):
+            chunks = []
+            cur = 1
+            for _ in range(systems):
+                chunks.append(np.repeat(np.arange(cur, cur + n400, dtype=np.int32), 80))
+                cur += n400
+                chunks.append(np.repeat(np.arange(cur, cur + n800, dtype=np.int32), 160))
+                cur += n800
+            return np.concatenate(chunks)
 
-    #traj_CGU = "/Users/luis/Desktop/workspacetwo/PDBs/CCU_CGU_10frames.mdcrd"
-    #top_CGU  = "/Users/luis/Desktop/workspacetwo/PDBs/5JUP_N2_CGU_nowat.prmtop"
+        replicate_ids = make_replicate_ids()  # 60 uniques, length 6400
 
-    ## processors created individually
-    #processor_GCU = TrajectoryProcessor(traj_GCU, top_GCU)
-    #processor_CGU = TrajectoryProcessor(traj_CGU, top_CGU)
 
-    ## systems representations created individually
-    #systems_GCU = processor_GCU.create_system_representations()
-    #systems_CGU = processor_CGU.create_system_representations()
+        time_series_rep_lengths = (list(np.arange(0,80))*20 + list(np.arange(0,160))*10)
 
-    #Analyzer = systems_analysis(systems_representations=[systems_GCU,systems_CGU])
-    #Analyzer.replicates_to_feature_matrix()
+        time_series_rep_lengths=time_series_rep_lengths*2
+
+        system_labels = 3200*[1] + 3200*[2] 
+
+        import colorcet as cc
+        replicate_palette = cc.glasbey[:60]  # list of hex colors
+
+
+        import matplotlib.cm as cm
+
+        visualize_reduction(Global_UMAP_opt,cbar_type='discrete',color_mappings=system_labels,savepath='1_in_50_global_system_labels',
+        title='1_in_50_system_labels',cmap=cm.plasma_r)
+        
+        visualize_reduction(Global_UMAP_opt,cbar_type='discrete',color_mappings=time_series_rep_lengths,savepath='1_in_50_global_time_series_rep_lengths',
+        title='1_in_50_time_series_rep_lengths')
+        
+        visualize_reduction(Global_UMAP_opt,cbar_type='discrete',color_mappings=replicate_ids,
+        color_palette=replicate_palette,savepath='1_in_50_global_replicate_palette',
+        title='1_in_50_replicate_palette')
+
+
+        visualize_reduction(Local_UMAP_opt,cbar_type='discrete',color_mappings=system_labels,savepath='1_in_50_local_system_labels',
+        title='1_in_50_system_labels',cmap=cm.plasma_r)
+
+        visualize_reduction(Local_UMAP_opt,cbar_type='discrete',color_mappings=time_series_rep_lengths,savepath='1_in_50_local_time_series_rep_lengths',
+        title='sa1_in_50_time_series_rep_lengths')
+
+        visualize_reduction(Local_UMAP_opt,cbar_type='discrete',
+        color_mappings=replicate_ids,savepath='1_in_50_local_replicate_palette',
+        title='1_in_50_replicate_palette',color_palette=replicate_palette)
+
+
+        #traj_GCU = "/Users/luis/Desktop/workspacetwo/PDBs/CCU_GCU_10frames.mdcrd"
+        #top_GCU  = "/Users/luis/Desktop/workspacetwo/PDBs/5JUP_N2_GCU_nowat.prmtop"
+
+        #traj_CGU = "/Users/luis/Desktop/workspacetwo/PDBs/CCU_CGU_10frames.mdcrd"
+        #top_CGU  = "/Users/luis/Desktop/workspacetwo/PDBs/5JUP_N2_CGU_nowat.prmtop"
+
+        ## processors created individually
+        #processor_GCU = TrajectoryProcessor(traj_GCU, top_GCU)
+        #processor_CGU = TrajectoryProcessor(traj_CGU, top_CGU)
+
+        ## systems representations created individually
+        #systems_GCU = processor_GCU.create_system_representations()
+        #systems_CGU = processor_CGU.create_system_representations()
+
+        #Analyzer = systems_analysis(systems_representations=[systems_GCU,systems_CGU])
+        #Analyzer.replicates_to_feature_matrix()
 
     
