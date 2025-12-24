@@ -311,8 +311,7 @@ class systems_analysis:
         k = k if k is not None else None
 
         if k is None:
-            optimal_k_silhouette_labels, optimal_k_elbow_labels, centers_sillohuette, centers_elbow = \
-                self.perform_clust_opt(outfile_path=outfile_path, data=data, max_clusters=max_clusters)
+            optimal_k_silhouette_labels, optimal_k_elbow_labels, centers_sillohuette, centers_elbow = self.perform_clust_opt(outfile_path=outfile_path, data=data, max_clusters=max_clusters)
 
         if k is not None:
             kmeans = KMeans(n_clusters=k, init='random', n_init=k, random_state=0)
@@ -836,6 +835,90 @@ class systems_analysis:
         
         return dataframe
 
+    def assignment_schemas(self,centers=None,labels=None,feature_matrix=None,indexes=None):
+        '''
+        Parameters
+        ----------
+        centers : np.ndarray, shape== (n_clusters, n_features)
+            Cluster centers (e.g., from KMeans). If ``None`` (or if ``labels`` is
+            ``None``), centers and labels are obtained from ``perform_clust_opt()``.
+        
+        labels : array-like of int, shape=(n_samples,)
+            Cluster assignment for each sample/frame. 
+        
+        feature_matrix : np.ndarray, shape=(n_samples, n_features)
+            Per-sample feature matrix. If ``None``, uses ``self.feature_matrix``.
+            Features are assumed to correspond to the upper-triangle residue–residue
+            pairs (excluding diagonal), as produced by ``replicates_to_feature_matrix``.
+        
+        indexes : array-like of int
+            Residue indices used to label features. If ``None``, uses ``self.indexes``.
+            Labels are generated as strings ``"i-j"`` in the same order as the
+            upper-triangle feature construction.
+
+        Returns
+        -------
+        pandas.DataFrame
+            Tidy table with one row per (centroid, pair) containing:
+
+            * ``pair``     — residue–residue label ``"i-j"`` (str)
+            * ``count``    — number of samples in that centroid for which this pair
+            was the maximum-contributing feature (int)
+            * ``centroid`` — centroid/cluster id (int)
+
+            The table can be sorted/grouped to retrieve the top pairs per centroid.
+
+        Notes
+        -----
+        * Per-feature contributions are computed as ``(x_j - c_j)**2`` for each
+        feature ``j`` and assigned sample ``x`` relative to its centroid ``c``.
+        * The “dominant pair” for a sample is the feature index with the maximum
+        squared deviation (ties take the first occurrence although for our implementation use case
+        there was not much of an issue).
+  
+        Examples
+        --------
+        >>> labels, centers = sa.perform_kmeans(k=2)
+        >>> df = sa.compute_cluster_assignment_schemas(centers, labels)
+        >>> df.sort_values(["centroid","count"], ascending=[True, False]) \
+        ...   .groupby("centroid").head(20)  
+        '''
+        feature_matrix = feature_matrix if feature_matrix is not None else self.feature_matrix
+        indexes = indexes if indexes is not None else self.indexes
+        
+        if centers is None or labels is None:
+            labels, _, centers, _=self.perform_clust_opt()
+        
+        #Make some indexes first 
+        triu_idx = np.triu_indices(len(indexes), k=1)
+        comparisons = [f"{str(int(indexes[i]))}-{str(int(indexes[j]))}" for i, j in zip(*triu_idx)]
+        new_matrix = np.column_stack([labels, feature_matrix])
+
+
+        pandas_dataframes=[]
+        for i in np.unique(labels):
+            assigned_current=new_matrix[new_matrix[:,0]==i]
+            #get rid of the unnecessary first column for analysis
+            assigned_current = assigned_current[:,1:]
+            squared_distances_currentassigned=(assigned_current-centers[i])**2 
+
+            current_centroid_top_pairs = []
+            for j in squared_distances_currentassigned:
+                highest_val=np.max(j)
+                index_of_highest_val=np.where(j==highest_val)[0][0]
+                current_centroid_top_pairs.append(comparisons[index_of_highest_val])
+
+            s = pd.Series(current_centroid_top_pairs, name="pair")
+            counts = s.value_counts()
+            df = counts.reset_index()
+            df.columns = [f"pair", f"count"]
+            df["centroid"] = int(i)
+            pandas_dataframes.append(df)
+        
+        final_df=pd.concat(pandas_dataframes)
+
+        return final_df
+    
     def compute_cluster_assignment_schemas(self,centers=None,labels=None,feature_matrix=None,indexes=None):
         '''
         Parameters
@@ -893,32 +976,41 @@ class systems_analysis:
         #Make some indexes first 
         triu_idx = np.triu_indices(len(indexes), k=1)
         comparisons = [f"{str(int(indexes[i]))}-{str(int(indexes[j]))}" for i, j in zip(*triu_idx)]
-        new_matrix = np.column_stack([labels, feature_matrix])
 
-      
-        pandas_dataframes=[]
-        for i in np.unique(labels):
-            assigned_current=new_matrix[new_matrix[:,0]==i]
-            #get rid of the unnecessary first column for analysis
-            assigned_current = assigned_current[:,1:]
-            squared_distances_currentassigned=(assigned_current-centers[i])**2 
+        all_distances = ((feature_matrix[:, None, :] - centers[None, :, :]) ** 2).sum(axis=2)
 
-            current_centroid_top_pairs = []
-            for j in squared_distances_currentassigned:
-                highest_val=np.max(j)
-                index_of_highest_val=np.where(j==highest_val)[0][0]
-                current_centroid_top_pairs.append(comparisons[index_of_highest_val])
+        # for each sample: index of closest "other" centroid (2nd best)
+        # we didnt really need to do this for the ribosome since we have only 
+        # two clusters but in the effort of modularity i decided to go with an approach that would
+        # pick the nearest other cluster but, really for us its just comparing the two clusters
 
-            s = pd.Series(current_centroid_top_pairs, name="pair")
-            counts = s.value_counts()
-            df = counts.reset_index()
-            df.columns = [f"pair", f"count"]
-            df["centroid"] = int(i)
-            pandas_dataframes.append(df)
+        competitor = np.argsort(all_distances, axis=1)[:, 1]
+        difference_between_squared_distances_to_each_centroid = (feature_matrix - centers[competitor]) ** 2 - (feature_matrix - centers[labels]) ** 2 
+
+        # take the differences between them and return a dataframe and we can find the most "influential" feature that way
+        max_feature = difference_between_squared_distances_to_each_centroid.argmax(axis=1)
+        top_pairs = np.array([comparisons[j] for j in max_feature], dtype=object)
+
+        out = (
+            pd.DataFrame({"centroid": labels, "pair": top_pairs})
+            .value_counts()
+            .reset_index(name="count")
+        )
+
+        return out
+
+    def _quick_filter(arr,to_drop):
+        '''
+        internal quick filter b/c im tired of rewriting it everytime i use it in a jupyter notebook  
+        '''
         
-        final_df=pd.concat(pandas_dataframes)
+        drop_idx = np.where(np.isin(arr[0,0,:], to_drop))[0]  # positions in axes 1/2 to remove
 
-        return final_df
+        # delete rows (axis=1) and cols (axis=2)
+        arr2 = np.delete(arr, drop_idx, axis=1)
+        arr2 = np.delete(arr2, drop_idx, axis=2)
+
+        return arr2
 
     #Algorithm wrappers 
     def perform_clust_opt(self, outfile_path, max_clusters=None, data=None, k=None):
@@ -1091,7 +1183,13 @@ if __name__ == '__main__':
         labels, centers= analyzer.perform_kmeans(k=2)
         cluster_schema_df=analyzer.compute_cluster_assignment_schemas(centers,labels,feature_matrix=analyzer.feature_matrix,indexes=analyzer.indexes)
 
-        print(cluster_schema_df.sort_values(["centroid", "count"], ascending=[True, False]).groupby("centroid").head(20))
+        print(labels[0])
+        cluster_one_assignment=cluster_schema_df[cluster_schema_df['centroid']==1].head(20)
+        cluster_zero_assignment=cluster_schema_df[cluster_schema_df['centroid']==0].head(20)
+        
+        cluster_one_assignment.to_csv('cluster_one_assignment.csv')
+        cluster_zero_assignment.to_csv('cluster_zero_assignment.csv')
+        #print(cluster_schema_df.sort_values(["centroid", "count"], ascending=[True, False]).groupby("centroid").head(20))
 
         pass
 
