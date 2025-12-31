@@ -1,14 +1,3 @@
-'''
-adk dataset is being strange with CI request. probably getting overloaded so i threw this in
-'''
-import urllib.request
-opener = urllib.request.build_opener()
-opener.addheaders = [("User-Agent", "Mozilla/5.0 (compatible; GitHubCI/1.0)")]
-urllib.request.install_opener(opener)
-'''
-end section
-'''
-
 from pathlib import Path
 import pytest
 from mdsa_tools.Data_gen_hbond import TrajectoryProcessor
@@ -70,23 +59,17 @@ Oliver Beckstein, Richard Gowers, Irfan Alibay, Shujie Fan, Lily Wang, & Micaela
 
 Seyler, Sean; Beckstein, Oliver (2017): Molecular dynamics trajectory for benchmarking MDAnalysis. figshare. Fileset. doi: 10.6084/m9.figshare.5108170.v1
 '''
+RES = Path(__file__).parent / "data" / "trajectories"
 
-from MDAnalysisData import datasets
-adk = datasets.fetch_adk_equilibrium()  
-adk_traj_path = adk.trajectory            
-adk_top_path  = adk.topology 
+ADK_TOP = RES / "adk_topology.pdb"
+ADK_TRAJ = RES / "adk_10frames.dcd"
 
-
+import mdtraj as md
 @pytest.fixture(scope="session")
 def external_systems():
-    import mdtraj as md
-    full_traj = md.load(adk_traj_path, top=adk_top_path)
-    small_traj = full_traj[:10]  # make an independent copy
-    del full_traj
-
-    tp = TrajectoryProcessor(preloaded_trajectory=small_traj,one_indexed=False)
-    external_systems=tp.create_system_representations()
-    return external_systems
+    full_traj = md.load(str(ADK_TRAJ), top=str(ADK_TOP))
+    tp = TrajectoryProcessor(preloaded_trajectory=full_traj, one_indexed=False)
+    return tp.create_system_representations()
 
 @pytest.fixture(scope="session")
 def external_analyzer(external_systems):
