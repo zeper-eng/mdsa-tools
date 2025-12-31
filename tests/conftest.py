@@ -1,3 +1,14 @@
+'''
+adk dataset is being strange with CI request. probably getting overloaded so i threw this in
+'''
+import urllib.request
+opener = urllib.request.build_opener()
+opener.addheaders = [("User-Agent", "Mozilla/5.0 (compatible; GitHubCI/1.0)")]
+urllib.request.install_opener(opener)
+'''
+end section
+'''
+
 from pathlib import Path
 import pytest
 from mdsa_tools.Data_gen_hbond import TrajectoryProcessor
