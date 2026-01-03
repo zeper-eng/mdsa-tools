@@ -71,6 +71,27 @@ all_systems=[redone_CCU_GCU_fulltraj,redone_CCU_CGU_fulltraj]
 Systems_Analyzer = systems_analysis(systems_representations=all_systems)
 Systems_Analyzer.replicates_to_feature_matrix()
 
+from mdsa_tools.Analysis import systems_analysis
+
+analyzer = systems_analysis([redone_CCU_GCU_fulltraj,redone_CCU_CGU_fulltraj])
+analyzer.replicates_to_feature_matrix()
+
+#preprocessing removes empty columns
+mask=[]
+filler_bool=False
+
+for column in analyzer.feature_matrix.T:
+    nonzero_col=np.where(column!=0)
+    if nonzero_col[0].shape[0] > 0:
+        mask.append(True)
+        continue
+
+    mask.append(False)
+
+masked_feature_matrix = analyzer.feature_matrix[:,mask]
+analyzer.feature_matrix = masked_feature_matrix #reassign to feature matrix
+
+
 def make_replicate_ids(n400=20, n800=10, systems=2):
     '''basically a neat helper function for masking our systems the way we want to '''
     chunks = []
@@ -107,7 +128,7 @@ k_labels_sil, k_labels_elbow, centers_sil, centers_elbow = Systems_Analyzer.perf
 )
 
 
-#It is assumed you end up with the 2 max clusters via sillohuette score evaluation thus, we simply take the differnece to compre
+#For our particular analysis is assumed you end up with the 2 max clusters via sillohuette score evaluation thus, we simply take the differnece to compre
 #ofcourse this would change slightly depending on your situation but that ad-hoc analyses would come down to the particular
 #study that is being run
 
@@ -123,8 +144,6 @@ difference_df=pd.DataFrame({"pairs":comparisons,
 
 difference_df=difference_df.sort_values('absolute_difference_in_feature_vals',ascending=False).head(20)
 difference_df.to_csv("difference_table_kmeans.csv")
-
-
 
 
 
