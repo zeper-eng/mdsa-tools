@@ -71,8 +71,6 @@ all_systems=[redone_CCU_GCU_fulltraj,redone_CCU_CGU_fulltraj]
 Systems_Analyzer = systems_analysis(systems_representations=all_systems)
 Systems_Analyzer.replicates_to_feature_matrix()
 
-from mdsa_tools.Analysis import systems_analysis
-
 analyzer = systems_analysis([redone_CCU_GCU_fulltraj,redone_CCU_CGU_fulltraj])
 analyzer.replicates_to_feature_matrix()
 
