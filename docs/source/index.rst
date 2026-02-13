@@ -37,7 +37,7 @@ mdsa-tools is a Python package for systems-level analysis of molecular-dynamics 
       **Link to the full python API**
       ^^^
       
-      .. image:: /resources/Pipelineflic.png
+      .. image:: /resources/pipeline_11_2_2025.png
          :alt: PCA clusters for system A
          :width: 100%
          :align: center
