@@ -1011,7 +1011,7 @@ class systems_analysis:
         arr2 = np.delete(arr2, drop_idx, axis=2)
 
         return arr2
-
+    
     #Algorithm wrappers 
     def perform_clust_opt(self, outfile_path, max_clusters=None, data=None, k=None):
         """Sweep K for KMeans and pick “best” K by silhouette and elbow, or fit a single K.
