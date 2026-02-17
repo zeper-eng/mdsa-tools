@@ -7,7 +7,7 @@ Tools for systems-level analysis of Molecular Dynamics (MD) simulations
 
 ![Pipeline](https://raw.githubusercontent.com/zeper-eng/mdsa-tools/main/resources/pipeline_11_2_2025.png)
 
-We start from an MD trajectory and generate per-frame interaction networks. We vectorize our adjacency matrices by representing them as edge vectors (vectors consisting of just the edgeweights for every edge connecting pairs of unique nodes); stacking these per-frame vectors yields a feature matrix suitable for clustering (e.g., k-means) and dimensionality reduction (PCA/UMAP). Results can be visualized with graphs, scatter plots, MDcircos plots (residue H-bonding), or replicate maps of frame-level measurements of interest. 
+We start from an MD trajectory and generate per-frame interaction networks. We vectorize our adjacency matrices by representing them as edge vectors (vectors consisting of just the edgeweights for every edge connecting pairs of unique nodes); stacking these per-frame vectors yields a feature matrix suitable for clustering (e.g., k-means) and dimensionality reduction (PCA/UMAP). Results can be visualized with graphs, scatter plots, MDcircos plots (Chord Diagrams), or replicate maps of frame-level measurements of interest. 
 
 ## Install
 
