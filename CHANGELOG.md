@@ -1,5 +1,14 @@
 ## Theese changes are mainly for the pipi releases you can download the most recent version straight from github always
 
+# [1.2.2]-
+Updates will be in bulletpoint form to match progress more accurately
+ - Many small docs edits to readthedocs
+ - Example file now directly in github readme inside of `manuscript_data_availability/Manuscript_examplescript.py`
+ - Grid Search using either pearson corellation coefficients or trustworthiness as metrics to create bubbleplots from now in code.
+ - ADK and PDB fixtures added for external systems testing
+ - re-structured CI to include pip installable version before running tests
+
+
 # [1.2.1]-
 Updates will be in bulletpoint form to match progress more accurately
  - Added Alternative Feature Matrix route for analysis
