@@ -1,4 +1,4 @@
-## Theese changes are mainly for the pipi releases you can download the most recent version straight from github always
+## Theese changes are mainly for the pypi releases you can download the most recent version straight from github always
 
 # [1.2.2]-
 Updates will be in bulletpoint form to match progress more accurately
