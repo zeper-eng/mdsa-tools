@@ -5,7 +5,7 @@ Tools for systems-level analysis of Molecular Dynamics (MD) simulations
 
 ## Pipeline overview
 
-![Pipeline](https://raw.githubusercontent.com/zeper-eng/mdsa-tools/main/resources/pipeline_11_2_2025.png)
+[![Pipeline](https://raw.githubusercontent.com/zeper-eng/mdsa-tools/main/resources/pipeline_11_2_2025.png)](https://mdsa-tools.readthedocs.io/en/latest/)
 
 We start from an MD trajectory and generate per-frame interaction networks. Then we vectorize our adjacency matrices by representing them as edge vectors (vectors consisting of just the edgeweights for every edge connecting pairs of unique nodes); stacking these per-frame vectors yields a feature matrix suitable for clustering (e.g., k-means) and dimensionality reduction (PCA/UMAP). Results can be visualized with graphs, scatter plots, MDcircos plots (Chord Diagrams), or replicate maps of frame-level measurements of interest. 
 
@@ -17,9 +17,8 @@ pip install mdsa-tools
 
 ## Systems Problem Area:
 
-![System panel](https://raw.githubusercontent.com/zeper-eng/mdsa-tools/main/resources/Fig_1.png)
-
-In the Weir Group at Wesleyan University, we perform molecular dynamics (MD) simulations of a ribosomal subsystem to study tuning of protein translation by the CAR interaction surface — a ribosomal interface identified by the lab that interacts with the +1 codon (poised to enter the ribosome A site). Our "computational genetics" research focuses on modifying adjacent codon identities at the A-site and the +1 positions to model how changes at these sites influence the behavior of the CAR surface and correlate with translation rate variations.
+[![System panel](https://raw.githubusercontent.com/zeper-eng/mdsa-tools/main/resources/Fig_1.png)](https://www.biorxiv.org/content/10.64898/2026.03.28.714829v1)
+In the Weir Group at Wesleyan University, we perform molecular dynamics (MD) simulations of a ribosomal subsystem to study tuning of protein translation by the CAR interaction surface, a ribosomal interface identified by the lab that interacts with the +1 codon (poised to enter the ribosome A site). Our "computational genetics" research focuses on modifying adjacent codon identities at the A-site and the +1 positions to model how changes at these sites influence the behavior of the CAR surface and correlate with translation rate variations.
 
 ## Quickstart example (see [docs](https://mdsa-tools.readthedocs.io/en/latest/examples.html) for more examples):
 
