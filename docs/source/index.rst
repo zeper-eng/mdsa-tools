@@ -56,11 +56,11 @@ While some systems analytical approaches are “black box” in nature, making i
 suggesting long-range allosteric interactions across the neighborhood.  
 
    .. grid-item-card:: 
-      :link: api
+      :link: https://www.biorxiv.org/content/10.64898/2026.03.28.714829v1
       :link-type: doc        
       :text-align: center
 
-      **Link to the Systems Pre-print (in-preparation)**
+      **Link to the Systems Pre-print**
       ^^^
 
       .. image:: /resources/paperfigure.png
