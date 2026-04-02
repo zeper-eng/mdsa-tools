@@ -57,7 +57,7 @@ suggesting long-range allosteric interactions across the neighborhood.
 
    .. grid-item-card:: 
       :link: https://www.biorxiv.org/content/10.64898/2026.03.28.714829v1
-      :link-type: doc        
+      :link-type: url        
       :text-align: center
 
       **Link to the Systems Pre-print**
