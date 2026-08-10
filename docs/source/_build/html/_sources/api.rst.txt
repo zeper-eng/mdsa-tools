@@ -1,4 +1,4 @@
-mdsa-tools Python API 
+MDSA-tools Python API 
 =====================
 
 The API currently consists of five main modules 

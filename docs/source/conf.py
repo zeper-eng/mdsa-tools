@@ -5,9 +5,9 @@ import os, sys
 sys.path.insert(0, os.path.abspath("../.."))
 
 # Setting our titles and stuff
-project = "mdsa-tools"
-html_title = "mdsa-tools"
-html_short_title = "mdsa-tools"
+project = "MDSA-tools"
+html_title = "MDSA-tools"
+html_short_title = "MDSA-tools"
 
 extensions = [
     "sphinx.ext.autodoc",

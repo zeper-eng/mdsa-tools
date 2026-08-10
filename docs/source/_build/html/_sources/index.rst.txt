@@ -1,26 +1,26 @@
 
-Welcome to mdsa-tools!
+Welcome to MDSA-tools!
 ======================
 .. image:: https://img.shields.io/badge/GitHub-mdsa--tools-f06292?logo=github&logoColor=1E3A8A&labelColor=555555&color=f06292
-   :target: https://github.com/zeper-eng/mdsa-tools
-   :alt: GitHub: mdsa-tools
+   :target: https://github.com/zeper-eng/MDSA-tools
+   :alt: GitHub: MDSA-tools
 
-.. image:: https://img.shields.io/pypi/v/mdsa-tools?label=PyPI
-   :target: https://pypi.org/project/mdsa-tools/
-   :alt: PyPI: mdsa-tools
+.. image:: https://img.shields.io/pypi/v/MDSA-tools?label=PyPI
+   :target: https://pypi.org/project/MDSA-tools/
+   :alt: PyPI: MDSA-tools
 
 .. image:: https://zenodo.org/badge/DOI/10.5281/zenodo.17195649.svg
    :target: https://doi.org/10.5281/zenodo.17195649
    :alt: DOI: 10.5281/zenodo.17195649
 
-mdsa-tools is a Python package for systems-level analysis of molecular-dynamics (MD) data. It provides utilities for clustering, dimensionality reduction (PCA, UMAP), visualization, and hydrogen-bond network generation.
+MDSA-tools is a Python package for systems-level analysis of molecular-dynamics (MD) data. It provides utilities for clustering, dimensionality reduction (PCA, UMAP), visualization, and hydrogen-bond network generation.
 
 
 .. toctree:: 
    :maxdepth: 2
    :hidden:
    
-   GitHub <https://github.com/zeper-eng/mdsa-tools>
+   GitHub <https://github.com/zeper-eng/MDSA-tools>
    api
    examples
 

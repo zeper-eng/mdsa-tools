@@ -3,7 +3,7 @@ requires = ["setuptools>=64", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "mdsa-tools"
+name = "MDSA-tools"
 version = "1.2.2"
 description = "The Weir Labs H-bond Systems Analyses modules!"
 readme = "README.md"
