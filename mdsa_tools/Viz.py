@@ -736,7 +736,8 @@ def mdcircos_graph(empty_circle, residue_dict, savepath=os.getcwd()+'mdcircos_gr
         empty_circle.chord_plot(arc1, arc2, linewidth=lw, facecolor=color, edgecolor=color)
 
     empty_circle.figure.savefig(savepath + ".png", dpi=dpi, bbox_inches="tight")
-
+    plt.close(empty_circle.figure)
+    
     # Separate colorbar
     fig_cb, ax_cb = plt.subplots(figsize=(1.5, 4))
     sm = cm.ScalarMappable(cmap=cmap, norm=color_norm)
