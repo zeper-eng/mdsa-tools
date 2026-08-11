@@ -12,7 +12,7 @@ We start from an MD trajectory and generate per-frame interaction networks. Then
 ## Install
 
 ```bash
-pip install MDSA-tools
+pip install mdsa-tools
 ```
 
 ## Systems Problem Area:
