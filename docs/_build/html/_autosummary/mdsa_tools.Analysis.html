@@ -61,7 +61,7 @@
 <li class="toctree-l4"><a class="reference internal" href="#mdsa_tools.Analysis.systems_analysis.perform_clust_opt"><code class="docutils literal notranslate"><span class="pre">systems_analysis.perform_clust_opt()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#mdsa_tools.Analysis.systems_analysis.perform_kmeans"><code class="docutils literal notranslate"><span class="pre">systems_analysis.perform_kmeans()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#mdsa_tools.Analysis.systems_analysis.reduce_systems_representations"><code class="docutils literal notranslate"><span class="pre">systems_analysis.reduce_systems_representations()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#mdsa_tools.Analysis.systems_analysis.replicates_to_featurematrix"><code class="docutils literal notranslate"><span class="pre">systems_analysis.replicates_to_featurematrix()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mdsa_tools.Analysis.systems_analysis.replicates_to_feature_matrix"><code class="docutils literal notranslate"><span class="pre">systems_analysis.replicates_to_feature_matrix()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#mdsa_tools.Analysis.systems_analysis.run_PCA"><code class="docutils literal notranslate"><span class="pre">systems_analysis.run_PCA()</span></code></a></li>
 </ul>
 </li>
@@ -155,7 +155,7 @@ across replicates/systems. If <code class="docutils literal notranslate"><span c
 <dt><strong>indexes</strong><span class="classifier">np.ndarray</span></dt><dd><p>Derived from <code class="docutils literal notranslate"><span class="pre">systems_representations[0][0,</span> <span class="pre">0,</span> <span class="pre">1:]</span></code>. These are used to
 label residue–residue comparisons when generating feature names.</p>
 </dd>
-<dt><strong>feature_matrix</strong><span class="classifier">np.ndarray or None</span></dt><dd><p>Cached 2D feature matrix produced by <code class="docutils literal notranslate"><span class="pre">replicates_to_featurematrix</span></code>.</p>
+<dt><strong>feature_matrix</strong><span class="classifier">np.ndarray or None</span></dt><dd><p>Cached 2D feature matrix produced by <code class="docutils literal notranslate"><span class="pre">replicates_to_feature_matrix</span></code>.</p>
 </dd>
 <dt><strong>replicate_distribution</strong><span class="classifier">np.ndarray</span></dt><dd><p>Distribution vector set from the provided argument or default.</p>
 </dd>
@@ -186,7 +186,7 @@ label residue–residue comparisons when generating feature names.</p>
 <tr class="row-odd"><td><p><a class="reference internal" href="#mdsa_tools.Analysis.systems_analysis.reduce_systems_representations" title="mdsa_tools.Analysis.systems_analysis.reduce_systems_representations"><code class="xref py py-obj docutils literal notranslate"><span class="pre">reduce_systems_representations</span></code></a>([...])</p></td>
 <td><p>Reduce the dimensionality of the per-frame feature matrix using PCA or UMAP.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#mdsa_tools.Analysis.systems_analysis.replicates_to_featurematrix" title="mdsa_tools.Analysis.systems_analysis.replicates_to_featurematrix"><code class="xref py py-obj docutils literal notranslate"><span class="pre">replicates_to_featurematrix</span></code></a>([arrays])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#mdsa_tools.Analysis.systems_analysis.replicates_to_feature_matrix" title="mdsa_tools.Analysis.systems_analysis.replicates_to_feature_matrix"><code class="xref py py-obj docutils literal notranslate"><span class="pre">replicates_to_feature_matrix</span></code></a>([arrays])</p></td>
 <td><p>Construct a flattened, per-frame feature matrix from one or more systems of residue×residue adjacency matrices.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#mdsa_tools.Analysis.systems_analysis.run_PCA" title="mdsa_tools.Analysis.systems_analysis.run_PCA"><code class="xref py py-obj docutils literal notranslate"><span class="pre">run_PCA</span></code></a>(feature_matrix, n)</p></td>
@@ -468,7 +468,7 @@ If <code class="docutils literal notranslate"><span class="pre">None</span></cod
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl class="simple">
 <dt><strong>feature_matrix</strong><span class="classifier">np.ndarray or None</span></dt><dd><p>If provided, use this matrix; otherwise prefer <code class="docutils literal notranslate"><span class="pre">self.feature_matrix</span></code>.
-If neither is set, calls <code class="docutils literal notranslate"><span class="pre">replicates_to_featurematrix()</span></code> to create it.</p>
+If neither is set, calls <code class="docutils literal notranslate"><span class="pre">replicates_to_feature_matrix()</span></code> to create it.</p>
 </dd>
 <dt><strong>method</strong><span class="classifier">{‘PCA’,’UMAP’}, optional</span></dt><dd><p>Reduction method. Default <code class="docutils literal notranslate"><span class="pre">'PCA'</span></code>.</p>
 </dd>
@@ -510,8 +510,8 @@ If neither is set, calls <code class="docutils literal notranslate"><span class=
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="mdsa_tools.Analysis.systems_analysis.replicates_to_featurematrix">
-<span class="sig-name descname"><span class="pre">replicates_to_featurematrix</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">arrays</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span></span></span><a class="headerlink" href="#mdsa_tools.Analysis.systems_analysis.replicates_to_featurematrix" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="mdsa_tools.Analysis.systems_analysis.replicates_to_feature_matrix">
+<span class="sig-name descname"><span class="pre">replicates_to_feature_matrix</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">arrays</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span></span></span><a class="headerlink" href="#mdsa_tools.Analysis.systems_analysis.replicates_to_feature_matrix" title="Link to this definition"></a></dt>
 <dd><p>Construct a flattened, per-frame feature matrix from one or more
 systems of residue×residue adjacency matrices.</p>
 <dl class="field-list simple">
@@ -543,7 +543,7 @@ they hold metadata (residue indices).</p></li>
 </ul>
 <p class="rubric">Examples</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">arrays</span> <span class="o">=</span> <span class="p">[</span><span class="n">sys1</span><span class="p">,</span> <span class="n">sys2</span><span class="p">]</span>  <span class="c1"># each (n_frames, n_res, n_res)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">X</span> <span class="o">=</span> <span class="n">sa</span><span class="o">.</span><span class="n">replicates_to_featurematrix</span><span class="p">(</span><span class="n">arrays</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">X</span> <span class="o">=</span> <span class="n">sa</span><span class="o">.</span><span class="n">replicates_to_feature_matrix</span><span class="p">(</span><span class="n">arrays</span><span class="p">)</span>
 </pre></div>
 </div>
 </dd></dl>
@@ -557,7 +557,7 @@ coordinates, component loadings, and explained variance ratios.</p>
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl class="simple">
 <dt><strong>feature_matrix</strong><span class="classifier">np.ndarray</span></dt><dd><p>Shape <code class="docutils literal notranslate"><span class="pre">(n_samples,</span> <span class="pre">n_features)</span></code>. Typically produced by
-<code class="docutils literal notranslate"><span class="pre">replicates_to_featurematrix()</span></code>.</p>
+<code class="docutils literal notranslate"><span class="pre">replicates_to_feature_matrix()</span></code>.</p>
 </dd>
 <dt><strong>n</strong><span class="classifier">int</span></dt><dd><p>Number of components to retain (default <code class="docutils literal notranslate"><span class="pre">2</span></code> in upstream callers).</p>
 </dd>

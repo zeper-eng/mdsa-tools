@@ -49,7 +49,7 @@ see :ref:`datagen`.
    #####################################
 
    SA = systems_analysis(all_systems)
-   X = SA.replicates_to_featurematrix()  # (sum(n_frames), n_features_uppertri)
+   X = SA.replicates_to_feature_matrix()  # (sum(n_frames), n_features_uppertri)
 
    #####################################
    # Per-replicate frame-index labels
@@ -94,7 +94,7 @@ Notes
 - **Input format:** Each system is a per-frame adjacency stack shaped
   ``(n_frames, n_res+1, n_res+1)`` with **1-based** residue indices in the leading row/col.
   Slice ``[:, 1:, 1:]`` if you only need the numeric adjacency.
-- **Feature matrix:** :meth:`~mdsa_tools.Analysis.systems_analysis.replicates_to_featurematrix`
+- **Feature matrix:** :meth:`~mdsa_tools.Analysis.systems_analysis.replicates_to_feature_matrix`
   flattens each frame’s **upper triangle** so rows correspond to frames and columns to
   unique residue–residue pairs.
 - **Labels:** ``per_rep_timeframe`` must be the same length as the total number of frames
@@ -123,5 +123,5 @@ See also
 
 - :mod:`mdsa_tools.Data_gen_hbond` — build per-frame H-bond adjacency matrices.
 - :mod:`mdsa_tools.Cpptraj_import` — construct matrices from cpptraj series tables.
-- :meth:`mdsa_tools.Analysis.systems_analysis.replicates_to_featurematrix` — feature preparation.
+- :meth:`mdsa_tools.Analysis.systems_analysis.replicates_to_feature_matrix` — feature preparation.
 - :mod:`mdsa_tools.Viz` *(optional)*: ``visualize_reduction`` scatter helper.

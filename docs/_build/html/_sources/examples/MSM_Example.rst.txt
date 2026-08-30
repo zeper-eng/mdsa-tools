@@ -54,7 +54,7 @@ by :class:`mdsa_tools.Data_gen_hbond.TrajectoryProcessor` or :mod:`mdsa_tools.Cp
    all_systems = [redone_CCU_GCU_fulltraj, redone_CCU_CGU_fulltraj]
    SA = systems_analysis(systems_representations=all_systems,
                          replicate_distribution=per_rep_lengths)
-   SA.replicates_to_featurematrix()
+   SA.replicates_to_feature_matrix()
    X_pca, _, _ = SA.reduce_systems_representations(method="PCA")
 
    outdir = "./msm_example_outputs"

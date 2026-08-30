@@ -146,7 +146,7 @@ by <a class="reference internal" href="../_autosummary/mdsa_tools.Data_gen_hbond
 <span class="n">all_systems</span> <span class="o">=</span> <span class="p">[</span><span class="n">redone_CCU_GCU_fulltraj</span><span class="p">,</span> <span class="n">redone_CCU_CGU_fulltraj</span><span class="p">]</span>
 <span class="n">SA</span> <span class="o">=</span> <span class="n">systems_analysis</span><span class="p">(</span><span class="n">systems_representations</span><span class="o">=</span><span class="n">all_systems</span><span class="p">,</span>
                       <span class="n">replicate_distribution</span><span class="o">=</span><span class="n">per_rep_lengths</span><span class="p">)</span>
-<span class="n">SA</span><span class="o">.</span><span class="n">replicates_to_featurematrix</span><span class="p">()</span>
+<span class="n">SA</span><span class="o">.</span><span class="n">replicates_to_feature_matrix</span><span class="p">()</span>
 <span class="n">X_pca</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">SA</span><span class="o">.</span><span class="n">reduce_systems_representations</span><span class="p">(</span><span class="n">method</span><span class="o">=</span><span class="s2">&quot;PCA&quot;</span><span class="p">)</span>
 
 <span class="n">outdir</span> <span class="o">=</span> <span class="s2">&quot;./msm_example_outputs&quot;</span>

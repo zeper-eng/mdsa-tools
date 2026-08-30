@@ -139,7 +139,7 @@ see <a class="reference internal" href="data_generation_workflow.html#datagen"><
 <span class="c1">#####################################</span>
 
 <span class="n">SA</span> <span class="o">=</span> <span class="n">systems_analysis</span><span class="p">(</span><span class="n">all_systems</span><span class="p">)</span>
-<span class="n">X</span> <span class="o">=</span> <span class="n">SA</span><span class="o">.</span><span class="n">replicates_to_featurematrix</span><span class="p">()</span>  <span class="c1"># (sum(n_frames), n_features_uppertri)</span>
+<span class="n">X</span> <span class="o">=</span> <span class="n">SA</span><span class="o">.</span><span class="n">replicates_to_feature_matrix</span><span class="p">()</span>  <span class="c1"># (sum(n_frames), n_features_uppertri)</span>
 
 <span class="c1">#####################################</span>
 <span class="c1"># Per-replicate frame-index labels</span>
@@ -187,7 +187,7 @@ see <a class="reference internal" href="data_generation_workflow.html#datagen"><
 <li><p><strong>Input format:</strong> Each system is a per-frame adjacency stack shaped
 <code class="docutils literal notranslate"><span class="pre">(n_frames,</span> <span class="pre">n_res+1,</span> <span class="pre">n_res+1)</span></code> with <strong>1-based</strong> residue indices in the leading row/col.
 Slice <code class="docutils literal notranslate"><span class="pre">[:,</span> <span class="pre">1:,</span> <span class="pre">1:]</span></code> if you only need the numeric adjacency.</p></li>
-<li><p><strong>Feature matrix:</strong> <a class="reference internal" href="../_autosummary/mdsa_tools.Analysis.html#mdsa_tools.Analysis.systems_analysis.replicates_to_featurematrix" title="mdsa_tools.Analysis.systems_analysis.replicates_to_featurematrix"><code class="xref py py-meth docutils literal notranslate"><span class="pre">replicates_to_featurematrix()</span></code></a>
+<li><p><strong>Feature matrix:</strong> <a class="reference internal" href="../_autosummary/mdsa_tools.Analysis.html#mdsa_tools.Analysis.systems_analysis.replicates_to_feature_matrix" title="mdsa_tools.Analysis.systems_analysis.replicates_to_feature_matrix"><code class="xref py py-meth docutils literal notranslate"><span class="pre">replicates_to_feature_matrix()</span></code></a>
 flattens each frame’s <strong>upper triangle</strong> so rows correspond to frames and columns to
 unique residue–residue pairs.</p></li>
 <li><p><strong>Labels:</strong> <code class="docutils literal notranslate"><span class="pre">per_rep_timeframe</span></code> must be the same length as the total number of frames
@@ -217,7 +217,7 @@ contact-pattern dynamics.</p>
 <ul class="simple">
 <li><p><a class="reference internal" href="../_autosummary/mdsa_tools.Data_gen_hbond.html#module-mdsa_tools.Data_gen_hbond" title="mdsa_tools.Data_gen_hbond"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mdsa_tools.Data_gen_hbond</span></code></a> — build per-frame H-bond adjacency matrices.</p></li>
 <li><p><a class="reference internal" href="../_autosummary/mdsa_tools.Cpptraj_import.html#module-mdsa_tools.Cpptraj_import" title="mdsa_tools.Cpptraj_import"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mdsa_tools.Cpptraj_import</span></code></a> — construct matrices from cpptraj series tables.</p></li>
-<li><p><a class="reference internal" href="../_autosummary/mdsa_tools.Analysis.html#mdsa_tools.Analysis.systems_analysis.replicates_to_featurematrix" title="mdsa_tools.Analysis.systems_analysis.replicates_to_featurematrix"><code class="xref py py-meth docutils literal notranslate"><span class="pre">mdsa_tools.Analysis.systems_analysis.replicates_to_featurematrix()</span></code></a> — feature preparation.</p></li>
+<li><p><a class="reference internal" href="../_autosummary/mdsa_tools.Analysis.html#mdsa_tools.Analysis.systems_analysis.replicates_to_feature_matrix" title="mdsa_tools.Analysis.systems_analysis.replicates_to_feature_matrix"><code class="xref py py-meth docutils literal notranslate"><span class="pre">mdsa_tools.Analysis.systems_analysis.replicates_to_feature_matrix()</span></code></a> — feature preparation.</p></li>
 <li><p><a class="reference internal" href="../_autosummary/mdsa_tools.Viz.html#module-mdsa_tools.Viz" title="mdsa_tools.Viz"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mdsa_tools.Viz</span></code></a> <em>(optional)</em>: <code class="docutils literal notranslate"><span class="pre">visualize_reduction</span></code> scatter helper.</p></li>
 </ul>
 </section>

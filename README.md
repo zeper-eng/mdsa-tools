@@ -36,11 +36,11 @@ import os
 ###
 
 # load in and test trajectory
-system_one_topology = '../PDBs/5JUP_N2_CGU_nowat.prmtop'
-system_one_trajectory = '../PDBs/CCU_CGU_10frames.mdcrd'
+system_one_topology = 'trajectories_and_topologies/5JUP_N2_CGU_nowat.prmtop'
+system_one_trajectory = 'trajectories_and_topologies/CCU_CGU_10frames.mdcrd'
 
-system_two_topology = '../PDBs/5JUP_N2_GCU_nowat.prmtop'
-system_two_trajectory = '../PDBs/CCU_GCU_10frames.mdcrd'
+system_two_topology = 'trajectories_and_topologies/5JUP_N2_GCU_nowat.prmtop'
+system_two_trajectory = 'trajectories_and_topologies/CCU_GCU_10frames.mdcrd'
 
 test_trajectory_one = tp(trajectory_path=system_one_trajectory, topology_path=system_one_topology)
 test_trajectory_two = tp(trajectory_path=system_two_trajectory, topology_path=system_two_topology)
@@ -62,7 +62,7 @@ all_systems = [test_system_one_, test_system_two_]
 Systems_Analyzer = systems_analysis(all_systems)
 
 # transform adjacency matrices, perform clustering and dimensional reduction
-Systems_Analyzer.replicates_to_featurematrix()
+Systems_Analyzer.replicates_to_feature_matrix()
 optimal_k_silhouette_labels, optimal_k_elbow_labels, centers_silhouette, centers_elbow = Systems_Analyzer.perform_kmeans(outfile_path='./test_', max_clusters=5)
 print('clustering successfully completed')
 X_pca, weights, explained_variance_ratio_ = Systems_Analyzer.reduce_systems_representations(method='PCA')  # you could do method='PCA'/'UMAP' here

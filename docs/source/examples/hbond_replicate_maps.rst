@@ -46,7 +46,7 @@ If you’re unfamiliar with producing these arrays, see :ref:`datagen`.
    #########################################
    Systems_Analyzer = systems_analysis(all_systems)
    # Creates a feature matrix for downstream extraction/label ops
-   Systems_Analyzer.replicates_to_featurematrix()
+   Systems_Analyzer.replicates_to_feature_matrix()
 
    #########################################
    # Extract discrete labels for residue pairs
@@ -84,7 +84,7 @@ Notes
 -----
 
 - **Inputs:** Each system is a per-frame H-bond adjacency stack of shape ``(n_frames, n_res+1, n_res+1)``, with the 0-th row/col storing **1-based** residue indices. Slice ``[:, 1:, 1:]`` if you only need the numeric adjacency.
-- **Feature prep:** Call :meth:`~mdsa_tools.Analysis.systems_analysis.replicates_to_featurematrix` before extracting labels so that downstream methods have aligned internal representations.
+- **Feature prep:** Call :meth:`~mdsa_tools.Analysis.systems_analysis.replicates_to_feature_matrix` before extracting labels so that downstream methods have aligned internal representations.
 - **Labels shape:** ``labels`` returned by :meth:`~mdsa_tools.Analysis.systems_analysis.extract_hbond_values` should align with your total frames across replicates/systems. Your ``frame_list`` must be the same total length.
 - **Windowing:** The ``frame_list`` can segment the visualization by blocks (e.g., different sampling intervals or concatenated runs). Adjust the counts to match your actual concatenation scheme.
 - **Saving:** :func:`~mdsa_tools.Viz.replicatemap_from_labels` writes figures to ``savepath`` (without extension); ensure the directory exists.
